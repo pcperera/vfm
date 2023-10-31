@@ -1,0 +1,6 @@
+attention_head_size: 4
+dropout: 0.13713111797541364
+gradient_clip_val: 0.020191025896572703
+hidden_continuous_size: 98
+hidden_size: 139
+learning_rate: 0.0006984301767719157

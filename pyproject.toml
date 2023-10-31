@@ -1,0 +1,47 @@
+[tool.poetry]
+authors = ["pcperera@gmail.com"]
+description = "Neural Network VFM"
+name = "vfm-nn"
+version = "1.0.0"
+
+[[tool.poetry.source]]
+name = "default"
+url = "https://pypi.org/simple"
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu118"
+secondary = true
+
+[tool.poetry.dependencies]
+cognite-sdk = { version = "^5.3.4", source = "default" }
+numpy = { version = "^1.24.1", source = "default" }
+optuna = { version = "*", source = "default" }
+pandas = { version = "^1.5.2", source = "default" }
+pandera = { version = "^0.13.4", source = "default" }
+python = "~3.10.12"
+pytorch-forecasting = { version = "=1.0.0", source = "default" }
+scikit-learn = { version = "^1.2.1", source = "default" }
+scipy = { version = "^1.10.0", source = "default" }
+seaborn = { version = "^0.12.2", source = "default" }
+tensorboard = { version = "*", source = "default"}
+tensorboardX = { version = "*", source = "default"}
+torch = { version = "=2.1.0", source = "default" }
+
+
+[tool.poetry.group.dev.dependencies]
+jupyterlab = { version = "^3.6.4", source = "default" }
+matplotlib = { version = "^3.0.0", source = "default" }
+tornado = { version = "=6.1.0", source = "default" }
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+atomic = true
+line_length = 120
+profile = "black"
