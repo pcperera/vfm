@@ -1,0 +1,763 @@
+%% Default is IEEE. Add "APA" as an option to use APA
+% add twoside for final
+% singlespace
+% UoMdraft
+\documentclass[12pt,APA]{uomthesis}
+
+
+\usepackage{packages/lgrind}
+%\usepackage{lgrind}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\pagestyle{plain}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{tabularx}
+%\renewcommand\tabularxcolumn[1]{m{#1}}% for vertical centering text in X column
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\usepackage{enumerate}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{mathdots}
+% \usetikzlibrary{fadings}
+\usepackage{bbm}
+\captionsetup{compatibility=false}
+\DeclareMathOperator*{\argmax}{argmax}
+\usepackage{tikz}
+\usepackage{epsfig}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{makecell}
+\usepackage{hyperref}
+\hypersetup{
+colorlinks   = true,
+citecolor    = blue,
+urlcolor    =  blue
+}
+\usepackage{url}
+
+
+\begin{document}
+% Update the following variables. Doing so will auto-generate the first three pages:
+% 1. Cover Page
+% 2. Title Page
+% 3. Declaration Page
+\title{Revolutionizing Flow Rate Prediction in Oil and Gas Industry: Virtual Flow Meter Empowered by Transformers}
+\student{239171B}{Priyanka Perera}
+%\student{}{} % If there are multiple student authors (e.g., undergraduate project), just keep adding \student{}{} variables. The class will automatically handle it
+\degree{Master's in Data Science and Artificial Intelligence} % PhD/MPhil/Master’s 
+\department{Department of Computer Science and Engineering}
+\type{Dissertation} % Thesis/Dissertation
+\degreemonth{December}
+\degreeyear{2023}
+\faculty{Faculty of Engineering}
+\keywords{Virtual Flow Meter, Oil and Gas Industry, Transformers}
+\supervisorName{Dr. Uthayasanker Thayasivam}
+\supervisorName{Dr. Sandareka Wickramanayake}
+
+
+\maketitle
+
+
+\unNumChapter{Dedication}
+
+To my beloved wife,
+
+Your unwavering love, encouragement, and sacrifices have been the cornerstone of my academic journey. Your constant support gave me the strength to pursue my dreams and overcome challenges along the way.
+
+To my dedicated supervisors,
+
+I am indebted to your guidance, knowledge and patience. Your mentorship has shaped my academic growth and instilled in me a passion for knowledge that goes beyond the lectures. Your dedication to teaching and learning has been a beacon of inspiration throughout my studies.
+
+\unNumChapter{Acknowledgement}
+I extend my heartfelt gratitude to Cognite AS for their invaluable support and expertise in offering profound domain knowledge throughout the course of my research. Their guidance has been instrumental in shaping the direction and depth of my study. The insights and perspectives shared by the team at Cognite AS have significantly enriched the quality and relevance of this research endeavor. I am deeply appreciative of the time, resources, and commitment extended by Cognite AS in providing invaluable assistance, which has been pivotal in navigating the complexities of this study. Their dedication to advancing knowledge and innovation within their domain has been a constant source of inspiration.
+
+I extend my sincere appreciation to Dr. Sandareka and Dr. Thayasivam from the University of Moratuwa for their invaluable supervision, unwavering support, and insightful guidance throughout the course of my research. Their expertise, encouragement, and dedication have been instrumental in shaping the trajectory and depth of this study.
+
+
+\begin{abstractpage}
+The accurate measurement of oil flow rates is critical for optimizing oil well production. Traditional physical flow meters are often costly, require regular maintenance, and are prone to failure in harsh operating conditions. This research proposes a novel approach to address these challenges by leveraging TFT neural networks for virtual flow metering in oil well production. The Transformer architecture, known for its success in natural language processing tasks, is adapted to capture the complex relationships and dependencies in the oil flow data using TFT. This research presents a detailed methodology for training the virtual flow meter using historical production data and demonstrate its performance on a real data-set. Additionally, this research explore the potential of transfer learning techniques to enhance the generalization capabilities of the virtual flow meter across different well configurations and operating conditions. The findings of this research contribute to the advancement of oil well production optimization by providing an accurate, cost-effective, and reliable alternative to traditional flow meters.
+\end{abstractpage}
+
+
+% This prints the Table of Contents. Do not change this block.
+\begin{ToC}
+\makeatletter
+    \@starttoc{toc}
+ \makeatother
+\end{ToC}
+
+% This prints the List of Figures, if there is at least one figure in your document, set up according to the given guidelines.
+\iffigures
+    \begin{LoF}
+        \makeatletter
+            \@starttoc{lof}
+        \makeatother
+    \end{LoF}
+\fi
+
+
+% This prints the List of Tables, if there is at least one table in your document, set up according to the given guidelines.
+\iftables
+    \begin{LoT}
+    \makeatletter
+        \@starttoc{lot}
+    \makeatother
+    \end{LoT}
+\fi
+
+% This prints the List of Abbreviations, if there is at least one abbreviation in your document, set up according to the given guidelines.
+\ifabbrs
+    \printacronyms
+\fi
+
+% This prints the List of Appendices, if there is at least one abbreviation in your document, set up according to the given guidelines.
+\ifappens
+    \begin{LoAp}
+    \makeatletter
+        \@starttoc{apc} % Print List of Appendices
+    \makeatother
+    \end{LoAp}
+\fi
+
+% This marks the start of your chapters
+\startContent
+
+
+\chapter{Introduction}
+\label{Sec:Intro}
+
+Oil and gas production is a complex process that involves the extraction of hydrocarbons from underground reservoirs. Oilfield is a geographical area that encompasses one or more oil or gas reservoirs equipped with the necessary infrastructure for exploration, extraction and production. The fluid mixture flowing out of the well consists of oil, natural gas and water. The flow rates of oil, gas and water reflect the performance of the well. Petroleum Engineers need to make informed decisions regarding the production strategies based on the performance of the wells. Through accurate predictions of flow rates, petroleum Engineers can diagnose production inefficiencies and constraints, and implement solutions to optimize production and project future investments. Physical flow meters and \abbr{Virtual Flow Meter}{VFM} are used to predict flow rates in the oil wells. Physical flow meters are often very expensive, require regular maintenance, and are prone to failure in harsh operating conditions. Physical flow meters use in-built sensor data and physics based mathematical equations to predict the real-time flow rates. Virtual flow meters in contrast, can use physics based mathematical models, machine learning based models or hybrid models to predict the flow rates \citep{bikmukhametov2020first}. 
+
+\section{Oil Well Configuration}
+The configuration of sensors in an oil well can vary depending on the specific needs of the well, but generally, they are strategically placed to monitor various aspects of the drilling, production, and safety of the well. The wellbore, often simply referred to as the "borehole" or "hole," is the hole or opening that is drilled or dug into the earth's surface during the process of drilling an oil, gas, water, or geothermal well. It's a cylindrical shaft that extends from the surface down into the subsurface layers of the earth. Typically, oil wells are installed with temperature, pressure and valve sensors in well-bottom-hole (BH), well-head (WH) and downstream choke (DC \ref{fig:well-sensors}. The "well bottom hole sensors" refer to instrumentation placed at the bottom of an oil or gas well, often within the drilling equipment or downhole tools. These sensors are designed to gather crucial data about the conditions, characteristics, and behavior of the wellbore and the surrounding subsurface formations. They typically measure parameters such as pressure, temperature and fluid properties, and sometimes even seismic data. These sensors play a vital role in monitoring and optimizing various aspects of well operations. By providing real-time data from deep within the well, they help in making informed decisions related to drilling, production, reservoir management, and maintenance. Well bottom hole sensors aid in assessing reservoir performance, optimizing production rates, identifying potential issues or anomalies, and ensuring the overall efficiency and safety of the well operation. Wellhead sensors are instruments installed at the wellhead—the surface area where the wellbore meets the surface equipment. These sensors are crucial components in oil and gas operations as they monitor and collect various data points related to the well's performance, production, and safety. Some common types of wellhead sensors include pressure sensors, temperature sensors, and level sensors. The choke sensors, also known as choke position sensors or choke valve position sensors, are devices used in oil and gas production systems to monitor the position and movement of choke valves. Choke valves are crucial components in controlling the flow of fluids such as oil, gas, and water from the wellhead into the production system.
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=10cm]{images/well-sensors.png}
+    \caption{Oil well sensors}
+    \label{fig:well-sensors}
+\end{figure}
+
+\section{Physical Flow Meters}
+Physical flow meters encompass a diverse range of instruments designed to measure the rate of fluid flow across various industries and applications. These meters operate based on physical principles, employing mechanisms like pressure differentials, velocity measurement, displacement, mass calculation, or volumetric methods. Their versatility lies in their ability to cater to a wide array of fluids, from gases and liquids to multi-phase mixtures.
+
+\section{Virtual Flow Meters}
+Over the past two decades, the evolution of VFM has led to the creation of diverse techniques for estimating multi-phase flow rates using field data. This progress has seen the emergence of commercial VFM systems from various companies, widely adopted by oil and gas operators globally. Presently, some methods seek to enhance flow rate prediction accuracy, while others, though not currently employed in the industry, hold promising potential for advancing VFM development in the future. When it comes to modeling approaches, three primary categories of Virtual Flow Metering can be identified
+
+\begin{itemize}
+    \item Physics based VFM
+    \item Data-driven VFM
+    \item Hybrid VFM
+\end{itemize}
+
+\chapter{Research Problem}
+\label{Sec:Problem}
+
+Well flow rate prediction is a challenging problem due to the complex design of the well and the complicated physics of the fluid mixture flowing out of the well. These challenges affect accurate predictions regardless of the type of flow meters used. Physical flow meters are the most common method of measuring oil and gas well rates. They are however extremely expensive to install and maintain. The accuracy of the physical flow meters gradually reduces over time and requires re-calibration. VFMs are a growing alternative to physical flow meters. VFMs are less expensive than physical flow meters and can be used when physical flow meters are not financially viable. VFMs are typically less accurate than physical flow meters, and they they are often complex to develop and implement. The hybrid VFM models which use physics and machine learning have become increasingly popular since 2018. Increase usage of neural networks including RNN and LSTM also seen for developing both physics and ML based models \citep{franklin2022physics}.
+
+Although many types of neural networks have been evaluated in literature, author at the time of writing did not discover any experimentation or implementation of transformers for VFMs. Transformers \citep{vaswani2017attention}, originally designed for natural language processing tasks, have shown remarkable performance in capturing complex and long range dependencies in sequential data. Temporal Fusion Transformer (TFT) \citep{lim2021temporal} a type of a transformer network, on a variety of real-world data-sets have demonstrated significant performance improvements over existing benchmarks for predicting time-series data. The author therefore argues that developing a VFM based on promising transformers holds potential for accurate and cost-effective flow rate prediction leading to greater production optimization and profits.
+
+\chapter{Research Objectives}
+\label{Sec:Objectives}
+
+\begin{enumerate}
+  \item Investigate the feasibility and effectiveness of the TFT architecture in capturing the complex relationships and dependencies present in oil flow data.
+  \item Develop a virtual flow meter based on TFT neural networks to accurately estimate oil flow rates in real-time for oil well production optimization.
+  \item Explore the use of historical production data to train the virtual flow meter and establish its accuracy and reliability compared to traditional flow meters.
+  \item Evaluate the performance of the TFT-based virtual flow meter in various well configurations and operating conditions, ensuring its adaptability and versatility.
+  \item Investigate transfer learning techniques to enhance the generalization capabilities of the virtual flow meter across different oil well production settings.
+  \item Compare the performance of the proposed virtual flow meter with existing flow metering methods, quantifying the advantages in terms of cost, accuracy, and maintenance requirements.
+  \item Provide recommendations and guidelines for implementing and deploying the TFT-based virtual flow meter in real-world oil production scenarios.
+  \item Assess the scalability and potential for integration with existing oil production systems, considering computational requirements and data management aspects.
+  \item Contribute to the broader field of machine learning in industrial applications by showcasing the applicability of TFT neural networks in optimizing oil well production processes.
+\end{enumerate}
+
+
+\section{Class Options}
+\label{Sec:ClOp}
+The minimum configuration of the first line of the file must be:
+
+\begin{indentedQuote}
+\begin{verbatim}
+\documentclass[12pt]{uomthesis}
+\end{verbatim}
+\end{indentedQuote}
+
+The \texttt{12pt} option makes sure the body text is formatted to \texttt{12pt} font size as discussed in Section~\ref{Sec:Fonts}. However, depending on various other requirements, you can add or alter the other options passed to the class. We discuss the options in Sections~\ref{Sec:ClOp:APA} to~\ref{Sec:ClOp:Optional}.
+
+\subsection{Using the APA style instead of IEEE}
+\label{Sec:ClOp:APA}
+
+A very important point here is that the default configuration of \TheClass{} uses \textbf{IEEE} conventions for Tables, Figures, and references. However, some courses of study at \UoM{} prefer the \textbf{APA} style instead. If you want to use the \textbf{APA} style with the \TheClass, all you have to do is pass the \texttt{APA} option to the class as shown below:
+
+\begin{indentedQuote}
+\begin{verbatim}
+\documentclass[12pt,APA]{uomthesis}
+\end{verbatim}
+\end{indentedQuote}
+
+Once you do this, all the Tables, Figures, and references will automatically change to the \texttt{APA} conventions instead of the \textbf{IEEE} conventions. If you want to move back to \textbf{IEEE} conventions, simply delete the \texttt{APA} option in from the class option list. To facilitate this automatic transition, you should adhere to the Table and Figure declarations discussed in Section~\ref{sec:Latex:table} and~\ref{sec:Latex:fig} respectively.
+
+\vspace{0.5cm}\noindent\fbox{%
+    \parbox{\textwidth}{%
+This document is currently using the \styleSwitch{APA}{IEEE} style. If you want to have your document in the \styleSwitch{IEEE}{APA} style instead, \styleSwitch{remove}{add} the \texttt{APA} option~\styleSwitch{from}{to} the \latexC{documentclass}.
+ }%
+}
+
+
+
+\subsection{Compiling the Draft version}
+\label{Sec:ClOp:Draft}
+
+Section~\ref{Sec:Draft} gives instructions on compiling a draft version of your document for the purpose of reading by your committee or editor. This draft is different from the final version discussed in Section~\ref{Sec:Final} by two aspects: \textit{line spacing} alterations and printing \textit{single sided}. The \TheClass{} by default is configured as \textit{single sided}. Therefore, you only need to pass the \texttt{UoMdraft} option, to comply with the instructions in Section~\ref{Sec:Draft} as shown below:
+
+\begin{indentedQuote}
+\begin{verbatim}
+\documentclass[12pt,UoMdraft]{uomthesis}
+\end{verbatim}
+\end{indentedQuote}
+
+If you are using \texttt{APA} conventions instead of the \texttt{IEEE} conventions as discussed in Section~\ref{Sec:ClOp:APA}, your class options will now look like as follows:
+
+\begin{indentedQuote}
+\begin{verbatim}
+\documentclass[12pt,APA,UoMdraft]{uomthesis}
+\end{verbatim}
+\end{indentedQuote}
+
+\subsection{Compiling the Final version}
+\label{Sec:ClOp:Final}
+
+As mentioned in Section~\ref{Sec:ClOp:Draft}, the \TheClass{} by default is configured as \textit{single sided}. But it follows the line spacing conventions of Section~\ref{Sec:Final} by default. Therefore, you only need to pass the \textit{twoside} option, to comply with the instructions in Section~\ref{Sec:Final} as shown below:
+
+\begin{indentedQuote}
+\begin{verbatim}
+\documentclass[12pt,twoside]{uomthesis}
+\end{verbatim}
+\end{indentedQuote}
+
+If you are using \texttt{APA} conventions instead of the \texttt{IEEE} conventions as discussed in Section~\ref{Sec:ClOp:APA}, your class options will now look like as follows:
+
+\begin{indentedQuote}
+\begin{verbatim}
+\documentclass[12pt,APA,twoside]{uomthesis}
+\end{verbatim}
+\end{indentedQuote}
+
+This will automatically handle the margins of even and odd pages according to the instructions in Section~\ref{Sec:Margins}. In addition to that, it will automatically insert empty pages where needed to make sure that a new chapter will always start on an odd numbered page.
+
+\subsection{Advanced: Other Optional Arguments}
+\label{Sec:ClOp:Optional}
+
+If you are a novice \LaTeX{} user, you can ignore this section. But if you are an advanced user and desire more customizability, while you compose your document, note that our~\TheClass{} is a sub-class of the~\texttt{report} class. As such, you may pass, to the~\TheClass{} any option compatible with the~\texttt{report} class. However, please be mindful that some options such as~\texttt{draft} may introduce formatting inconsistencies. Either way, these options should be used only for your convenience when you are compiling your document. They have no official standing in the style guidelines of \UoM. Therefore, any version you hand over to the university or a different individual should \textbf{always} confirm to either the draft configuration discussed in Section~\ref{Sec:ClOp:Draft} or the final configuration discussed in Section~\ref{Sec:ClOp:Final}.
+
+
+\chapter{Literature Review}
+
+Measuring flow rates in wells faces several challenges due to the dynamic and complex nature of well environments. Wells often produce a mixture of oil, gas, water, and sometimes solids. This multi-phase flow makes it difficult to directly measure individual phase flow rates accurately. 
+
+
+
+\subsection{Physics-based VFM}
+Physics based VFMs are also known as first principles VFM systems. Physics based VFMs dominate the industry as they've undergone significant development over half a century to comprehensively outline each facet of this approach. This extensive effort has yielded a strong grasp of mechanistic modeling within production systems, fluid properties, and optimization methods. Consequently, first principles modeling stands as a dependable method to depict overall production system behavior and especially multiphase flow phenomena.
+
+\subsection{Data-driven VFM}
+Data-driven modeling involves analyzing system data to uncover connections between input and output variables without precise knowledge of the system's physical behavior. This method proves advantageous in bypassing intricate physical modeling, especially for systems like multiphase flows in pipes, where exact numerical solutions can be challenging. It relies on experimental or industrial data to grasp the system's behavior directly and attempts to learn the underlying relationships from this data.
+
+For Virtual Flow Metering (VFM) applications, data-driven modeling involves collecting data such as bottomhole and wellhead pressures and temperatures, choke opening values, ESP parameters, and corresponding oil, gas, and water flowrate measurements. These measurements can originate from various sources, like well test data or hardware multiphase flow meters (MPFMs). The data-driven model can serve as a backup metering system for individual wells if MPFMs are installed for each wellhead. Alternatively, if one MPFM serves multiple wells, its data aligns with well test or separator data, enabling flowrate measurements per well according to testing schedules. Post-training and validation, the data-driven model functions as a standalone VFM system. Detailed insight into the data-driven workflow process follows in the subsequent section.
+
+[3] have done a detailed literature study on the oilfield production and different types of flow meters. The area that contains the deposit of oil and/or natural gas is called the oil reservoir. There can be multiple wells connected to the same reservoir. Fluid flow in the piping network in a oil well is a multi-phase flow containing oil, gas and water. Piping network in a oil and gas well can be a combination of horizontal, vertical or inclined pipes. Therefore the flow of fluid in the piping can occur at any direction including upward and downward flows. Flow of fluid in the well can transit between the steady state and unsteady state. The steady state refers to the situation when the flow rates of the phases of the flow remains approximately uniform over time. Unsteady state on the other hand refers when the flow rates of individual phases rapidly varies over time.  There are two mechanisms of measuring the flow rates of the oil well. They are physical flow meters and virtual flow meters (VFM). They physical flow meters can be of two types. They are multi-phase flow meter and single phase flow meter. Even in the physical flow meters, flow rates are calculated indirectly using physics based mathematical model. Multi-phase flow meter measure the flow rates of different phases simultaneously without separation. Multi-phase flow meters can provide continuous measurement of flow rates at sensor locations with decent accuracy but they are considered extremely expensive and requires regular calibration. Multi-phase flow meters are however considered to be less accurate outside of normal operational ranges. Physical flow meters in general also have the limitation of not being able to back-fill historical flow rates prior to the installation of the instrument. Single phase flow meters in contrast measure the flow rate of each phase individually, therefore multi-phase flow should be separated through a separator prior to feeding the single phase flow meter. Single phase flow meters are considered more accurate than multi-phase flow meter. Although not as advanced as multi-phase flow meters, the single phase flow meters are also considered expensive and its usage is extremely costly due to production deferment. This is because the well has to be disconnected from the production and needs to be connected with the separator prior to feeding the single phase flow meter. Single phase flow measurement is often called a well test. Some wells cannot be measured from a well test because the distance from the well to the separator can be very long. Both VFMs and physical flow meters measure the flow rates indirectly [3]. Physical flow meters bring their own set of sensors whereas VFMs use the existing sensors in the well. Physical flow meters use physics based mathematical models to calculate the flow rates whereas VFM can use physics models and/or ML based models for prediction. VFMs, therefore can be categorized into 3 types; physics based, ML based and hybrid flow meters. Physics based VFMs are also called first principle VFMs or physics simulator based VFMs. Physics based VFMs are generally considered expensive due to licensing costs of the simulator and slow in prediction due to processing of high complexity mathematical models. Physics based VFMs require very accurate descriptions of the well, fluids, trajectory, production choke and installation parameters for modeling the simulator based on the principles of physics. ML based VFMs on the other hand are purely data driven. Hybrid VFMs implement combined physics based and ML based models. All 3 types of VFMs rely on pressure and temperature sensor data in the well. ML based VFM and hybrid VFM also rely on physical well-test measurements for model training. More the well-test measurements available, higher the accuracy of the model within the operating conditions of the well-test measurements. They are however said to have higher degree of uncertainty outside the operating conditions of the well-test measurements. Oilfields are required for perform well-tests at some point based on regulatory requirements of the jurisdictions. It is however not economically feasible to run regular well-tests as they cause production deferment. All types of VFMs have the limitation of being restricted to steady state, meaning that if there are rapid transient changes in the flow, VFMs will not predict them accurately. Therefore VFMs cannot predict startup, shutdown and other transient scenarios. ML and hybrid VFMs also cannot accurately handle advanced what-if predictive scenarios. Physics based VFMs in contrast can accurately handle advanced what-if predictive scenarios.
+
+In a typical well, pressure and temperature sensors are deployed in the well bottom-hole (BH), well-head (WH) and downstream of the choke (DC) [3]. The choke is used to control the produced flow in the well for situational requirements. The six pressure and temperature sensors along the the choke position is generally used as independent variables for predicting the flow rates in ML based VFMs. [4] more recent work published in 2022, similar to [3] performs a detailed study on the physical and virtual FMs with overlapping content.
+
+The hybrid VFM proposed by [5] uses ensemble learning to develop the data driven model by incorporating multiple ML models. The data driven model is then combined with the physics model using a combiner. They have achieved a 50\% improvement in performance using the combiner compared to their stand-alone performance of physics based and ML based VFMs. [6] too proposes a VFM based on ensemble learning but instead of a hybrid VFM they propose ML based model. The model consumes bottom-hole, well-head, downstream choke pressure and sensor data. The proposed method generates diverse NN learners by manipulating training data, NN architecture and learning trajectory. They have evaluated the proposed method using actual well-test data and achieved a remarkable performance with average errors of 4.7\% and 2.4\% for liquid and gas flow rates respectively. The accuracy of the developed VFM was also analyzed using cumulative deviation plot where the predictions are within a maximum deviation of ± 15\%. [7] have successfully developed a LSTM-RNN based model not only to predict multi-phase rates at present but also to predict future flow rates as a time-series. This is because unlike feed-forward NN, which process input data in a one-way, LSTM-RNN are designed to process sequential data, such as time series. [7] has achieved the best accuracy when the lengths of the input and output sequences to LSTM are equal. [8] develops a ML based VFM, implemented on BNN. BNNs provide a probabilistic distribution over weights and predictions unlike traditional neural networks, which produce point estimates for weights and predictions. They have trained the model on a large and heterogeneous data-set, consisting of 60 wells across five different oil and gas assets. The predictive performance is analyzed on historical and future test data, where an average error of 4\%–6\% and 8\%–13\% is achieved for the 50\% best performing models, respectively. [9] proposes a hybrid VFM combining PINN based physics model and LSTM-RNN based ML model. Their resulting hybrid model is capable of predicting the average flow rate some time-steps ahead using the measurements available in the oil well information system. Unlike the ML based LSTM-RNN model proposed by [7], the system proposed by [9] is hybrid model using NN for physics based model as well as the ML based model. [10] employs Back Propagation (BP) neural network, Long Short-Term Memory (LSTM) network, and Random Forest algorithm to develop an intelligent data-driven model for virtual flow meters in oil and gas development. Their data-set is constructed using actual data from two oil wells in an offshore oil field in the South China Sea. Among the three models, the LSTM model has demonstrated the highest accuracy, with a Mean Absolute Error (MAE) of 3.9\%. LSTM has also demonstrated the highest stability and requires a moderate amount of data volume. BP network on the other hand have exhibited the lowest accuracy, with a MAE of 12.1\%, as well as the lowest stability. BP however has shown the smallest data volume requirement. The Random Forest model has shown moderate accuracy, high stability, but has required the highest data volume.
+
+
+Hybird VFM models have become increasingly popular since 2018 and increase usage of NNs seen for developing both physics and ML based models. Although many types of NNs have been evaluated, author at the time did not discover Transformer based NN for implementing VFM. Transformers, with the ability to capture long-range patterns in sequential data, can be applied to time-series data obtained from sensors.
+
+\section{Number of Copies}
+Student must submit \textbf{One (01)} printed copy of the thesis to the Director of Postgraduate Studies/Faculty of Graduate Studies for PhD, MSc. and MPhil. students and dissertations to the Head of the Department for Taught Courses to be sent to the library. 
+
+\section{Page Format}
+
+This section discusses the page formatting guidelines accepted by the \UoM. All of the type setting instructions (Sections~\ref{Sec:Draft} to~\ref{Sec:Common:TabFig}) are automatically handled by the~\TheClass. Nevertheless, it is important that the students be informed on the conventions that are being used. 
+
+\subsection{General Instructions}
+International A4 white paper of good quality (80 GSM) should be used. Other paper may be used if required (e.g.: for maps) on the instructions of the supervisor. 
+
+\subsection{Draft}
+\label{Sec:Draft}
+The draft to be submitted to the examiners should be word
+processed and single sided. One and a half line spacing is required, except for the abstract, tables and indented quotations where double line spacing may be used. All of these formatting instructions are automatically handled by the~\TheClass{} if you have used the correct options in the beginning of the \LaTeX{} file as discussed in Section~\ref{Sec:ClOp:Draft}.
+
+\subsection{Final Submission}
+\label{Sec:Final}
+Final submission should be word processed and double
+sided. Line spacing should be 1.15, except for indented quotations where double line spacing may be used. All of these formatting instructions are automatically handled by the~\TheClass{} if you have used the correct options in the beginning of the \LaTeX{} file as discussed in Section~\ref{Sec:ClOp:Final}.
+
+\subsection{Margins}
+\label{Sec:Margins}
+4.0 cm from Left and 2.5 cm from Top, Bottom and Right. The margin instructions are automatically handled by the~\TheClass.
+
+\subsection{Fonts}
+\label{Sec:Fonts}
+A conventional font type must be used and text should be in Times New Roman. All font styling are automatically handled by the~\TheClass{} if you properly adhere to the \LaTeX{} conventions discussed in Chapter~\ref{ch:latex}.
+
+\begin{table}[!htb]
+    \centering
+    \begin{tabularx}{\textwidth}{lX}
+       Chapter heading  &  : All Capital - 14 Font size, Bold\\
+       Section heading  & : Sentence case - 14 Font size, Bold\\
+       Sub-section heading & : Sentence case - 12 Font size, Bold\\
+       Body text & : Sentence case - 12 Font size\\
+       Tables and Illustrations & : Font size may be varied while maintaining legibility. By default the~\TheClass uses the body text font size for tables and figures.\\
+    \end{tabularx}
+\end{table}
+
+\subsection{Pagination}
+Each page should have page numbers except the “Title” page. Lower case \textbf{Roman Numerals} should be assigned centered at the bottom of the page to all “preliminary pages” (Refer Appendix II; i - ix in content page). Pagination of the body text and appendices is to be in \textbf{Arabic Numerals} centered at the bottom of the page. The pagination begins with the first page of the first chapter and continues throughout the rest of the text. All numbering is automatically handled by the~\TheClass.
+
+\subsection{Tables and Figures}
+\label{Sec:Common:TabFig}
+Tables are grids consisting of columns and rows that present numerical or verbal facts by categories. Figures include charts, graphs, diagrams, photographs, maps, musical examples, drawings and other images. All these types of non-textural material are collectively referred to as illustrations. All tables and figures must be referred to in the text by number (not by a phrase such as "the following table"). Charts, graphs, maps, and tables that are larger than the standard page should be attached as Appendices. Tables and Figures should be centered. The~\TheClass{} provides special provisions to switch between \textbf{IEEE} and \textbf{APA} styles. The specific \LaTeX{} instructions for this is discussed in Section~\ref{Sec:Latex:FigTab}. 
+
+
+\subsection{Photographs}
+High-quality coloured or black-and-white photographs or reprints with sufficient clarity may be incorporated. State 'Original in Colour’ in the title where colour is used.
+
+\subsection{Units}
+\begin{itemize}
+\item Use either SI (MKS) or CGS as primary units. (SI units are encouraged.) English units may be used as secondary units (in parentheses). An exception would be the use of English units as identifiers in trade, such as ``3.5-inch disk drive''.
+\item Avoid combining SI and CGS units, such as current in amperes and magnetic field in oersteds. This often leads to confusion because equations do not balance dimensionally. If you must use mixed units, clearly state the units for each quantity that you use in an equation.
+\item Do not mix complete spellings and abbreviations of units: ``Wb/m\textsuperscript{2}'' or ``webers per square meter'', not ``webers/m\textsuperscript{2}''. Spell out units when they appear in text: ``. . . a few henries'', not ``. . . a few H''.
+\item Use a zero before decimal points: ``0.25'', not ``.25''. Use ``cm\textsuperscript{3}'', not ``cc''.)
+\end{itemize}
+
+
+\subsection{Additional Materials}
+Additional materials (if any, E.g.: software, audio, video etc.), could be enclosed in a CD/DVD as an Appendix. These CDs/DVDs must be submitted in a pocket pasted inside back cover. Both CD/DVD label and the pocket should carry the following information: Name, Title of submission with Appendix number, Date of submission (example: May 2012), Degree and Department (example: M.Sc. in Geotechnical Engineering, Department of Civil Engineering).
+
+\section{Binding}
+
+\begin{table}[!htb]
+    \centering
+\begin{tabular}{ll}
+PhD & Red\\
+MPhil & Dark Brown\\
+MSc/ MEng (By Research) & Dark Green\\
+MSc/ MEng (Taught courses) & Dark Blue\\
+MBA & White\\
+UG Degree & Black\\
+\end{tabular}
+\end{table}
+
+Short name of the degree and the year submitted should be indicated at 80mm and 40 mm from the bottom of the spine respectively. The name of the candidate with initials should be mentioned at 20mm from the top of the spine. Lettering on cover should be in \textbf{GOLD}.
+
+\begin{table}[!htb]
+    \centering
+\begin{tabular}{|l|}
+\hline
+\parbox[c]{10mm}{\centering\rotatebox{-90}{\hspace{0.8cm}A.P.Bandara\quad M.Sc\quad 2019\hspace{0.8cm}}}\\
+\hline
+\end{tabular}
+\end{table}
+
+\chapter{Methodology}
+The author proposes a novel approach to address the accuracy challenges by leveraging the capabilities of the TFTs and exploring transfer learning techniques to generalize across different well configurations and operating conditions. 
+
+A thesis/dissertation should contain the parts in the given order as shown in Table~\ref{tab:Components}. We have indicated below what are automatically generated by the~\TheClass.
+
+\begin{table}[!htb]
+\uomTable{Components of a Thesis/Dissertation}{tab:Components}{
+    \begin{tabular}{|l|l|}
+    \hline
+    Component & Automatically Generated?\\
+    \hline
+    Cover page & Yes\\
+    Title page & Yes\\
+    Declaration page of the candidate and supervisor & Yes\\
+    Dedication (if any) & No\\
+    Acknowledgements & No\\
+    Abstract & Partially*\\
+    Table of contents & Yes\\
+    List of figures (if any) & Yes\\
+    List of tables (if any) & Yes\\
+    List of abbreviations (if any) & Yes\\
+    The body of the thesis/dissertation & No\\
+    References & Yes\\
+    Bibliography (if any) & No\\
+    Appendices (if any)  & No\\
+    \hline
+    \end{tabular}
+ }{
+* Obviously, you need to write your own abstract and declare your keywords. But then, the~\TheClass{} will generate the abstract page in the correct format for you.
+}
+\end{table}
+
+\section{Declaration and the Statement of the Supervisor}
+The~\TheClass{} automatically generates the declaration which should be made by the candidate following the signature and the date.  A candidate, after a discussion with the supervisor/s can request an embargo for a particular thesis/dissertation for a given work for a given time or indefinitely. Such an embargo may override the statement made in the thesis/dissertation itself.
+%
+
+\begin{table}[!htb]
+    \centering
+\begin{tabular}{ll}
+\textbf{Abstract Title:} & \makecell[l]{Sentence case, Times New Roman 14 point, Bold, Centered\\(If use other fonts, change the size appropriately)} \\
+\textbf{Text:} & Times New Roman 12-point\\
+\textbf{Spacing:} & Line spacing 1.15\\
+\end{tabular}
+\end{table}
+
+
+\section{Table of Contents}
+All the main chapters and subsections of each chapter must be included in the table of contents with their page numbers. The page numbers of abstracts, acknowledgement and others which come first in the thesis/dissertation should also be included. Also, if there are any appendices and other supplements, should be included in the table of contents. The~\TheClass{} automatically generates for you. All you need to do is make sure you have used the proper commands to initiate chapters and sections as discussed in Section~\ref{Sec:Latex:Headdings}.
+
+\section{List of Figures}
+If the thesis/dissertation contains any figures, then separate list should be prepared including the name of the object and the page number. The chapter number should be included in defining the number of figures. The~\TheClass{} automatically generates this for you if you have followed the instructions in Section~\ref{sec:Latex:fig}. Further, if you do not have any figures defined, the~\TheClass{} will hide this section.
+
+\section{List of Tables}
+If the thesis/dissertation contains any tables then separate list should be prepared including the name of the object and the page number. The chapter number should be included in defining the number of tables. The~\TheClass{} automatically generates this for you if you have followed the instructions in Section~\ref{sec:Latex:table}. Further, if you do not have any tables defined, the~\TheClass{} will hide this section.
+
+\section{The Body of the Thesis/Dissertation}
+The thesis/dissertation should be started from an introduction and the last part of the thesis/dissertation should include the conclusions and recommendations. All the chapters of thesis/dissertation should have title and a chapter number. Any new chapter should be started from a new page. Follow the \LaTeX{} guidelines in Chapter~\ref{ch:latex} when you are writing your content. Following is a guide to organize this section:
+
+\begin{enumerate}
+    \item\textbf{Introduction:} Compulsory.
+    \item \textbf{Literature Survey:} Compulsory.
+    \item \textbf{Methodology:} You may split this into multiple chapters with more descriptive names or have one chapter. 
+    \item \textbf{Experiments:} You may split this into multiple chapters with more descriptive names or have one chapter. 
+    \item \textbf{Results and Discussion:} Compulsory, You may split this in two to have a separate \textit{Results} chapter and a \textit{Discussion} chapter.
+    \item \textbf{Conclusion and Future Work:} Compulsory, You may split this in two to have a separate \textit{Conclusions} chapter and a \textit{Future Work} chapter.
+\end{enumerate}
+
+\section{References}
+A reference list is the list of all books, articles, and other source of materials, cited in the body of the text and should be listed according to the international referencing method adopted. \textbf{APA Style} and \textbf{IEEE Style} are recommended. The ‘Reference list’ does not contain a chapter number. The~\TheClass{} uses the \textbf{IEEE Style} by default. If you want to follow the \textbf{APA Style} pass the \texttt{APA} option as described in Section~\ref{Sec:ClOp:APA}. The references list is automatically generated using the sources that you cite in the text. An extended guide on how to do citations can be found in Section~\ref{Sec:Cite}.
+
+
+
+\section{Bibliography (If required)}
+A bibliography is a list of all the sources that have been used in the process of conducting the research.
+
+
+\chapter{\LaTeX-based Formatting Guidelines and Tips}
+\label{ch:latex}
+
+In this chapter we discuss some~\LaTeX{} conventions and tips. If you are already an expert at using~\LaTeX, you might already know everything discussed in this chapter and hence be able to ignore it. This is mostly in benefit to those who are new.  
+
+
+\section{Headings}
+\label{Sec:Latex:Headdings}
+
+Headings guide your reader through your document. You do not need to worry about the headers of components such as Acknowledgments, Abstract, List of Figures, etc because the~\TheClass{} automatically handles them for you. What you need to handle are the text heads. Chapters are the highest level text head and use the \latexC{chapter} command. For the purpose of cross-reference, you may immediately follow it with the \latexC{label} command. It is generally desirable to keep the chapter titles short and to the point.
+
+\begin{indentedQuote}
+\begin{verbatim}
+\chapter{Chapter Name Here}
+\label{ChapterLabelHere}
+\end{verbatim}
+\end{indentedQuote}
+
+You can then use the \latexC{section} command to break the chapter into meaningful partitions. Which then in turn may be broken further using the \latexC{subsection} command. The~\TheClass{} will automatically add these sections to the \textbf{Table of Contents}. You can cross-reference the chapters and sections using the instructions in Section~\ref{sec:latex:cross}. 
+
+\begin{indentedQuote}
+\begin{verbatim}
+\section{Section Name Here}
+\label{SectionLabelHere}
+\end{verbatim}
+\end{indentedQuote}
+
+Subsections can then be broken into partitions using the \latexC{subsubsection} command. If you need to go even deeper, then you may use the \latexC{paragraph} command. However, be mindful that the \UoM{} styling instructions only allow a depth of 3 for the table of contents. Therefore, while your \latexC{subsubsection} and \latexC{paragraph} level  sections will be properly numbered and be possible to cross-reference in text following the instructions in Section~\ref{sec:latex:cross}, they will not appear in your \textbf{Table of Contents}.  
+
+\begin{indentedQuote}
+\begin{verbatim}
+\appendiceC{Appendix Name Here}{AppendixLabelHere}
+\end{verbatim}
+\end{indentedQuote}
+
+
+\section{Figures and Tables}
+\label{Sec:Latex:FigTab}
+
+In \LaTeX{} figures and tables are considered to be floats. As such, you can pass parameters to them to indicate how the algorithm may arrange them. A very popular order of precedence is \texttt{[!htb]} but you may use other orders or subsets of it as you see fit. However be careful if you opt to use \texttt{[H]} option provided by the  \texttt{float} package as it might cause undesirable pagination. Insert figures and tables after they are cited in the text. If you have a figure or a table that seems to be too big, consider moving it to an appendix. 
+
+
+\subsection{How to Add Figures}
+\label{sec:Latex:fig}
+
+The~\TheClass provides you with a special command, \latexC{uomFig} to insert figures. The reason for this is to facilitate the switching between the \textbf{IEEE} and \textbf{APA} styles as well as deciding automatically to generate the \textbf{List of Figures} or not. The \latexC{uomFig} is as follows.
+
+\begin{indentedQuote}
+\begin{verbatim}
+\uomFig{Caption}{FigureLabel}{Figure}{Note}
+\end{verbatim}
+\end{indentedQuote}
+
+The simplest type of figure is to load an image from the \texttt{images} folder as shown in Figure~\ref{fig:SampleGraph}. But instead, you may also pass a dynamically generated \texttt{tikz} image or any other compatible environment. 
+
+\begin{figure}[!htb]
+\uomFig{The Internet experience of the participants}{fig:SampleGraph}{\includegraphics[width=0.9\textwidth]{./images/SampleGraph.png}}{Explanations to clarify information in the table (if needed).}
+\end{figure}
+
+The \texttt{Note} argument at the very end is optional. If you do not wish to utilize it for a certain figure, just keep it empty. 
+
+\begin{indentedQuote}
+\begin{verbatim}
+\uomFig{Caption}{FigureLabel}{Figure}{}
+\end{verbatim}
+\end{indentedQuote}
+
+Following are some good practices in using figures:
+\begin{itemize}
+    \item Section~\ref{Sec:Fonts} gave you the freedom to use any font size in figures provided it is legible. Using at least 8 point size will help maintain legibility.
+    \item Use words rather than symbols or abbreviations when writing Figure axis labels to avoid confusing the reader. As an example, write the quantity ``Frequency'', or ``Frequency, F'', not just ``F''. 
+    \item If including units in the label, present them within parentheses. Do not label axes only with units. In the example, write ``Speed (m/s)'' or ``Speed ($ms^{-1}$)'', not just ``m/s''.
+    \item Do not label axes with a ratio of quantities and units. For example, write ``Temperature (K)'', not ``Temperature/K''.
+\end{itemize}
+
+Advanced users may decide to forgo using the \latexC{uomFig} environment as once you decide to adopt either the \textbf{IEEE} style or the \textbf{APA} style, it is unlikely that you may change it. These advanced uses may decide to use the vanilla \texttt{figure} environment. But if you do so, make sure you manually adhere to the styling guidelines of your selected style.
+
+
+
+\subsection{How to Add Tables}
+\label{sec:Latex:table}
+
+The instructions for adding a table is very similar to adding a figure. The~\TheClass provides you with a special command, \latexC{uomTable} to insert tables. The \latexC{uomTable} is as follows.
+
+\begin{indentedQuote}
+\begin{verbatim}
+\uomTable{Caption}{tableLabel}{Table}{Note}
+\end{verbatim}
+\end{indentedQuote}
+
+As in the case of figure, the \texttt{Note} argument at the very end is optional. If you do not wish to utilize it for a certain table, just keep it empty. 
+
+\begin{indentedQuote}
+\begin{verbatim}
+\uomTable{Caption}{tableLabel}{Table}{}
+\end{verbatim}
+\end{indentedQuote}
+
+You may use \LaTeX{} table environments such as \texttt{tabular} and \texttt{tabularx} to construct your table. Table~\ref{tab:taskdef} illustrates an example with the \texttt{tabularx} environment. Note that we are using a custom created \texttt{Y} column type to center align the stretched \texttt{tabularx} columns.
+
+\begin{table}[!htb]
+\uomTable{Kruskal-Wallis Test Results for the Internet Experience vs. User Category}{tab:taskdef}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
+\hline
+User Category & N & Median & Ave Rank & Z \\
+\hline
+Academics & 73 & 5.000 & 233.5 & 6.90 \\
+Postgraduates & 87 & 5.000 & 189.9 & 2.78 \\
+Undergraduates & 139 & 4.000 & 130.1 & -5.75 \\
+ITUM Students & 31 & 4.000 & 95.5 & -4.29 \\
+Overall & 330 & & 165.5 & \\
+\hline
+\end{tabularx}}{Explanations to clarify information in the table (if needed).}
+\end{table}
+
+The conventions of \textbf{IEEE} and \textbf{APA} are more drastically different for tables than for figures. Advanced users who may decide to forgo using the \latexC{uomTable} environment have to be doubly careful of adhere to the styling guidelines of your selected style.
+
+
+
+
+\section{How to do Cross-referencing}
+\label{sec:latex:cross}
+
+Cross-referencing is a very important part of academic writing. It helps you describe figures, tables, and equations without ambiguity. It also helps you to, refer back to a section the reader had already read or refer forward to a section the reader will be encountering, which is relevant to the current section they are reading. Using the \latexC{ref} command is the best way to do cross-reference. 
+
+\begin{indentedQuote}
+\begin{verbatim}
+\ref{labelOfTheTarget}
+\end{verbatim}
+\end{indentedQuote}
+
+If you look at the \LaTeX{} source of this document, you can see many uses of cross-reference. All of them using the \latexC{ref} command. Some examples are as follows:
+
+\begin{itemize}
+    \item Fig.~\ref{fig:SampleGraph} is in Section~\ref{sec:Latex:fig}.
+    \item Table ~\ref{tab:taskdef} is the only table in Chapter~\ref{ch:latex}.
+\end{itemize}
+
+Note how \LaTeX{} has created clickable links that will conveniently take you to the referred location. 
+%
+Please use ``soft'' (e.g., \verb|\eqref{Eq}| or \verb|\ref{Eq}|) cross references instead of ``hard'' references (e.g., \verb|(1)|). That will make it possible to combine sections, add equations, or change the order of figures or citations without having to go through the file line by line. The point of using \LaTeX{} is to automate these tedious tasks instead of doing them manually. So utilize its power. 
+
+Be mindful when you assign labels. If you assign the same label to a
+subsubsection and a table, you might find that Table I has been cross referenced as Table IV-B3. Labels, need to be unique.
+
+Advanced users abandon \latexC{uomFig} and \latexC{uomTable} have to be extra careful not to  put a \verb|\label| command before the command that updates the counter it's supposed to be using, If you do so, the label will pick up the last counter to be cross referenced instead. As such, a \verb|\label| command should not go before the caption of a figure or a table. This requirement is already handled within \latexC{uomFig} and \latexC{uomTable}. 
+
+
+\begin{indentedQuote}
+\begin{verbatim}
+\abbr{Description}{Abbreviation or Acronym}
+\end{verbatim}
+\end{indentedQuote}
+
+\begin{indentedQuote}
+\begin{verbatim}
+\abbr[Abbreviation]{Description}{Simple Abbreviation}
+\abbr[Acronym]{Description}{Simple Acronym}
+\end{verbatim}
+\end{indentedQuote}
+
+\section{How to Add Indented Quotations}
+The indented quotations have special formatting properties that they do not share with any other part of the document as discussed by Sections~\ref{Sec:Final} and~\ref{Sec:Draft}. Therefore the~\TheClass{} provides you with the \texttt{indentedQuote} environment which will automatically adhere to the relevant formatting guidelines when you pass the \texttt{UoMdraft} option or withhold it as described in Section~\ref{Sec:ClOp:Draft}. Given below is an example of an indented quotation.
+
+\begin{indentedQuote}
+This is an indented quotation. Please use this environment for all your indented quotations as there are some formatting guidelines that they need to follow. We have provided this environment with these requirements integrated. 
+\end{indentedQuote}
+
+\section{How to Add Footnotes}
+Footnotes are used mostly for two scenarios: 1) when there is a tangent explanation or a clarification is to be done but putting it in the body text might break the flow of the text, 2) To add a URL which is relevant but not a reference that should go on the references list (Section~\ref{Sec:Cite}). If it is a plain text footnote\footnote{This is a plain text footnote}, you can use the \latexC{footnote} command.
+
+\begin{indentedQuote}
+\begin{verbatim}
+\footnote{Footnote text}
+\end{verbatim}
+\end{indentedQuote}
+
+If it is a URL\footURL{http://mrt.ac.lk}, you can use the \latexC{footURL} command.
+
+\begin{indentedQuote}
+\begin{verbatim}
+\footURL{Footnote URL}
+\end{verbatim}
+\end{indentedQuote}
+
+However, sometimes you need to refer the same footnote again in the text. And if you only use the above command again, it gets repeated\footnote{This is a plain text footnote}. To prevent this, you can use the \latexC{footReText} command\footReText{This is a Reusable text footnote}{foot:reText}. 
+
+\begin{indentedQuote}
+\begin{verbatim}
+\footReText{Footnote Text}{FootnoteLabel}
+\end{verbatim}
+\end{indentedQuote}
+
+Then you can use the \latexC{footnoteref} command\footnoteref{foot:reText} in the subsequent uses to refer back to the same footnote.
+
+\begin{indentedQuote}
+\begin{verbatim}
+\footnoteref{FootnoteLabel}
+\end{verbatim}
+\end{indentedQuote}
+
+If you need a reusable URL footnote, you can use the \latexC{footReURL} command\footReURL{http://www.lib.mrt.ac.lk/}{foot:reURL}. Then later, you can use the \latexC{footnoteref} command\footnoteref{foot:reURL} as before.
+
+\begin{indentedQuote}
+\begin{verbatim}
+\footReURL{Footnote URL}{FootnoteLabel}
+\end{verbatim}
+\end{indentedQuote}
+
+Do not put footnotes in the abstract or reference list. Use letters for table footnotes.
+
+\section{How to Add Equations and Other Maths Symbols}
+There three ways you may need to add equations and Maths symbols: 1) Inline with text, 2) As a standalone equation, or 3) As a cluster of equations. When you need to use Maths inline, the simplest method is to nest it between two \verb|$| signs. For example, $E=MC^2$.
+
+When you have an equation that is too bulky to be put inline and/or you have a need to refer that equation in the text, you should use the \texttt{equation} environment. You must then use the \texttt{label} command to refer that equation in text and explain it. As shown in Equation~\ref{Eq:f}.
+
+\begin{equation}
+f = 2 * \sigma\big[ g \big( w_t, w_s \big) - || y_t - y_s|| \big] -1
+\label{Eq:f}
+\end{equation}
+
+If you have a cluster of equations you need to put, you can opt to use the \texttt{align} environment instead of repeating the \texttt{equation} environment again and again. We show an example of this usage in Equations~\ref{eq:ab} to~\ref{eq:Xinc}.
+
+\begin{align}
+    a+b=\gamma\label{eq:ab}\\
+    p_i = Softmax(x^Tm_i )\label{eq:sofm}\\
+    o =\sum_{i}p_i c_i\label{eq:sumO}\\
+    x_{k+1} = x_k + o_k\label{eq:Xinc}
+\end{align}
+
+Please make sure that the symbols in your equation have been defined before or immediately following  the equation. For example, ``Equation~\ref{Eq:MEeq}, where $M$ is Mass, $c$ is the speed of light, and $E$ is energy, expresses the fact that mass and energy are the same physical entity and can be changed into each other''
+
+\begin{equation}
+E=MC^2
+\label{Eq:MEeq}
+\end{equation}
+
+Use \textbf{Eq.} except at the beginning of a sentence when you mention an equation in text. \textbf{Equation} should be used at the beginning of a sentence. The above example shows how to use it in the beginning of the sentence.  An example of mentioning an equation in the middle of the sentence is: ``German-born physicist Albert Einstein proposed Eq.~\ref{Eq:MEeq} under the theory of special relativity''.
+
+
+
+
+
+
+\section{Handling Citation and References}
+\label{Sec:Cite}
+
+\LaTeX{} handles all of your references. However, in order to do so, you must tell it where to find your references. You do this by first creating a \texttt{.bib} file and then using the \latexC{bibliography} command to inform \LaTeX{} where your references are. For example, in this style document, we are using a \texttt{.bib} file named \texttt{references.bib} and it is added to the \texttt{main.tex} using the following line:
+
+\begin{indentedQuote}
+\begin{verbatim}
+\bibliography{references}
+\end{verbatim}
+\end{indentedQuote}
+
+In case you have another \texttt{.bib} file named \texttt{books.bib}, all you need to do is add it after a comma, as shown below.
+
+\begin{indentedQuote}
+\begin{verbatim}
+\bibliography{references,books}
+\end{verbatim}
+\end{indentedQuote}
+
+Appendix~\ref{App:GScholar} gives you a quick guide in how to extract the bibliographic entries from google scholar~\footURL{https://scholar.google.com/} to create your \texttt{.bib} files. 
+
+We have created the~\TheClass to be able to handle multiple convention types of in-text citations. In fact, it handles \texttt{natbib} citation command as well as the traditional citation commands. We encourage you to use the \texttt{natbib} styles. Table~\ref{tab:citeComp} shows how each command will show up in \textbf{IEEE} and \textbf{APA} formats.
+
+\begin{table}[!htb]
+\uomTable{Citation commands supported by the style file.}{tab:citeComp}{\begin{tabular}{|l|l|l|l|}
+\hline
+\multicolumn{2}{|c|}{\textbf{Command}}&\multicolumn{2}{c|}{\textbf{Output}} \\
+\hline
+\textbf{\texttt{natbib}} & \textbf{Traditional} & \textbf{IEEE} & \textbf{APA}\\
+\hline
+\hline
+\latexC{citep} & \latexC{cite} & [1] & (Sugathadasa et al., 2017)  \\
+\latexC{citealp} & no equivalent & 1 & Sugathadasa et al., 2017 \\
+\latexC{citet} & \latexC{newcite} & Sugathadasa et al. [1] & Sugathadasa et al. (2017)  \\
+\latexC{citeyearpar} & \latexC{shortcite} & [2017] & (2017) \\
+\hline
+\end{tabular}}{}
+\end{table}
+
+In Table~\ref{tab:citeCurrent} we show how this document currently shows citations. Given that this document is currently using the \styleSwitch{APA}{IEEE} style, the citations are also in the \styleSwitch{APA}{IEEE} style. If you want to have your document in the \styleSwitch{IEEE}{APA} style instead, \styleSwitch{remove}{add} the \texttt{APA} option as described in Section~\ref{Sec:ClOp:APA}.
+
+\begin{table}[!htb]
+\uomTable{Citation style currently used in this document}{tab:citeCurrent}{\begin{tabular}{ll}
+\hline
+\textbf{Command Used} & \textbf{Current Output} \\
+\hline
+\latexC{citep} & \citep{lim2021temporal}\\
+\latexC{citealp} & \citealp{lim2021temporal}\\
+\latexC{citet} & \citet{lim2021temporal} \\
+\latexC{citeyearpar} & \citeyearpar{lim2021temporal} \\
+\hline
+\end{tabular}}{}
+\end{table}
+
+\begin{references}
+    \bibliography{references} % argument is your bibliography database(s)
+\end{references}
+
+
+\begin{appendices}
+
+\appendiceC{How to Extract Bibliographic Entries}{App:GScholar}
+Say you want to cite the paper \textit{Survey on Publicly Available Sinhala Natural Language Processing Tools and Research}.
+\begin{enumerate}
+    \item Navigate to Google Scholar~\footURL{https://scholar.google.com/}.\newline\includegraphics[width=0.85\textwidth]{./images/scholar01.png}
+    \item Paste/type the name of the paper you want to cite in the search box and press enter.\newline\includegraphics[width=0.85\textwidth]{./images/scholar02.png}
+    \item Now click on the small cite icon below the paper description.\newline\includegraphics[width=0.85\textwidth]{./images/scholar03.png}
+    \item From the given options, select \textbf{BibTeX}\newline\includegraphics[width=0.85\textwidth]{./images/scholar04.png}
+    \item Copy the generated \texttt{bib} entry.\newline\includegraphics[width=0.85\textwidth]{./images/scholar05.png}
+    \item Now paste the copied \texttt{bib} entry into your \texttt{bib} file.\newline\includegraphics[width=0.85\textwidth]{./images/scholar06.png}
+\end{enumerate}
+
+\end{appendices}
+
+\end{document}
+
+
+
