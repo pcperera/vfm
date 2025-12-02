@@ -1,7 +1,7 @@
 [tool.poetry]
 authors = ["pcperera@gmail.com"]
 description = "Neural Network VFM"
-name = "vfm-nn"
+name = "vfm"
 version = "1.0.0"
 package-mode = false
 
@@ -11,23 +11,25 @@ url = "https://pypi.org/simple"
 
 [[tool.poetry.source]]
 name = "pytorch"
-url = "https://download.pytorch.org/whl/cu118"
+url = "https://download.pytorch.org/whl/cu126"
+priority = "explicit"
 
 [tool.poetry.dependencies]
-cognite-sdk = { version = "^5.3.4", source = "default" }
+python = "~3.11.9"
+cognite-sdk = { version = "^7.90.1", source = "default" }
 numpy = { version = "^1.24.1", source = "default" }
 optuna = { version = "*", source = "default" }
 pandas = { version = "^1.5.2", source = "default" }
 pandera = { version = "^0.13.4", source = "default" }
-python = "~3.11.9"
-pytorch-forecasting = { version = "=1.5.0", source = "default" }
-scikit-learn = { version = "^1.2.1", source = "default" }
+scikit-learn = { version = "^1.7.2", source = "default" }
 scipy = { version = "^1.10.0", source = "default" }
 seaborn = { version = "^0.12.2", source = "default" }
 tensorboard = { version = "*", source = "default"}
 tensorboardX = { version = "*", source = "default"}
-torch = { version = "=2.9.1", source = "default" }
-
+ipykernel = { version = "*", source = "default"}
+torch = { version = "=2.9.1", source = "pytorch" }
+pytorch-forecasting = { version = "=1.5.0", source = "default" }
+pytorch-lightning = { version = "=2.6.0", source = "default" }
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab = { version = "^3.6.4", source = "default" }
