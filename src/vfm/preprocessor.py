@@ -25,9 +25,10 @@ class Preprocessor:
         # Training data (based on well test)
         # fields_to_drop_na = ["qo_mpfm"]
         fields_to_drop_na = ["qo_well_test"]
-        fiels_to_forward_fill = ["dhp", "dht", "whp", "wht", "choke", "dcp"]
+        fields_to_forward_fill = ["dhp", "dht", "whp", "wht", "choke", "dcp"]
         df = df[["dhp", "dht", "whp", "wht", "choke", "dcp", "qo_mpfm", "qg_mpfm", "qw_mpfm", "qo_well_test", "qg_well_test", "qw_well_test", "well_id"]]
-        df.fillna(method="ffill", inplace=True)
+        df[fields_to_forward_fill].fillna(method="ffill", inplace=True)
+        df = df[df[['qo_well_test', 'qg_well_test', 'qw_well_test']].notna().any(axis=1)]
         # return df[(df["choke"] > 0) & (df["qo_well_test"] > 0) & (df["qg_well_test"] > 0) & (df["qw_well_test"] > 0)]
         return df
         # df = df.dropna(subset=fields_to_drop_na)

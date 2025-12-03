@@ -1,9 +1,9 @@
 import optuna
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from torch.utils.data import DataLoader, TensorDataset
 from src.metrics import generate_scores, generate_plot
 from pandas import DataFrame

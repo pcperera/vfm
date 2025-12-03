@@ -1,3 +1,4 @@
+
 import pandas as pd
 import torch
 from lightning.pytorch import Trainer, LightningModule
@@ -20,17 +21,20 @@ class SWTTFTModel:
     def __init__(self, df: pd.DataFrame, dependent_variables: list[str], independent_variables= list[str]):
         self._df_train = df.dropna(subset=dependent_variables).copy()
         self._batch_size = 4
-        max_encoder_length = 288  # e.g., last 24 hours at 5-min intervals
-        max_prediction_length = 1  # Sequence-to-point prediction
+        max_encoder_length = 1  
+        min_encoder_length = 1  
+        max_prediction_length = 1
+        min_prediction_length = 1
+
 
         training = TimeSeriesDataSet(
             self._df_train,
             time_idx="time_idx",
             target=dependent_variables,
             group_ids=["well_id"],
-            min_encoder_length=max_encoder_length,  # encoder length
+            min_encoder_length=min_encoder_length,  # encoder length
             max_encoder_length=max_encoder_length,
-            min_prediction_length=max_prediction_length,
+            min_prediction_length=min_prediction_length,
             max_prediction_length=max_prediction_length,
             static_categoricals=["well_id"],
             time_varying_known_reals=["time_idx"],  # we only know timestamp
