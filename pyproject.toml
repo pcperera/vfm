@@ -29,7 +29,6 @@ tensorboardX = { version = "*", source = "default"}
 ipykernel = { version = "*", source = "default"}
 torch = { version = "=2.9.1", source = "pytorch" }
 pytorch-forecasting = { version = "=1.5.0", source = "default" }
-pytorch-lightning = { version = "=2.6.0", source = "default" }
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab = { version = "^3.6.4", source = "default" }

@@ -74,4 +74,5 @@ class Connection:
         #                             "wht": Feature.WELL_HEAD_TEMPERATURE.value, "dht": Feature.DOWN_HOLE_TEMPERATURE.value,
         #                             "qo_mpfm": Feature.QO_MPFM.value})
 
+        data["well_id"] = well
         return data

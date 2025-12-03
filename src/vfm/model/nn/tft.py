@@ -10,12 +10,12 @@ from pytorch_forecasting.models.temporal_fusion_transformer.tuning import optimi
 
 class TemporalFusionTransformerModel:
     def __init__(self, train_data: pd.DataFrame, max_encoder_length: int = 4, max_prediction_length: int = 2, batch_size: int = 10, num_workers: int = 16):
-        self.__train_data = train_data
-        self.__max_encoder_length = max_encoder_length
-        self.__max_prediction_length = max_prediction_length
-        self.__batch_size = batch_size
-        self.__num_workers = num_workers
-        self.__accelerator = "gpu" if torch.cuda.is_available() else "cpu"
+        self._train_data = train_data
+        self._max_encoder_length = max_encoder_length
+        self._max_prediction_length = max_prediction_length
+        self._batch_size = batch_size
+        self._num_workers = num_workers
+        self._accelerator = "gpu" if torch.cuda.is_available() else "cpu"
 
         print(f"CUDA available: {torch.cuda.is_available()}")
 
@@ -23,7 +23,7 @@ class TemporalFusionTransformerModel:
             print(f"CUDA version: {torch.version.cuda}")
             print(f"CUDA version: {torch.cuda.get_device_name(0)}")
 
-    def train(self, time_idx: str, time_series_idx: [], target_fields: [str], time_varying_known_reals: [str]):
+    def train(self, time_idx: str, time_series_idx: list, target_fields: list[str], time_varying_known_reals: list[str]):
 
         normalizers = []
 
@@ -32,14 +32,14 @@ class TemporalFusionTransformerModel:
 
         # Training data set timeseries
         training_data_timeseries = TimeSeriesDataSet(
-            self.__train_data,
+            self._train_data,
             time_idx=time_idx,
             group_ids=time_series_idx,
             target=target_fields if len(target_fields) < 0 else target_fields[0],
-            min_encoder_length=self.__max_encoder_length // 2,
-            max_encoder_length=self.__max_encoder_length,
-            min_prediction_length=self.__max_prediction_length // 2,
-            max_prediction_length=self.__max_prediction_length,
+            min_encoder_length=self._max_encoder_length // 2,
+            max_encoder_length=self._max_encoder_length,
+            min_prediction_length=self._max_prediction_length // 2,
+            max_prediction_length=self._max_prediction_length,
             time_varying_known_reals=time_varying_known_reals,
             time_varying_unknown_reals=target_fields,
             add_relative_time_idx=True,
@@ -50,11 +50,11 @@ class TemporalFusionTransformerModel:
         )
 
         # Validation data set timeseries
-        validation_data_timeseries = TimeSeriesDataSet.from_dataset(training_data_timeseries, self.__train_data, predict=True, stop_randomization=True)
+        validation_data_timeseries = TimeSeriesDataSet.from_dataset(training_data_timeseries, self._train_data, predict=True, stop_randomization=True)
 
         # Create dataloaders for our model
-        train_dataloader = training_data_timeseries.to_dataloader(train=True, batch_size=self.__batch_size, num_workers=self.__num_workers, pin_memory=True)
-        val_dataloader = validation_data_timeseries.to_dataloader(train=False, batch_size=self.__batch_size, num_workers=self.__num_workers, pin_memory=True)
+        train_dataloader = training_data_timeseries.to_dataloader(train=True, batch_size=self._batch_size, num_workers=self._num_workers, pin_memory=True)
+        val_dataloader = validation_data_timeseries.to_dataloader(train=False, batch_size=self._batch_size, num_workers=self._num_workers, pin_memory=True)
 
         early_stop_callback = EarlyStopping(monitor="val_loss", min_delta=1e-4, patience=5, verbose=True, mode="min")
         lr_logger = LearningRateMonitor()
@@ -76,7 +76,7 @@ class TemporalFusionTransformerModel:
             learning_rate_range=(0.0001, 0.01),
             dropout_range=(0.0, 0.3),
             use_learning_rate_finder=False,  # Use Optuna to find ideal learning rate or use in-built learning rate finder
-            trainer_kwargs=dict(accelerator=self.__accelerator, devices=1, callbacks=[lr_logger, early_stop_callback]),
+            trainer_kwargs=dict(accelerator=self._accelerator, devices=1, callbacks=[lr_logger, early_stop_callback]),
             verbose=2,
             loss=QuantileLoss(),
             reduce_on_plateau_patience=4)

@@ -12,91 +12,91 @@ from pandas import DataFrame
 class FeedForwardNeuralNetworkModel(pl.LightningModule):
     def __init__(self, x_train: DataFrame, y_train: DataFrame, x_test: DataFrame, y_test: DataFrame, num_hidden_layers=5, num_hidden_features=10, learning_rate=0.001):
         super(FeedForwardNeuralNetworkModel, self).__init__()
-        self.__x_train = x_train
-        self.__y_train = y_train
-        self.__x_test = x_test
-        self.__y_test = y_test
-        self.__y_predicted = []
-        self.__batch_size = 64
-        self.__num_workers = 4
+        self._x_train = x_train
+        self._y_train = y_train
+        self._x_test = x_test
+        self._y_test = y_test
+        self._y_predicted = []
+        self._batch_size = 64
+        self._num_workers = 4
 
         # Hyperparameters
-        self.__num_hidden_layers = num_hidden_layers
-        self.__num_hidden_features = num_hidden_features
-        self.__learning_rate = learning_rate
+        self._num_hidden_layers = num_hidden_layers
+        self._num_hidden_features = num_hidden_features
+        self._learning_rate = learning_rate
 
         # Loss function
-        self.__criterion = nn.MSELoss()
+        self._criterion = nn.MSELoss()
 
-        self.__fc1 = nn.Linear(self.__x_train.shape[1], num_hidden_features)  # Input layer
+        self._fc1 = nn.Linear(self._x_train.shape[1], num_hidden_features)  # Input layer
 
         # Hidden layers
-        self.__hidden_layers = nn.ModuleList([
+        self._hidden_layers = nn.ModuleList([
             nn.Linear(num_hidden_features, num_hidden_features)
             for _ in range(num_hidden_layers)
         ])
 
-        self.__fc3 = nn.Linear(num_hidden_features, self.__y_train.shape[1])  # Output layer
+        self._fc3 = nn.Linear(num_hidden_features, self._y_train.shape[1])  # Output layer
 
     def forward(self, x):
-        out = self.__fc1(x)
-        for hidden_layer in self.__hidden_layers:
+        out = self._fc1(x)
+        for hidden_layer in self._hidden_layers:
             out = torch.relu(hidden_layer(out))
-        out = self.__fc3(out)
+        out = self._fc3(out)
         return out
 
     def training_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
-        loss = self.__criterion(y_hat, y)
+        loss = self._criterion(y_hat, y)
         self.log('train_loss', loss)
         return loss
 
     def test_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
-        loss = self.__criterion(y_hat, y)
+        loss = self._criterion(y_hat, y)
         self.log('test_loss', loss)
         # Iterate over individual samples and append predictions
         for i in range(len(y)):
-            self.__y_predicted.append(y_hat[i])
+            self._y_predicted.append(y_hat[i])
         return loss
 
     def configure_optimizers(self):
-        return optim.Adam(self.parameters(), lr=self.__learning_rate)
+        return optim.Adam(self.parameters(), lr=self._learning_rate)
 
     def train_dataloader(self):
-        train_dataset = TensorDataset(torch.Tensor(self.__x_train.values), torch.Tensor(self.__y_train.values))
-        return DataLoader(train_dataset, batch_size=self.__batch_size, num_workers=self.__num_workers, shuffle=False)
+        train_dataset = TensorDataset(torch.Tensor(self._x_train.values), torch.Tensor(self._y_train.values))
+        return DataLoader(train_dataset, batch_size=self._batch_size, num_workers=self._num_workers, shuffle=False)
 
     def test_dataloader(self):
-        self.__y_predicted.clear()
-        train_dataset = TensorDataset(torch.Tensor(self.__x_test.values), torch.Tensor(self.__y_test.values))
-        return DataLoader(train_dataset, batch_size=self.__batch_size, num_workers=self.__num_workers, shuffle=False)
+        self._y_predicted.clear()
+        train_dataset = TensorDataset(torch.Tensor(self._x_test.values), torch.Tensor(self._y_test.values))
+        return DataLoader(train_dataset, batch_size=self._batch_size, num_workers=self._num_workers, shuffle=False)
 
     def get_predicted(self):
-        return self.__y_predicted
+        return self._y_predicted
 
 
 class FeedForwardNeuralNetworkEvaluator:
     def __init__(self, x_train, y_train, x_test, y_test):
-        self.__x_train = x_train
-        self.__y_train = y_train
-        self.__x_test = x_test
-        self.__y_test = y_test
-        self.__y_predicted = None
-        self.__study = optuna.create_study(direction="minimize")
-        self.__best_model: FeedForwardNeuralNetworkModel = None
+        self._x_train = x_train
+        self._y_train = y_train
+        self._x_test = x_test
+        self._y_test = y_test
+        self._y_predicted = None
+        self._study = optuna.create_study(direction="minimize")
+        self._best_model: FeedForwardNeuralNetworkModel = None
 
         # Create a PyTorch Lightning Trainer
-        self.__trainer = None
-        self.__checkpoint_callback = ModelCheckpoint(dirpath="checkpoints", filename="best_model", monitor="train_loss", mode="min")
+        self._trainer = None
+        self._checkpoint_callback = ModelCheckpoint(dirpath="checkpoints", filename="best_model", monitor="train_loss", mode="min")
 
     def train(self):
-        self.__study.optimize(self.__objective, n_trials=5)
+        self._study.optimize(self._objective, n_trials=5)
 
     def test(self):
-        best_trial = self.__study.best_trial
+        best_trial = self._study.best_trial
         best_model_path = best_trial.user_attrs["best_model_path"]
 
         print('Best model :')
@@ -108,31 +108,31 @@ class FeedForwardNeuralNetworkEvaluator:
               f'learning_rate = {best_learning_rate}, num_epochs = {best_num_epochs}')
 
         # Load the best model checkpoint into memory
-        self.__best_model = FeedForwardNeuralNetworkModel.load_from_checkpoint(best_model_path,
-                                                                               x_train=self.__x_train,
-                                                                               y_train=self.__y_train,
-                                                                               x_test=self.__x_test,
-                                                                               y_test=self.__y_test,
+        self._best_model = FeedForwardNeuralNetworkModel.load_from_checkpoint(best_model_path,
+                                                                               x_train=self._x_train,
+                                                                               y_train=self._y_train,
+                                                                               x_test=self._x_test,
+                                                                               y_test=self._y_test,
                                                                                num_hidden_layers=best_num_hidden_layers,
                                                                                num_hidden_features=best_num_hidden_features,
                                                                                learning_rate=best_learning_rate)
 
-        test_results = self.__trainer.test(model=self.__best_model)
+        test_results = self._trainer.test(model=self._best_model)
         print(f"Test loss {test_results[0]['test_loss']}")
 
         # Convert tensors to NumPy arrays
-        numpy_arrays = [tensor.numpy() for tensor in self.__best_model.get_predicted()]
+        numpy_arrays = [tensor.numpy() for tensor in self._best_model.get_predicted()]
 
         print('Predictions:')
         for predicted_column in numpy_arrays:
             print(f'q_oil: {predicted_column[0].item()}, q_gas: {predicted_column[1].item()},  q_water: {predicted_column[2].item()}')
 
         # Create the DataFrame
-        self.__y_predicted = DataFrame(numpy_arrays, columns=[self.__y_test.columns])
+        self._y_predicted = DataFrame(numpy_arrays, columns=[self._y_test.columns])
 
     def results(self):
-        generate_scores(y_test=self.__y_test, y_predicted=self.__y_predicted)
-        generate_plot(y_test=self.__y_test, y_predicted=self.__y_predicted)
+        generate_scores(y_test=self._y_test, y_predicted=self._y_predicted)
+        generate_plot(y_test=self._y_test, y_predicted=self._y_predicted)
 
     def __objective(self, trial):
         # Define the hyperparameters to be tuned
@@ -144,18 +144,18 @@ class FeedForwardNeuralNetworkEvaluator:
         print(f'num_hidden_layers = {num_hidden_layers}, num_hidden_features = {num_hidden_features},'
               f' learning_rate = {learning_rate}, num_epochs = {num_epochs}')
 
-        model = FeedForwardNeuralNetworkModel(self.__x_train, self.__y_train, self.__x_test, self.__y_test,
+        model = FeedForwardNeuralNetworkModel(self._x_train, self._y_train, self._x_test, self._y_test,
                                               num_hidden_layers=num_hidden_layers,
                                               num_hidden_features=num_hidden_features,
                                               learning_rate=learning_rate)
-        self.__trainer = pl.Trainer(max_epochs=num_epochs,
-                                    callbacks=[EarlyStopping(monitor='train_loss'), self.__checkpoint_callback])
+        self._trainer = pl.Trainer(max_epochs=num_epochs,
+                                    callbacks=[EarlyStopping(monitor='train_loss'), self._checkpoint_callback])
 
         # Train the model
-        self.__trainer.fit(model)
+        self._trainer.fit(model)
 
         # Save the best checkpoint path in user attributes
-        trial.set_user_attr("best_model_path", self.__checkpoint_callback.best_model_path)
+        trial.set_user_attr("best_model_path", self._checkpoint_callback.best_model_path)
 
         # Return the validation loss as the objective value to be minimized
-        return self.__trainer.callback_metrics["train_loss"].item()
+        return self._trainer.callback_metrics["train_loss"].item()

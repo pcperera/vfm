@@ -1,0 +1,92 @@
+import pandas as pd
+import torch
+from lightning.pytorch import Trainer, LightningModule
+from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor
+from lightning.pytorch.loggers import TensorBoardLogger
+from pytorch_forecasting.metrics import MultiLoss, QuantileLoss
+from pytorch_forecasting import TimeSeriesDataSet, TemporalFusionTransformer
+from pytorch_forecasting.data import MultiNormalizer, GroupNormalizer
+from pytorch_forecasting.metrics import MultiLoss, QuantileLoss
+
+# ----------------------------
+# 2. Example DataFrame
+# ----------------------------
+# Assume df is your dataframe with timestamp index
+# df.index = pd.to_datetime(df.index)
+
+
+class SWTTFTModel:
+
+    def __init__(self, df: pd.DataFrame, dependent_variables: list[str], independent_variables= list[str]):
+        self._df_train = df.dropna(subset=dependent_variables).copy()
+        self._batch_size = 4
+        max_encoder_length = 288  # e.g., last 24 hours at 5-min intervals
+        max_prediction_length = 1  # Sequence-to-point prediction
+
+        training = TimeSeriesDataSet(
+            self._df_train,
+            time_idx="time_idx",
+            target=dependent_variables,
+            group_ids=["well_id"],
+            min_encoder_length=max_encoder_length,  # encoder length
+            max_encoder_length=max_encoder_length,
+            min_prediction_length=max_prediction_length,
+            max_prediction_length=max_prediction_length,
+            static_categoricals=["well_id"],
+            time_varying_known_reals=["time_idx"],  # we only know timestamp
+            time_varying_unknown_reals=independent_variables,
+            target_normalizer=MultiNormalizer(
+                [GroupNormalizer(groups=["well_id"], transformation="softplus") for _ in dependent_variables]
+            ),
+            add_relative_time_idx=True,
+            add_target_scales=True,
+            add_encoder_length=True,
+            allow_missing_timesteps=True
+        )
+
+        # Create train data loader
+        self.train_dataloader = training.to_dataloader(train=True, batch_size=self._batch_size, num_workers=0)
+        quantiles = [0.1, 0.5, 0.9]
+
+        # Define TFT model
+        self.tft = TemporalFusionTransformer.from_dataset(
+            training,
+            learning_rate=3e-4,
+            hidden_size=32,  # smaller due to small training data
+            attention_head_size=4,
+            dropout=0.3,
+            hidden_continuous_size=16,
+            output_size=[len(quantiles) for _ in dependent_variables],  # number of targets
+            loss=MultiLoss([QuantileLoss(quantiles=quantiles) for _ in dependent_variables]),
+            log_interval=10,
+            reduce_on_plateau_patience=5,
+        )
+
+        # ----------------------------
+        # 6. Trainer
+        # ----------------------------
+        logger = TensorBoardLogger("lightning_logs")
+        early_stop_callback = EarlyStopping(monitor="val_loss", patience=10, mode="min")
+        lr_monitor = LearningRateMonitor()
+
+        self.trainer = Trainer(
+            max_epochs=50,
+            accelerator="auto",
+            devices=1 if torch.cuda.is_available() else None,
+            logger=logger,
+            callbacks=[early_stop_callback, lr_monitor],
+        )
+
+    def train(self):
+        print(type(self.tft))
+
+        self.trainer.fit(
+            model=self.tft,
+            train_dataloaders=self.train_dataloader,
+        )
+
+    def predict(self):
+        # Use the last sequence for prediction
+        raw_predictions, x = self.tft.predict(self.train_dataloader, mode="raw", return_x=True)
+        predictions = self.tft.predict(self.train_dataloader)
+        return predictions[:5]
