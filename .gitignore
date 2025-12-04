@@ -160,3 +160,5 @@ cython_debug/
 .idea/
 checkpoints
 lightning_logs
+
+*.csv

@@ -27,8 +27,8 @@ class GradientBoost:
                 subsample=0.85,
                 colsample_bytree=0.8,
                 objective="reg:squarederror",
-                tree_method="hist",   # fast CPU training
-                random_state=42
+                tree_method="hist",
+                random_state=42,
             )
             
             model.fit(X_train, y_train)
