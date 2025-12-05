@@ -67,7 +67,6 @@ class Connection:
 
         external_ids = list(mapping.values())
         data = client.time_series.data.retrieve_dataframe(external_id=external_ids, start=start, end=end)
-        data = data.resample("1T").mean()
         data = data.rename(columns={mapping[item]: item.lower() for item in mapping})
         
         # data = data.rename(columns={"whp": Feature.WELL_HEAD_PRESSURE.value, "dhp": Feature.DOWN_HOLE_PRESSURE.value, "dcp": Feature.DOWNSTREAM_CHOKE_PRESSURE.value,
@@ -75,4 +74,5 @@ class Connection:
         #                             "qo_mpfm": Feature.QO_MPFM.value})
 
         data["well_id"] = well
+        data.sort_index(inplace=True)  # Ensure chronological order
         return data

@@ -113,70 +113,112 @@ class PhysicsModel:
 # Hybrid Physics + ML Model with Water Cut Prediction
 # -------------------------
 class PhysicsInformedHybridModel:
-    def __init__(self, degree=2, lags=1):
+    def __init__(self, dependant_vars: list[str], independent_vars: list[str], degree=2, lags=1):
         self.phys_model = PhysicsModel()
-        self.features = ["dhp","dht","whp","wht","choke","dcp"]
+        self.independent_vars = independent_vars
+        self.dependant_vars = dependant_vars
         self.degree = degree
         self.lags = lags
         
+        # PolynomialFeatures instance (will be fitted during fit())
         self.poly = PolynomialFeatures(degree=self.degree, include_bias=False)
         self.ml_qo = GradientBoostingRegressor(n_estimators=500, max_depth=6, learning_rate=0.05)
         self.ml_wc = GradientBoostingRegressor(n_estimators=500, max_depth=6, learning_rate=0.05)
         self.ml_qg = GradientBoostingRegressor(n_estimators=500, max_depth=6, learning_rate=0.05)
 
-    def _create_lagged_features(self, df):
+    def _create_lagged_features(self, df: pd.DataFrame, drop_na: bool = True) -> pd.DataFrame:
+        """
+        Create lagged features for safe columns only (dhp, whp).
+        If drop_na is True (training mode) drop rows with NaNs so ML sees clean examples.
+        If drop_na is False (prediction mode) keep rows — don't drop them.
+        """
         df_lagged = df.copy()
-        for lag in range(1, self.lags+1):
-            for col in ["dhp","whp","qo_well_test","qw_well_test"]:
+        for lag in range(1, self.lags + 1):
+            for col in ["dhp", "whp"]:
                 df_lagged[f"{col}_lag{lag}"] = df_lagged[col].shift(lag)
-        df_lagged.dropna(inplace=True)
+
+        if drop_na:
+            df_lagged = df_lagged.dropna()
+
         return df_lagged
 
-    def _transform_features(self, df):
-        X = df[self.features].values
-        return self.poly.fit_transform(X)
+    def _transform_features(self, df: pd.DataFrame):
+        """
+        Transform features with a pre-fitted polynomial transformer.
+        Assumes self.poly was fitted previously in fit().
+        """
+        X = df[self.independent_vars].values
+        return self.poly.transform(X)
 
     def fit(self, df, y_qo_col="qo_well_test", y_qg_col="qg_well_test", y_qw_col="qw_well_test"):
-        # Physics model
+        # Fit physics model (uses only rows with full rates)
         self.phys_model.fit(df, y_qo_col, y_qg_col, y_qw_col)
-        df_lagged = self._create_lagged_features(df)
-        
+
+        # Create lagged dataframe for training and drop rows with NaNs
+        df_lagged = self._create_lagged_features(df, drop_na=True)
+
+        # Predict physics outputs for the training rows
         pred_phys = self.phys_model.predict(df_lagged)
-        # Water cut
+
+        # Water cut actual and physics
         wc_actual = df_lagged[y_qw_col] / (df_lagged[y_qw_col] + df_lagged[y_qo_col] + 1e-8)
         wc_pred = pred_phys["wc_pred"]
-        
-        # Residuals
+
+        # Residuals to be modeled by ML
         res_qo = df_lagged[y_qo_col] - pred_phys["qo_pred"]
         res_wc = wc_actual - wc_pred
         res_qg = df_lagged[y_qg_col] - pred_phys["qg_pred"]
 
-        X_poly = self._transform_features(df_lagged)
+        # Fit polynomial transformer on the independent variables from training set
+        X_train = df_lagged[self.independent_vars].values
+        self.poly.fit(X_train)
+        X_poly = self.poly.transform(X_train)
+
+        # Fit ML models on residuals
         self.ml_qo.fit(X_poly, res_qo)
         self.ml_wc.fit(X_poly, res_wc)
         self.ml_qg.fit(X_poly, res_qg)
         return self
 
     def predict(self, df):
-        df_lagged = self._create_lagged_features(df)
+        # Create lagged features but DO NOT drop rows (we want same index as input)
+        df_lagged = self._create_lagged_features(df, drop_na=False)
+
+        # Physics predictions for df_lagged (works because physics uses only instantaneous inputs)
         pred_phys = self.phys_model.predict(df_lagged)
+
+        # Transform features using the pre-fitted polynomial transformer
         X_poly = self._transform_features(df_lagged)
 
-        # Correct physics predictions
+        # Correct physics predictions using ML residuals (predictions align to df_lagged.index)
         pred_hybrid = pred_phys.copy()
-        pred_hybrid["qo_pred"] += self.ml_qo.predict(X_poly)
-        wc_corrected = pred_phys["wc_pred"] + self.ml_wc.predict(X_poly)
+        pred_hybrid["qo_pred"] = pred_hybrid["qo_pred"] + self.ml_qo.predict(X_poly)
+        wc_corrected = pred_hybrid["wc_pred"] + self.ml_wc.predict(X_poly)
         wc_corrected = np.clip(wc_corrected, 0.0, 1.0)
-        pred_hybrid["qw_pred"] = wc_corrected * (pred_hybrid["qo_pred"] + pred_hybrid["qw_pred"])
-        pred_hybrid["qo_pred"] = (1 - wc_corrected) * (pred_hybrid["qo_pred"] + pred_hybrid["qw_pred"])
-        pred_hybrid["qg_pred"] += self.ml_qg.predict(X_poly)
+
+        # Update water and oil split consistently
+        total_liquid = pred_hybrid["qo_pred"] + pred_hybrid["qw_pred"]
+        # avoid division by zero in pathological cases
+        total_liquid = np.where(total_liquid <= 0, 1e-8, total_liquid)
+        pred_hybrid["qw_pred"] = wc_corrected * total_liquid
+        pred_hybrid["qo_pred"] = (1 - wc_corrected) * total_liquid
+
+        pred_hybrid["qg_pred"] = pred_hybrid["qg_pred"] + self.ml_qg.predict(X_poly)
+
         return pred_hybrid
 
     def score(self, df, y_qo_col="qo_well_test", y_qg_col="qg_well_test", y_qw_col="qw_well_test"):
         pred = self.predict(df)
-        r2_qo = r2_score(df[y_qo_col].iloc[self.lags:], pred["qo_pred"])
-        r2_qw = r2_score(df[y_qw_col].iloc[self.lags:], pred["qw_pred"])
-        r2_qg = r2_score(df[y_qg_col].iloc[self.lags:], pred["qg_pred"])
+        # predictions correspond to df_lagged.index which equals df.index when lags don't drop rows
+        # remove first self.lags rows from truth comparison if you prefer (they may lack lag data)
+        start_idx = 0
+        if self.lags > 0:
+            # If you want to compare only rows that had valid lags during training, use .iloc[self.lags:]
+            start_idx = self.lags
+
+        r2_qo = r2_score(df[y_qo_col].iloc[start_idx:], pred["qo_pred"].iloc[start_idx:])
+        r2_qw = r2_score(df[y_qw_col].iloc[start_idx:], pred["qw_pred"].iloc[start_idx:])
+        r2_qg = r2_score(df[y_qg_col].iloc[start_idx:], pred["qg_pred"].iloc[start_idx:])
         return {"r2_qo": r2_qo, "r2_qw": r2_qw, "r2_qg": r2_qg}
 
     def physics_score(self, df, y_qo_col="qo_well_test", y_qg_col="qg_well_test", y_qw_col="qw_well_test"):
@@ -185,3 +227,32 @@ class PhysicsInformedHybridModel:
         r2_qw = r2_score(df[y_qw_col], pred_phys["qw_pred"])
         r2_qg = r2_score(df[y_qg_col], pred_phys["qg_pred"])
         return {"r2_qo": r2_qo, "r2_qw": r2_qw, "r2_qg": r2_qg}
+
+    def generate_dense_well_rates(self, df: pd.DataFrame) -> pd.DataFrame:
+        df_dense = df.copy()
+        targets = self.dependant_vars
+
+        # Rows where at least one rate is missing
+        mask_missing = df_dense[targets].isna().any(axis=1)
+        if not mask_missing.any():
+            print("No missing rates found.")
+            return df_dense
+
+        # Only rows with missing values (keep full index)
+        df_missing = df_dense.loc[mask_missing]
+
+        # Predict using hybrid model (predict will not drop rows)
+        pred = self.predict(df_missing)
+
+        # Build preds_df aligned to df_missing.index
+        preds_df = pd.DataFrame({
+            "qo_well_test": pred["qo_pred"].values,
+            "qw_well_test": pred["qw_pred"].values,
+            "qg_well_test": pred["qg_pred"].values,
+        }, index=df_missing.index)
+
+        # Fill missing values only (do not overwrite existing real values)
+        for col in targets:
+            df_dense.loc[df_dense[col].isna(), col] = preds_df.loc[df_dense[col].isna(), col]
+
+        return df_dense

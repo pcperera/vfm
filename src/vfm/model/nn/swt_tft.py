@@ -74,7 +74,7 @@ class SWTTFTModel:
         lr_monitor = LearningRateMonitor()
 
         self.trainer = Trainer(
-            max_epochs=50,
+            max_epochs=2,
             accelerator="auto",
             devices=1 if torch.cuda.is_available() else None,
             logger=logger,
