@@ -7,7 +7,7 @@ class Preprocessor:
 
     def __init__(self, df: pd.DataFrame):
         self._df = df.copy(deep=True)
-        self._resample_period_min = 1
+        self._resample_period_min = 120
 
     def preprocess(self, well_id: str):
         # Data transformation

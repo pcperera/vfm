@@ -9,16 +9,10 @@ from pytorch_forecasting import TimeSeriesDataSet, TemporalFusionTransformer
 from pytorch_forecasting.data import MultiNormalizer, GroupNormalizer
 from pytorch_forecasting.metrics import MultiLoss, QuantileLoss
 
-# ----------------------------
-# 2. Example DataFrame
-# ----------------------------
-# Assume df is your dataframe with timestamp index
-# df.index = pd.to_datetime(df.index)
-
 
 class SWTTFTModel:
 
-    def __init__(self, df: pd.DataFrame, dependent_variables: list[str], independent_variables= list[str]):
+    def __init__(self, df: pd.DataFrame, dependent_variables: list[str] = None, independent_variables: list[str] = None):
         self._df_train = df.dropna(subset=dependent_variables).copy()
         self._batch_size = 4
         max_encoder_length = 1  
@@ -27,7 +21,7 @@ class SWTTFTModel:
         min_prediction_length = 1
 
 
-        training = TimeSeriesDataSet(
+        self.training_dataset = TimeSeriesDataSet(
             self._df_train,
             time_idx="time_idx",
             target=dependent_variables,
@@ -49,12 +43,12 @@ class SWTTFTModel:
         )
 
         # Create train data loader
-        self.train_dataloader = training.to_dataloader(train=True, batch_size=self._batch_size, num_workers=0)
+        self.train_data_loader = self.training_dataset.to_dataloader(train=True, batch_size=self._batch_size, num_workers=0)
         quantiles = [0.1, 0.5, 0.9]
 
         # Define TFT model
         self.tft = TemporalFusionTransformer.from_dataset(
-            training,
+            self.training_dataset,
             learning_rate=3e-4,
             hidden_size=32,  # smaller due to small training data
             attention_head_size=4,
@@ -66,9 +60,6 @@ class SWTTFTModel:
             reduce_on_plateau_patience=5,
         )
 
-        # ----------------------------
-        # 6. Trainer
-        # ----------------------------
         logger = TensorBoardLogger("lightning_logs")
         early_stop_callback = EarlyStopping(monitor="val_loss", patience=10, mode="min")
         lr_monitor = LearningRateMonitor()
@@ -81,16 +72,36 @@ class SWTTFTModel:
             callbacks=[early_stop_callback, lr_monitor],
         )
 
+        self.validation_dataset = TimeSeriesDataSet.from_dataset(
+            self.training_dataset,
+            self._df_train,               # same dataframe unless you have a separate val set
+            predict=False,
+            stop_randomization=True,
+        )
+
+        self.validation_data_loader = self.validation_dataset.to_dataloader(
+            train=False,
+            batch_size=self._batch_size,
+            num_workers=0
+        )
+
     def train(self):
         print(type(self.tft))
 
         self.trainer.fit(
             model=self.tft,
-            train_dataloaders=self.train_dataloader,
+            train_dataloaders=self.train_data_loader,
+            val_dataloaders=self.validation_data_loader
         )
 
     def predict(self):
         # Use the last sequence for prediction
-        raw_predictions, x = self.tft.predict(self.train_dataloader, mode="raw", return_x=True)
-        predictions = self.tft.predict(self.train_dataloader)
+        raw_predictions, x = self.tft.predict(self.train_data_loader, mode="raw", return_x=True)
+        predictions = self.tft.predict(self.train_data_loader)
         return predictions[:5]
+
+
+    def validation_step(self, batch, batch_idx):
+        loss = self.loss(batch)
+        print("val_loss", loss)
+        return loss
