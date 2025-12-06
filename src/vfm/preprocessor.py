@@ -11,6 +11,8 @@ class Preprocessor:
 
     def preprocess(self, well_id: str):
         # Data transformation
+        self._df.sort_index(inplace=True)  # Ensure chronological order
+
         # Ignore records where DHP is zero. These are 
         self._df = self._df[self._df["dhp"] != 0]
         self._df = self._df[self._df["whp"] != 0]
@@ -31,7 +33,6 @@ class Preprocessor:
         })
         
         self._df["well_id"] = well_id
-        self._df.sort_index(inplace=True)  # Ensure chronological order
         independent_tp_vars = ["dhp", "dht", "whp", "wht", "dcp"]
 
         # Convert choke to fraction
