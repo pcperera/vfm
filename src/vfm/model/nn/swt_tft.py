@@ -15,11 +15,10 @@ class SWTTFTModel:
     def __init__(self, df: pd.DataFrame, dependent_variables: list[str] = None, independent_variables: list[str] = None):
         self._df_train = df.dropna(subset=dependent_variables).copy()
         self._batch_size = 4
-        max_encoder_length = 1  
-        min_encoder_length = 1  
-        max_prediction_length = 1
+        min_encoder_length = 1
+        max_encoder_length = 5
         min_prediction_length = 1
-
+        max_prediction_length = 5
 
         self.training_dataset = TimeSeriesDataSet(
             self._df_train,
