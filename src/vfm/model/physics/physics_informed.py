@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
+import os, joblib
 from scipy.optimize import least_squares
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.preprocessing import PolynomialFeatures
 
@@ -11,6 +12,16 @@ from sklearn.preprocessing import PolynomialFeatures
 def logistic(x):
     x = np.clip(x, -50, 50)
     return 1 / (1 + np.exp(-x))
+
+def regression_metrics(y_true, y_pred):
+    """
+    Compute R2, MAE, and RMSE.
+    """
+    mae = mean_absolute_error(y_true, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+    r2 = r2_score(y_true, y_pred)
+    return r2, mae, rmse
+
 
 # -------------------------
 # Physics-based model with Closure Law
@@ -104,10 +115,32 @@ class PhysicsModel:
 
     def score(self, df, y_qo_col="qo_well_test", y_qg_col="qg_well_test", y_qw_col="qw_well_test"):
         pred = self.predict(df)
-        r2_qo = r2_score(df[y_qo_col], pred["qo_pred"])
-        r2_qw = r2_score(df[y_qw_col], pred["qw_pred"])
-        r2_qg = r2_score(df[y_qg_col], pred["qg_pred"])
-        return {"r2_qo": r2_qo, "r2_qw": r2_qw, "r2_qg": r2_qg}
+
+        r2_qo, mae_qo, rmse_qo = regression_metrics(df[y_qo_col], pred["qo_pred"])
+        r2_qw, mae_qw, rmse_qw = regression_metrics(df[y_qw_col], pred["qw_pred"])
+        r2_qg, mae_qg, rmse_qg = regression_metrics(df[y_qg_col], pred["qg_pred"])
+
+        return {
+            "qo": {"r2": r2_qo, "mae": mae_qo, "rmse": rmse_qo},
+            "qw": {"r2": r2_qw, "mae": mae_qw, "rmse": rmse_qw},
+            "qg": {"r2": r2_qg, "mae": mae_qg, "rmse": rmse_qg},
+        }
+
+    def save(self, path: str):
+        """
+        Save fitted physics model parameters.
+        """
+        if self.params_ is None:
+            raise RuntimeError("Physics model is not fitted.")
+        joblib.dump(self.params_, path)
+
+    def load(self, path: str):
+        """
+        Load fitted physics model parameters.
+        """
+        self.params_ = joblib.load(path)
+        return self
+
 
 # -------------------------
 # Hybrid Physics + ML Model with Water Cut Prediction
@@ -209,24 +242,42 @@ class PhysicsInformedHybridModel:
 
     def score(self, df, y_qo_col="qo_well_test", y_qg_col="qg_well_test", y_qw_col="qw_well_test"):
         pred = self.predict(df)
-        # predictions correspond to df_lagged.index which equals df.index when lags don't drop rows
-        # remove first self.lags rows from truth comparison if you prefer (they may lack lag data)
-        start_idx = 0
-        if self.lags > 0:
-            # If you want to compare only rows that had valid lags during training, use .iloc[self.lags:]
-            start_idx = self.lags
 
-        r2_qo = r2_score(df[y_qo_col].iloc[start_idx:], pred["qo_pred"].iloc[start_idx:])
-        r2_qw = r2_score(df[y_qw_col].iloc[start_idx:], pred["qw_pred"].iloc[start_idx:])
-        r2_qg = r2_score(df[y_qg_col].iloc[start_idx:], pred["qg_pred"].iloc[start_idx:])
-        return {"r2_qo": r2_qo, "r2_qw": r2_qw, "r2_qg": r2_qg}
+        start_idx = self.lags if self.lags > 0 else 0
+
+        r2_qo, mae_qo, rmse_qo = regression_metrics(
+            df[y_qo_col].iloc[start_idx:], pred["qo_pred"].iloc[start_idx:]
+        )
+        r2_qw, mae_qw, rmse_qw = regression_metrics(
+            df[y_qw_col].iloc[start_idx:], pred["qw_pred"].iloc[start_idx:]
+        )
+        r2_qg, mae_qg, rmse_qg = regression_metrics(
+            df[y_qg_col].iloc[start_idx:], pred["qg_pred"].iloc[start_idx:]
+        )
+
+        return {
+            "qo": {"r2": r2_qo, "mae": mae_qo, "rmse": rmse_qo},
+            "qw": {"r2": r2_qw, "mae": mae_qw, "rmse": rmse_qw},
+            "qg": {"r2": r2_qg, "mae": mae_qg, "rmse": rmse_qg},
+        }
+
 
     def physics_score(self, df, y_qo_col="qo_well_test", y_qg_col="qg_well_test", y_qw_col="qw_well_test"):
+        """
+        Evaluate physics-only model performance using R2, MAE, and RMSE.
+        """
         pred_phys = self.phys_model.predict(df)
-        r2_qo = r2_score(df[y_qo_col], pred_phys["qo_pred"])
-        r2_qw = r2_score(df[y_qw_col], pred_phys["qw_pred"])
-        r2_qg = r2_score(df[y_qg_col], pred_phys["qg_pred"])
-        return {"r2_qo": r2_qo, "r2_qw": r2_qw, "r2_qg": r2_qg}
+
+        r2_qo, mae_qo, rmse_qo = regression_metrics(df[y_qo_col], pred_phys["qo_pred"])
+        r2_qw, mae_qw, rmse_qw = regression_metrics(df[y_qw_col], pred_phys["qw_pred"])
+        r2_qg, mae_qg, rmse_qg = regression_metrics(df[y_qg_col], pred_phys["qg_pred"])
+
+        return {
+            "qo": {"r2": r2_qo, "mae": mae_qo, "rmse": rmse_qo},
+            "qw": {"r2": r2_qw, "mae": mae_qw, "rmse": rmse_qw},
+            "qg": {"r2": r2_qg, "mae": mae_qg, "rmse": rmse_qg},
+        }
+
 
     def generate_dense_well_rates(self, df: pd.DataFrame) -> pd.DataFrame:
         df_dense = df.copy()
@@ -256,3 +307,53 @@ class PhysicsInformedHybridModel:
             df_dense.loc[df_dense[col].isna(), col] = preds_df.loc[df_dense[col].isna(), col]
 
         return df_dense
+    
+
+    def save(self, directory: str):
+        """
+        Save the entire hybrid model (physics + ML).
+        """
+        os.makedirs(directory, exist_ok=True)
+
+        # Save physics model parameters
+        self.phys_model.save(os.path.join(directory, "physics_model.pkl"))
+
+        # Save ML models and feature transformer
+        joblib.dump(self.poly, os.path.join(directory, "poly.pkl"))
+        joblib.dump(self.ml_qo, os.path.join(directory, "ml_qo.pkl"))
+        joblib.dump(self.ml_wc, os.path.join(directory, "ml_wc.pkl"))
+        joblib.dump(self.ml_qg, os.path.join(directory, "ml_qg.pkl"))
+
+        # Save metadata
+        meta = {
+            "independent_vars": self.independent_vars,
+            "dependant_vars": self.dependant_vars,
+            "degree": self.degree,
+            "lags": self.lags,
+        }
+        joblib.dump(meta, os.path.join(directory, "meta.pkl"))
+
+    @classmethod
+    def load(cls, directory: str):
+        """
+        Load a previously saved hybrid model.
+        """
+        meta = joblib.load(os.path.join(directory, "meta.pkl"))
+
+        model = cls(
+            dependant_vars=meta["dependant_vars"],
+            independent_vars=meta["independent_vars"],
+            degree=meta["degree"],
+            lags=meta["lags"],
+        )
+
+        # Load physics model
+        model.phys_model.load(os.path.join(directory, "physics_model.pkl"))
+
+        # Load ML models
+        model.poly = joblib.load(os.path.join(directory, "poly.pkl"))
+        model.ml_qo = joblib.load(os.path.join(directory, "ml_qo.pkl"))
+        model.ml_wc = joblib.load(os.path.join(directory, "ml_wc.pkl"))
+        model.ml_qg = joblib.load(os.path.join(directory, "ml_qg.pkl"))
+
+        return model
