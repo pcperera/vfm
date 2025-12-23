@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-def summarize_na(df: pd.DataFrame) -> pd.Series:
+def summarize_null(df: pd.DataFrame) -> pd.Series:
     # Count NaNs per column
     nan_counts = df[df.columns.to_list()].isna().sum()
     return nan_counts
