@@ -50,9 +50,13 @@ class Preprocessor:
             limit_direction="both"      # fill start & end gaps
         )
 
-        # Convert pressures to Pa
-        # for item in ["dhp", "whp", "dcp"]:
-        #     df[item] *= 1E5
+        # Convert pressures from bara to Pa
+        for item in ["dhp", "whp", "dcp"]:
+            df[item] *= 1E5
+
+        # Convert C to K
+        for item in ["dht", "wht"]:
+            df[item] = df[item] + 273.15
 
         # Calculate MPFM flow rates from GOR and WC
         df["gor_mpfm"] = df["qg_mpfm"] / df["qo_mpfm"]
@@ -67,7 +71,7 @@ class Preprocessor:
         df['choke'] = df['choke'].ffill()
         df[self._independent_tp_vars] = df[self._independent_tp_vars].interpolate(method="time", limit_direction="forward")
         df = df.dropna(subset=self._independent_vars)
-        # df = df[(df["choke"] > 0) & (df["qo_well_test"] > 0) & (df["qg_well_test"] > 0) & (df["qw_well_test"] > 0)]
+        df = df[(df["choke"] > 0) & (df["dhp"] > 0) & (df["dht"] > 0) & (df["whp"] > 0) & (df["wht"] > 0) & (df["dcp"] > 0)]
         return df
     
         # df = df[df[['qo_well_test', 'qg_well_test', 'qw_well_test']].notna().any(axis=1)]
@@ -94,4 +98,13 @@ class Preprocessor:
             df_well["time_idx"] = df_well["time_idx"].astype(int)
             dfs.append(df_well)
 
-        return pd.concat(dfs, ignore_index=False)
+        df = pd.concat(dfs, ignore_index=False)
+
+        df["well_code"] = (
+            df["well_id"]
+                .astype("category")
+                .cat.codes
+                .astype(float)   # ML-friendly
+            ) 
+
+        return df   
