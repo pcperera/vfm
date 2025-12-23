@@ -108,7 +108,7 @@ class Connection:
 
         # Concatenate all wells
         data = pd.concat(all_well_dfs, axis=0)
-        print(data.index)
+
         return data
 
     # def get_data(self, client: CogniteClient, well: str = 'W06', start:int = None, end: int = None):

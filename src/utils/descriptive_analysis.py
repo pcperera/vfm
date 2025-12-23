@@ -22,14 +22,13 @@ def get_train_test_split_per_well(
     df: pd.DataFrame,
     well_id_col: str = "well_id",
     test_size: float = 0.2,
+    lags: int = 1,
+    min_train_points: int = 30,
 ):
     """
-    Split dataframe into train/test sets with the same proportion
-    for each well, assuming df is already sorted by time_idx.
+    Per-well temporal train/test split with lag safety.
 
-    Returns
-    -------
-    df_train, df_test
+    Assumes df is already sorted by time_idx.
     """
 
     if not 0.0 < test_size < 1.0:
@@ -40,15 +39,31 @@ def get_train_test_split_per_well(
 
     for well_id, df_well in df.groupby(well_id_col, sort=False):
         n = len(df_well)
-        if n < 2:
-            continue  # or raise, depending on your policy
+
+        # Not enough data → skip well
+        if n < min_train_points + lags + 1:
+            continue
 
         split_idx = int((1 - test_size) * n)
 
-        train_parts.append(df_well.iloc[:split_idx])
-        test_parts.append(df_well.iloc[split_idx:])
+        # Enforce minimum train size
+        if split_idx < min_train_points:
+            split_idx = min_train_points
+
+        df_train = df_well.iloc[:split_idx]
+        df_test = df_well.iloc[split_idx + lags:]  # lag buffer
+
+        if len(df_test) == 0:
+            continue
+
+        train_parts.append(df_train)
+        test_parts.append(df_test)
 
     df_train = pd.concat(train_parts)
     df_test = pd.concat(test_parts)
 
     return df_train, df_test
+
+
+def get_all_wells() -> list[str]:
+    return  ["W06", "W08", "W10", "W11", "W15", "W18", "W19"]

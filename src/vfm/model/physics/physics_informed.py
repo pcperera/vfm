@@ -1,10 +1,19 @@
 import numpy as np
 import pandas as pd
 import os, joblib
+import matplotlib.pyplot as plt
+import numpy as np
 from scipy.optimize import least_squares
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.preprocessing import PolynomialFeatures
+
+
+EPS = 1e-6
+METRICS = ["r2", "mae", "rmse", "mre"]
+
+def compute_wgr(qw, qg):
+    return qw / np.maximum(qg, EPS)
 
 # -------------------------
 # Helpers
@@ -15,12 +24,16 @@ def logistic(x):
 
 def regression_metrics(y_true, y_pred):
     """
-    Compute R2, MAE, and RMSE.
+    Compute R2, MAE, RMSE and MRE
     """
+    # Mean Absolute Error 
     mae = mean_absolute_error(y_true, y_pred)
+    # Root Mean Squared Error
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     r2 = r2_score(y_true, y_pred)
-    return r2, mae, rmse
+    # Mean Relative Error (%)
+    mre = np.mean(np.abs(y_true - y_pred) / np.maximum(np.abs(y_true), EPS)) * 100.0
+    return r2, mae, rmse, mre
 
 
 # -------------------------
@@ -171,14 +184,14 @@ class PhysicsModel:
     def score(self, df, y_qo_col="qo_well_test", y_qg_col="qg_well_test", y_qw_col="qw_well_test"):
         pred = self.predict(df)
 
-        r2_qo, mae_qo, rmse_qo = regression_metrics(df[y_qo_col], pred["qo_pred"])
-        r2_qw, mae_qw, rmse_qw = regression_metrics(df[y_qw_col], pred["qw_pred"])
-        r2_qg, mae_qg, rmse_qg = regression_metrics(df[y_qg_col], pred["qg_pred"])
+        r2_qo, mae_qo, rmse_qo, mre_qo = regression_metrics(df[y_qo_col], pred["qo_pred"])
+        r2_qw, mae_qw, rmse_qw, mre_qw = regression_metrics(df[y_qw_col], pred["qw_pred"])
+        r2_qg, mae_qg, rmse_qg, mre_qg = regression_metrics(df[y_qg_col], pred["qg_pred"])
 
         return {
-            "qo": {"r2": r2_qo, "mae": mae_qo, "rmse": rmse_qo},
-            "qw": {"r2": r2_qw, "mae": mae_qw, "rmse": rmse_qw},
-            "qg": {"r2": r2_qg, "mae": mae_qg, "rmse": rmse_qg},
+            "qo": {"r2": r2_qo, "mae": mae_qo, "rmse": rmse_qo, "mre": mre_qo},
+            "qw": {"r2": r2_qw, "mae": mae_qw, "rmse": rmse_qw, "mre": mre_qw},
+            "qg": {"r2": r2_qg, "mae": mae_qg, "rmse": rmse_qg, "mre": mre_qg}
         }
 
     def save(self, path: str):
@@ -324,7 +337,7 @@ class PhysicsInformedHybridModel:
             },
             index=df_lagged.index,
         )
-
+    
     # --------------------------------------------------
     # Hybrid score
     # --------------------------------------------------
@@ -340,8 +353,8 @@ class PhysicsInformedHybridModel:
         start_idx = self.lags if self.lags > 0 else 0
 
         results = {}
-        qo_all, qw_all, qg_all = [], [], []
-        qo_p_all, qw_p_all, qg_p_all = [], [], []
+        qo_all, qw_all, qg_all, wgr_all = [], [], [], []
+        qo_p_all, qw_p_all, qg_p_all, wgr_p_all = [], [], [], []
 
         for well_id, df_well in df.groupby(self.well_id_col, sort=False):
             pred_well = pred.loc[df_well.index]
@@ -354,20 +367,27 @@ class PhysicsInformedHybridModel:
             p_qw = pred_well["qw_pred"].iloc[start_idx:]
             p_qg = pred_well["qg_pred"].iloc[start_idx:]
 
+            # ---- WGR ----
+            y_wgr = compute_wgr(y_qw.values, y_qg.values)
+            p_wgr = compute_wgr(p_qw.values, p_qg.values)
+
             results[well_id] = {
-                "qo": dict(zip(["r2", "mae", "rmse"], regression_metrics(y_qo, p_qo))),
-                "qw": dict(zip(["r2", "mae", "rmse"], regression_metrics(y_qw, p_qw))),
-                "qg": dict(zip(["r2", "mae", "rmse"], regression_metrics(y_qg, p_qg))),
+                "qo": dict(zip(METRICS, regression_metrics(y_qo, p_qo))),
+                "qw": dict(zip(METRICS, regression_metrics(y_qw, p_qw))),
+                "qg": dict(zip(METRICS, regression_metrics(y_qg, p_qg))),
+                "wgr": dict(zip(METRICS, regression_metrics(y_wgr, p_wgr)))
             }
 
             qo_all.append(y_qo); qo_p_all.append(p_qo)
             qw_all.append(y_qw); qw_p_all.append(p_qw)
             qg_all.append(y_qg); qg_p_all.append(p_qg)
+            wgr_all.append(pd.Series(y_wgr)); wgr_p_all.append(pd.Series(p_wgr))
 
         results["__global__"] = {
-            "qo": dict(zip(["r2", "mae", "rmse"], regression_metrics(pd.concat(qo_all), pd.concat(qo_p_all)))),
-            "qw": dict(zip(["r2", "mae", "rmse"], regression_metrics(pd.concat(qw_all), pd.concat(qw_p_all)))),
-            "qg": dict(zip(["r2", "mae", "rmse"], regression_metrics(pd.concat(qg_all), pd.concat(qg_p_all)))),
+            "qo": dict(zip(METRICS, regression_metrics(pd.concat(qo_all), pd.concat(qo_p_all)))),
+            "qw": dict(zip(METRICS, regression_metrics(pd.concat(qw_all), pd.concat(qw_p_all)))),
+            "qg": dict(zip(METRICS, regression_metrics(pd.concat(qg_all), pd.concat(qg_p_all)))),
+            "wgr": dict(zip(METRICS, regression_metrics(pd.concat(wgr_all), pd.concat(wgr_p_all)))),
         }
 
         return results
@@ -383,8 +403,8 @@ class PhysicsInformedHybridModel:
         y_qw_col="qw_well_test",
     ):
         results = {}
-        qo_all, qw_all, qg_all = [], [], []
-        qo_p_all, qw_p_all, qg_p_all = [], [], []
+        qo_all, qw_all, qg_all, wgr_all = [], [], [], []
+        qo_p_all, qw_p_all, qg_p_all, wgr_p_all = [], [], [], []
 
         for well_id, df_well in df.groupby(self.well_id_col, sort=False):
             phys = self.phys_models[well_id]
@@ -398,20 +418,27 @@ class PhysicsInformedHybridModel:
             p_qw = pred["qw_pred"]
             p_qg = pred["qg_pred"]
 
+            # ---- WGR ----
+            y_wgr = compute_wgr(y_qw.values, y_qg.values)
+            p_wgr = compute_wgr(p_qw.values, p_qg.values)
+
             results[well_id] = {
-                "qo": dict(zip(["r2", "mae", "rmse"], regression_metrics(y_qo, p_qo))),
-                "qw": dict(zip(["r2", "mae", "rmse"], regression_metrics(y_qw, p_qw))),
-                "qg": dict(zip(["r2", "mae", "rmse"], regression_metrics(y_qg, p_qg))),
+                "qo": dict(zip(METRICS, regression_metrics(y_qo, p_qo))),
+                "qw": dict(zip(METRICS, regression_metrics(y_qw, p_qw))),
+                "qg": dict(zip(METRICS, regression_metrics(y_qg, p_qg))),
+                "wgr": dict(zip(METRICS, regression_metrics(y_wgr, p_wgr)))
             }
 
             qo_all.append(y_qo); qo_p_all.append(p_qo)
             qw_all.append(y_qw); qw_p_all.append(p_qw)
             qg_all.append(y_qg); qg_p_all.append(p_qg)
+            wgr_all.append(pd.Series(y_wgr)); wgr_p_all.append(pd.Series(p_wgr))
 
         results["__global__"] = {
-            "qo": dict(zip(["r2", "mae", "rmse"], regression_metrics(pd.concat(qo_all), pd.concat(qo_p_all)))),
-            "qw": dict(zip(["r2", "mae", "rmse"], regression_metrics(pd.concat(qw_all), pd.concat(qw_p_all)))),
-            "qg": dict(zip(["r2", "mae", "rmse"], regression_metrics(pd.concat(qg_all), pd.concat(qg_p_all)))),
+            "qo": dict(zip(METRICS, regression_metrics(pd.concat(qo_all), pd.concat(qo_p_all)))),
+            "qw": dict(zip(METRICS, regression_metrics(pd.concat(qw_all), pd.concat(qw_p_all)))),
+            "qg": dict(zip(METRICS, regression_metrics(pd.concat(qg_all), pd.concat(qg_p_all)))),
+            "wgr": dict(zip(METRICS, regression_metrics(pd.concat(wgr_all), pd.concat(wgr_p_all)))),
         }
 
         return results
@@ -480,3 +507,92 @@ class PhysicsInformedHybridModel:
         model.ml_qw = joblib.load(os.path.join(directory, "ml_qw.pkl"))
 
         return model
+
+
+    def plot_predictions(
+        self,
+        df: pd.DataFrame,
+        y_qo_col="qo_well_test",
+        y_qw_col="qw_well_test",
+        y_qg_col="qg_well_test",
+        time_col=None
+    ):
+        """
+        Plot actual vs predicted rates per well.
+        One figure per dependent variable.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Full dataframe (train or test)
+        well_id : str
+            Well identifier to plot
+        time_col : str or None
+            Column to use for x-axis (e.g. 'time_idx' or datetime)
+        plot_wgr : bool
+            Whether to also plot WGR
+        """
+        well_ids = df["well_id"].unique()
+        for well_id in well_ids:
+            df_well = df[df[self.well_id_col] == well_id].copy()
+            if df_well.empty:
+                raise ValueError(f"No data found for well {well_id}")
+
+            pred = self.predict(df_well)
+
+            start_idx = self.lags if self.lags > 0 else 0
+
+            df_well = df_well.iloc[start_idx:]
+            pred = pred.iloc[start_idx:]
+
+            x = df_well[time_col] if time_col else np.arange(len(df_well))
+
+            def _plot(y_true, y_pred, title, ylabel):
+                plt.figure()
+                plt.plot(x, y_true, label="Actual")
+                plt.plot(x, y_pred, label="Predicted")
+                plt.xlabel(time_col if time_col else "Index")
+                plt.ylabel(ylabel)
+                plt.title(title)
+                plt.legend()
+                plt.tight_layout()
+                plt.show()
+
+            # ---- Oil ----
+            _plot(
+                df_well[y_qo_col],
+                pred["qo_pred"],
+                f"{well_id} - Oil Rate (qo)",
+                "qo",
+            )
+
+            # ---- Water ----
+            _plot(
+                df_well[y_qw_col],
+                pred["qw_pred"],
+                f"{well_id} - Water Rate (qw)",
+                "qw",
+            )
+
+            # ---- Gas ----
+            _plot(
+                df_well[y_qg_col],
+                pred["qg_pred"],
+                f"{well_id} - Gas Rate (qg)",
+                "qg",
+            )
+
+            # ---- WGR (optional) ----
+            wgr_true = df_well[y_qw_col].values / np.maximum(
+                df_well[y_qg_col].values, EPS
+            )
+            wgr_pred = pred["qw_pred"].values / np.maximum(
+                pred["qg_pred"].values, EPS
+            )
+
+            _plot(
+                wgr_true,
+                wgr_pred,
+                f"{well_id} - Water Gas Ratio (WGR)",
+                "WGR",
+            )
