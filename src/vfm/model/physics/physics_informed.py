@@ -1,598 +1,469 @@
+import os
+import joblib
 import numpy as np
 import pandas as pd
-import os, joblib
 import matplotlib.pyplot as plt
-import numpy as np
+
 from scipy.optimize import least_squares
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.multioutput import MultiOutputRegressor
 
+# =====================================================
+# Constants & helpers
+# =====================================================
 
 EPS = 1e-6
 METRICS = ["r2", "mae", "rmse", "mre"]
 
-def compute_wgr(qw, qg):
-    return qw / np.maximum(qg, EPS)
+def compute_wgr(qw, qg, min_qg=50.0):
+    wgr = np.full_like(qw, np.nan, dtype=float)
 
-# -------------------------
-# Helpers
-# -------------------------
+    mask = (
+        (qg > min_qg) &
+        ~np.isnan(qw) &
+        ~np.isnan(qg) &
+        (qg != 0)
+    )
+
+    wgr[mask] = qw[mask] / qg[mask]
+    return wgr
+
 def logistic(x):
     x = np.clip(x, -50, 50)
     return 1 / (1 + np.exp(-x))
 
 def regression_metrics(y_true, y_pred):
-    """
-    Compute R2, MAE, RMSE and MRE
-    """
-    # Mean Absolute Error 
     mae = mean_absolute_error(y_true, y_pred)
-    # Root Mean Squared Error
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     r2 = r2_score(y_true, y_pred)
-    # Mean Relative Error (%)
-    mre = np.mean(np.abs(y_true - y_pred) / np.maximum(np.abs(y_true), EPS)) * 100.0
+    mre = np.mean(np.abs(y_true - y_pred) / np.maximum(np.abs(y_true), EPS)) * 100
     return r2, mae, rmse, mre
 
+# =====================================================
+# Physics Model
+# =====================================================
 
-# -------------------------
-# Physics-based model with Closure Law
-# -------------------------
 class PhysicsModel:
-    P_SCALE = 1e7   # pressure scaling (~100 bar in Pa)
-    T_SCALE = 300.0 # temperature scaling (K)
+    P_SCALE = 100.0       # ~100 bar
+    T_SCALE = 100.0       # ~100 °C (scaling only)
 
-    def __init__(self, estimate_pres_offset=1e6, fit_pres=True):
+    def __init__(self, estimate_pres_offset=10.0, fit_pres=True):
         self.fit_pres = fit_pres
         self.estimate_pres_offset = estimate_pres_offset
         self.params_ = None
 
     def _feature_matrix_for_wc(self, df):
         choke = df["choke"].values
-        dcp   = df["dcp"].values / self.P_SCALE
-        dht   = df["dht"].values / self.T_SCALE
-        wht   = df["wht"].values / self.T_SCALE
+        dcp = df["dcp"].values / self.P_SCALE
+        dht = df["dht"].values / self.T_SCALE
+        wht = df["wht"].values / self.T_SCALE
 
-        X = np.vstack([
+        return np.vstack([
             np.ones(len(df)),
             choke,
             dcp,
             dht,
             wht,
-            choke**2,
-            dcp**2,
-            dht**2,
-            wht**2,
             choke * dcp,
             choke * dht,
-            choke * wht,
-            dcp * dht,
             dcp * wht,
-            dht * wht
         ]).T
-        return X
 
-    def _pack_params(self, x, n_wc_features):
-        if self.fit_pres:
-            P_res, qL_max, Cg = x[0], x[1], x[2]
-            A = x[3:3+n_wc_features]
-        else:
-            P_res = None
-            qL_max, Cg = x[0], x[1]
-            A = x[2:2+n_wc_features]
-        return P_res, qL_max, Cg, A
+    def _unpack(self, x, n_wc):
+        i = 0
+        P_res = x[i] if self.fit_pres else None; i += self.fit_pres
+        qL_max, a, b = x[i:i+3]; i += 3
+        Cg, k_ch, ch0 = x[i:i+3]; i += 3
+        A_wc = x[i:i+n_wc]
+        return P_res, qL_max, a, b, Cg, k_ch, ch0, A_wc
 
     def residuals(self, x, df, y_qo, y_qg, y_qw):
-        P_res, qL_max, Cg, A = self._pack_params(x, 15)
+        n_wc = 8
+        P_res, qL_max, a, b, Cg, k_ch, ch0, A = self._unpack(x, n_wc)
 
         if P_res is None:
             P_res = df["dhp"].max() + self.estimate_pres_offset
 
         Pwf = df["dhp"].values
+        pr = np.clip(Pwf / P_res, 0, 1.5)
 
-        # ---- Liquid (dimensionless IPR) ----
-        pr = np.clip(Pwf / P_res, 0.0, 1.2)
-        qL = qL_max * (1 - 0.2*pr - 0.8*pr**2)
-        qL = np.maximum(0.0, qL)
-
-        # ---- Water cut ----
+        qL = np.maximum(0.0, qL_max * (1 - a * pr - b * pr**2))
         wc = logistic(self._feature_matrix_for_wc(df) @ A)
-        qw_pred = wc * qL
-        qo_pred = (1 - wc) * qL
 
-        # ---- Gas (scaled pressure drawdown) ----
-        dp = np.sqrt(np.maximum(0.0, P_res**2 - Pwf**2)) / self.P_SCALE
-        qg_pred = Cg * dp
-
-        eps = 1e-8
-        r_qo = (qo_pred - y_qo) / max(np.std(y_qo), eps)
-        r_qw = (qw_pred - y_qw) / max(np.std(y_qw), eps)
-        r_qg = (qg_pred - y_qg) / max(np.std(y_qg), eps)
-
-        return np.concatenate([r_qo, r_qw, r_qg])
-
-    def fit(self, df, y_qo_col, y_qg_col, y_qw_col):
-        df_fit = df[
-            ["dhp","dht","whp","wht","choke","dcp",
-             y_qo_col, y_qg_col, y_qw_col]
-        ].dropna()
-
-        y_qo = df_fit[y_qo_col].values
-        y_qg = df_fit[y_qg_col].values
-        y_qw = df_fit[y_qw_col].values
-
-        dhp_max = df_fit["dhp"].max()
-
-        if self.fit_pres:
-            x0 = [dhp_max * 1.1, np.mean(y_qo + y_qw), 100.0] + [0.0]*15
-            lb = [dhp_max, 0.0, 0.0] + [-5]*15
-            ub = [dhp_max * 1.5, 1e5, 1e5] + [5]*15
-        else:
-            x0 = [np.mean(y_qo + y_qw), 100.0] + [0.0]*15
-            lb = [0.0, 0.0] + [-5]*15
-            ub = [1e5, 1e5] + [5]*15
-
-        res = least_squares(
-            self.residuals,
-            x0,
-            bounds=(lb, ub),
-            args=(df_fit, y_qo, y_qg, y_qw),
-            max_nfev=20000,
-        )
-
-        P_res, qL_max, Cg, A = self._pack_params(res.x, 15)
-
-        if P_res is None:
-            P_res = dhp_max * 1.1
-
-        self.params_ = {
-            "P_res": P_res,
-            "qL_max": qL_max,
-            "Cg": Cg,
-            "A": np.array(A),
-        }
-        return self
-
-    def predict(self, df):
-        if self.params_ is None:
-            raise RuntimeError("Physics model not fitted")
-
-        P_res = self.params_["P_res"]
-        qL_max = self.params_["qL_max"]
-        Cg = self.params_["Cg"]
-        A = self.params_["A"]
-
-        Pwf = df["dhp"].values
-        pr = np.clip(Pwf / P_res, 0.0, 1.2)
-
-        qL = qL_max * (1 - 0.2*pr - 0.8*pr**2)
-        qL = np.maximum(0.0, qL)
-
-        wc = logistic(self._feature_matrix_for_wc(df) @ A)
         qw = wc * qL
         qo = (1 - wc) * qL
 
-        dp = np.sqrt(np.maximum(0.0, P_res**2 - Pwf**2)) / self.P_SCALE
-        qg = Cg * dp
+        dp = np.sqrt(np.maximum(0.0, P_res - Pwf)) / self.P_SCALE
+        choke_eff = logistic(k_ch * (df["choke"].values - ch0))
+        qg = Cg * dp * choke_eff
 
-        return pd.DataFrame(
-            {"qo_pred": qo, "qw_pred": qw, "qg_pred": qg, "wc_pred": wc},
-            index=df.index,
+        return np.concatenate([
+            (qo - y_qo) / max(np.std(y_qo), EPS),
+            (qw - y_qw) / max(np.std(y_qw), EPS),
+            (qg - y_qg) / max(np.std(y_qg), EPS),
+        ])
+
+    def fit(self, df, y_qo, y_qg, y_qw):
+        df = df.dropna(subset=[y_qo, y_qg, y_qw])
+        yqo, yqg, yqw = df[y_qo].values, df[y_qg].values, df[y_qw].values
+
+        dhp_max = df["dhp"].max()
+        qL_mean = np.mean(yqo + yqw)
+        n_wc = 8
+
+        x0 = [dhp_max * 1.1, qL_mean, 0.2, 0.6, 50.0, 10.0, 0.3] + [0.0] * n_wc
+        lb = [dhp_max, 0, 0, 0, 0, 0.1, 0] + [-5]*n_wc
+        ub = [dhp_max*2, 1e5, 1, 2, 1e5, 50, 1] + [5]*n_wc
+
+        res = least_squares(
+            self.residuals, x0, bounds=(lb, ub),
+            args=(df, yqo, yqg, yqw), max_nfev=30000
         )
 
-    def score(self, df, y_qo_col="qo_well_test", y_qg_col="qg_well_test", y_qw_col="qw_well_test"):
-        pred = self.predict(df)
-
-        r2_qo, mae_qo, rmse_qo, mre_qo = regression_metrics(df[y_qo_col], pred["qo_pred"])
-        r2_qw, mae_qw, rmse_qw, mre_qw = regression_metrics(df[y_qw_col], pred["qw_pred"])
-        r2_qg, mae_qg, rmse_qg, mre_qg = regression_metrics(df[y_qg_col], pred["qg_pred"])
-
-        return {
-            "qo": {"r2": r2_qo, "mae": mae_qo, "rmse": rmse_qo, "mre": mre_qo},
-            "qw": {"r2": r2_qw, "mae": mae_qw, "rmse": rmse_qw, "mre": mre_qw},
-            "qg": {"r2": r2_qg, "mae": mae_qg, "rmse": rmse_qg, "mre": mre_qg}
-        }
-
-    def save(self, path: str):
-        """
-        Save fitted physics model parameters.
-        """
-        if self.params_ is None:
-            raise RuntimeError("Physics model is not fitted.")
-        joblib.dump(self.params_, path)
-
-    def load(self, path: str):
-        """
-        Load fitted physics model parameters.
-        """
-        self.params_ = joblib.load(path)
+        P_res, qL_max, a, b, Cg, k_ch, ch0, A = self._unpack(res.x, n_wc)
+        self.params_ = dict(
+            P_res=P_res, qL_max=qL_max, a=a, b=b,
+            Cg=Cg, k_choke=k_ch, choke0=ch0, A_wc=A
+        )
         return self
 
+    def predict(self, df):
+        p = self.params_
+        Pwf = df["dhp"].values
+        pr = np.clip(Pwf / p["P_res"], 0, 1.5)
 
-# -------------------------
-# Hybrid Physics + ML Model
-# Direct Water Rate Prediction
-# -------------------------
+        qL = np.maximum(0.0, p["qL_max"] * (1 - p["a"]*pr - p["b"]*pr**2))
+        wc = logistic(self._feature_matrix_for_wc(df) @ p["A_wc"])
+
+        qw = wc * qL
+        qo = (1 - wc) * qL
+
+        dp = np.sqrt(np.maximum(0.0, p["P_res"] - Pwf)) / self.P_SCALE
+        choke_eff = logistic(p["k_choke"] * (df["choke"].values - p["choke0"]))
+        qg = p["Cg"] * dp * choke_eff
+
+        return pd.DataFrame(
+            {"qo_pred": qo, "qw_pred": qw, "qg_pred": qg},
+            index=df.index
+        )
+
+# =============================
+# Physics-Informed Hybrid Model
+# =============================
 class PhysicsInformedHybridModel:
-    def __init__(
-        self,
-        dependant_vars: list[str],
-        independent_vars: list[str],
-        degree=2,
-        lags=1,
-        well_id_col: str = "well_id",
-    ):
-        self.well_id_col = well_id_col
-        self.phys_models: dict[str, PhysicsModel] = {}
 
-        self.independent_vars = independent_vars
+    def __init__(self, dependant_vars, independent_vars,
+                 well_id_col="well_id", degree=1, lags=1):
+
         self.dependant_vars = dependant_vars
+        self.independent_vars = independent_vars
+        self.well_id_col = well_id_col
         self.degree = degree
         self.lags = lags
 
-        self.poly = PolynomialFeatures(degree=self.degree, include_bias=False)
+        self.phys_models = {}
 
-        # ML now predicts qw residual directly
-        self.ml_qw = GradientBoostingRegressor(
-            n_estimators=500,
-            max_depth=6,
-            learning_rate=0.05,
-            random_state=42,
+        self.scaler = StandardScaler()
+        self.poly = PolynomialFeatures(degree, include_bias=False)
+
+        self.ml_residual = MultiOutputRegressor(
+            GradientBoostingRegressor(
+                n_estimators=100,        # ↓ drastically
+                max_depth=2,             # ↓ shallow trees
+                min_samples_leaf=30,     # ↑ strong smoothing
+                learning_rate=0.05,
+                subsample=0.7,
+                random_state=42,
+            )
         )
 
-    # --------------------------------------------------
-    # Lagged features
-    # --------------------------------------------------
-    def _create_lagged_features(self, df: pd.DataFrame, drop_na: bool = True) -> pd.DataFrame:
-        df_lagged = df.copy()
 
+    # --------------------------------------------------
+    # Lag features
+    # --------------------------------------------------
+    def _create_lagged_features(self, df, drop_na=True):
+        df_lag = df.copy()
         for lag in range(1, self.lags + 1):
             for col in ["dhp", "whp"]:
-                df_lagged[f"{col}_lag{lag}"] = (
-                    df_lagged.groupby(self.well_id_col, sort=False)[col]
-                    .shift(lag)
+                df_lag[f"{col}_lag{lag}"] = (
+                    df_lag.groupby(self.well_id_col)[col].shift(lag)
                 )
-
-        if drop_na:
-            df_lagged = df_lagged.dropna()
-
-        return df_lagged
-
-    def _transform_features(self, df: pd.DataFrame):
-        X = df[self.independent_vars].values
-        return self.poly.transform(X)
+        return df_lag.dropna() if drop_na else df_lag
 
     # --------------------------------------------------
     # Fit
     # --------------------------------------------------
-    def fit(
-        self,
-        df,
-        y_qo_col="qo_well_test",
-        y_qg_col="qg_well_test",
-        y_qw_col="qw_well_test",
-    ):
-        # ---- Fit physics per well ----
+    def fit(self, df,
+            y_qo_col="qo_mpfm",
+            y_qg_col="qg_mpfm",
+            y_qw_col="qw_mpfm"):
+
+        # Physics per well
         self.phys_models = {}
-        for well_id, df_well in df.groupby(self.well_id_col, sort=False):
-            phys = PhysicsModel()
-            phys.fit(df_well, y_qo_col, y_qg_col, y_qw_col)
-            self.phys_models[well_id] = phys
+        for wid, d in df.groupby(self.well_id_col):
+            self.phys_models[wid] = PhysicsModel().fit(
+                d, y_qo_col, y_qg_col, y_qw_col
+            )
 
-        # ---- ML training (global) ----
-        df_lagged = self._create_lagged_features(df, drop_na=True)
+        # ML residual training
+        df_lag = self._create_lagged_features(df)
 
-        qw_phys_list = []
-        for well_id, df_well in df_lagged.groupby(self.well_id_col, sort=False):
-            pred = self.phys_models[well_id].predict(df_well)
-            qw_phys_list.append(pred["qw_pred"])
+        X_all, y_all = [], []
 
-        qw_phys = pd.concat(qw_phys_list).sort_index()
+        for wid, d in df_lag.groupby(self.well_id_col):
+            phys = self.phys_models[wid].predict(d)
 
-        # Residual target
-        y_qw = df_lagged[y_qw_col]
-        y_res = y_qw - qw_phys
+            X = np.column_stack([
+                d[self.independent_vars].values,
+                phys[["qo_pred", "qw_pred", "qg_pred"]].values,
+            ])
 
-        X_train = df_lagged[self.independent_vars].values
-        self.poly.fit(X_train)
-        X_poly = self.poly.transform(X_train)
+            y_true = d[[y_qo_col, y_qw_col, y_qg_col]].values
+            y_phys = phys.values
 
-        self.ml_qw.fit(X_poly, y_res)
+            y_res = np.log1p(y_true) - np.log1p(np.maximum(y_phys, EPS))
 
+            X_all.append(X)
+            y_all.append(y_res)
+
+        Xs = self.scaler.fit_transform(np.vstack(X_all))
+        Xp = self.poly.fit_transform(Xs)
+
+        self.ml_residual.fit(Xp, np.vstack(y_all))
         return self
 
     # --------------------------------------------------
     # Predict
     # --------------------------------------------------
     def predict(self, df):
-        df_lagged = self._create_lagged_features(df, drop_na=False)
+        df_lag = self._create_lagged_features(df)
+        outputs = []
 
-        qo_all, qw_all, qg_all = [], [], []
+        for wid, d in df_lag.groupby(self.well_id_col):
+            phys = self.phys_models[wid].predict(d)
 
-        for well_id, df_well in df_lagged.groupby(self.well_id_col, sort=False):
-            if well_id not in self.phys_models:
-                raise ValueError(f"No physics model found for well_id={well_id}")
+            X = np.column_stack([
+                d[self.independent_vars].values,
+                phys.values,
+            ])
 
-            phys = self.phys_models[well_id]
-            phys_pred = phys.predict(df_well)
+            Xp = self.poly.transform(self.scaler.transform(X))
+            res = self.ml_residual.predict(Xp)
 
-            X_poly = self._transform_features(df_well)
-            qw_ml = self.ml_qw.predict(X_poly)
+            y_hat = np.expm1(np.log1p(np.maximum(phys.values, EPS)) + res)
 
-            qw = np.maximum(0.0, phys_pred["qw_pred"] + qw_ml)
-
-            qL = phys_pred["qo_pred"] + phys_pred["qw_pred"]
+            qL = phys["qo_pred"].values + phys["qw_pred"].values
+            qw = np.clip(y_hat[:,1], 0, qL)
             qo = np.maximum(0.0, qL - qw)
+            qg = y_hat[:,2]
 
-            qo_all.append(qo)
-            qw_all.append(qw)
-            qg_all.append(phys_pred["qg_pred"])
+            outputs.append(pd.DataFrame(
+                {"qo_pred": qo, "qw_pred": qw, "qg_pred": qg},
+                index=d.index
+            ))
 
-        return pd.DataFrame(
-            {
-                "qo_pred": np.concatenate(qo_all),
-                "qw_pred": np.concatenate(qw_all),
-                "qg_pred": np.concatenate(qg_all),
-            },
-            index=df_lagged.index,
-        )
+        return pd.concat(outputs).sort_index()
     
-    # --------------------------------------------------
-    # Hybrid score
-    # --------------------------------------------------
-    def hybrid_score(
-        self,
-        df,
-        y_qo_col="qo_well_test",
-        y_qg_col="qg_well_test",
-        y_qw_col="qw_well_test",
-    ):
-        pred = self.predict(df)
-
-        start_idx = self.lags if self.lags > 0 else 0
-
-        results = {}
-        qo_all, qw_all, qg_all, wgr_all = [], [], [], []
-        qo_p_all, qw_p_all, qg_p_all, wgr_p_all = [], [], [], []
-
-        for well_id, df_well in df.groupby(self.well_id_col, sort=False):
-            pred_well = pred.loc[df_well.index]
-
-            y_qo = df_well[y_qo_col].iloc[start_idx:]
-            y_qw = df_well[y_qw_col].iloc[start_idx:]
-            y_qg = df_well[y_qg_col].iloc[start_idx:]
-
-            p_qo = pred_well["qo_pred"].iloc[start_idx:]
-            p_qw = pred_well["qw_pred"].iloc[start_idx:]
-            p_qg = pred_well["qg_pred"].iloc[start_idx:]
-
-            # ---- WGR ----
-            y_wgr = compute_wgr(y_qw.values, y_qg.values)
-            p_wgr = compute_wgr(p_qw.values, p_qg.values)
-
-            results[well_id] = {
-                "qo": dict(zip(METRICS, regression_metrics(y_qo, p_qo))),
-                "qw": dict(zip(METRICS, regression_metrics(y_qw, p_qw))),
-                "qg": dict(zip(METRICS, regression_metrics(y_qg, p_qg))),
-                "wgr": dict(zip(METRICS, regression_metrics(y_wgr, p_wgr)))
-            }
-
-            qo_all.append(y_qo); qo_p_all.append(p_qo)
-            qw_all.append(y_qw); qw_p_all.append(p_qw)
-            qg_all.append(y_qg); qg_p_all.append(p_qg)
-            wgr_all.append(pd.Series(y_wgr)); wgr_p_all.append(pd.Series(p_wgr))
-
-        results["__global__"] = {
-            "qo": dict(zip(METRICS, regression_metrics(pd.concat(qo_all), pd.concat(qo_p_all)))),
-            "qw": dict(zip(METRICS, regression_metrics(pd.concat(qw_all), pd.concat(qw_p_all)))),
-            "qg": dict(zip(METRICS, regression_metrics(pd.concat(qg_all), pd.concat(qg_p_all)))),
-            "wgr": dict(zip(METRICS, regression_metrics(pd.concat(wgr_all), pd.concat(wgr_p_all)))),
-        }
-
-        return results
-
-    # --------------------------------------------------
-    # Physics-only score (unchanged)
-    # --------------------------------------------------
-    def physics_score(
-        self,
-        df,
-        y_qo_col="qo_well_test",
-        y_qg_col="qg_well_test",
-        y_qw_col="qw_well_test",
-    ):
-        results = {}
-        qo_all, qw_all, qg_all, wgr_all = [], [], [], []
-        qo_p_all, qw_p_all, qg_p_all, wgr_p_all = [], [], [], []
-
-        for well_id, df_well in df.groupby(self.well_id_col, sort=False):
-            phys = self.phys_models[well_id]
-            pred = phys.predict(df_well)
-
-            y_qo = df_well[y_qo_col]
-            y_qw = df_well[y_qw_col]
-            y_qg = df_well[y_qg_col]
-
-            p_qo = pred["qo_pred"]
-            p_qw = pred["qw_pred"]
-            p_qg = pred["qg_pred"]
-
-            # ---- WGR ----
-            y_wgr = compute_wgr(y_qw.values, y_qg.values)
-            p_wgr = compute_wgr(p_qw.values, p_qg.values)
-
-            results[well_id] = {
-                "qo": dict(zip(METRICS, regression_metrics(y_qo, p_qo))),
-                "qw": dict(zip(METRICS, regression_metrics(y_qw, p_qw))),
-                "qg": dict(zip(METRICS, regression_metrics(y_qg, p_qg))),
-                "wgr": dict(zip(METRICS, regression_metrics(y_wgr, p_wgr)))
-            }
-
-            qo_all.append(y_qo); qo_p_all.append(p_qo)
-            qw_all.append(y_qw); qw_p_all.append(p_qw)
-            qg_all.append(y_qg); qg_p_all.append(p_qg)
-            wgr_all.append(pd.Series(y_wgr)); wgr_p_all.append(pd.Series(p_wgr))
-
-        results["__global__"] = {
-            "qo": dict(zip(METRICS, regression_metrics(pd.concat(qo_all), pd.concat(qo_p_all)))),
-            "qw": dict(zip(METRICS, regression_metrics(pd.concat(qw_all), pd.concat(qw_p_all)))),
-            "qg": dict(zip(METRICS, regression_metrics(pd.concat(qg_all), pd.concat(qg_p_all)))),
-            "wgr": dict(zip(METRICS, regression_metrics(pd.concat(wgr_all), pd.concat(wgr_p_all)))),
-        }
-
-        return results
-
-    # --------------------------------------------------
-    # Dense fill (unchanged interface)
-    # --------------------------------------------------
-    def generate_dense_well_rates(self, df: pd.DataFrame) -> pd.DataFrame:
-        df_dense = df.copy()
-        targets = self.dependant_vars
-
-        mask_missing = df_dense[targets].isna().any(axis=1)
-        if not mask_missing.any():
-            return df_dense
-
-        df_missing = df_dense.loc[mask_missing]
-        pred = self.predict(df_missing)
-
-        preds_df = pd.DataFrame(
-            {
-                "qo_well_test": pred["qo_pred"].values,
-                "qw_well_test": pred["qw_pred"].values,
-                "qg_well_test": pred["qg_pred"].values,
-            },
-            index=df_missing.index,
-        )
-
-        for col in targets:
-            df_dense.loc[df_dense[col].isna(), col] = preds_df.loc[df_dense[col].isna(), col]
-
-        return df_dense
-
-    # --------------------------------------------------
-    # Save / load
-    # --------------------------------------------------
-    def save(self, directory: str):
-        os.makedirs(directory, exist_ok=True)
-
-        joblib.dump(self.phys_models, os.path.join(directory, "physics_models.pkl"))
-        joblib.dump(self.poly, os.path.join(directory, "poly.pkl"))
-        joblib.dump(self.ml_qw, os.path.join(directory, "ml_qw.pkl"))
-
-        meta = {
-            "independent_vars": self.independent_vars,
-            "dependant_vars": self.dependant_vars,
-            "degree": self.degree,
-            "lags": self.lags,
-            "well_id_col": self.well_id_col,
-        }
-        joblib.dump(meta, os.path.join(directory, "meta.pkl"))
-
-    @classmethod
-    def load(cls, directory: str):
-        meta = joblib.load(os.path.join(directory, "meta.pkl"))
-
-        model = cls(
-            dependant_vars=meta["dependant_vars"],
-            independent_vars=meta["independent_vars"],
-            degree=meta["degree"],
-            lags=meta["lags"],
-            well_id_col=meta["well_id_col"],
-        )
-
-        model.phys_models = joblib.load(os.path.join(directory, "physics_models.pkl"))
-        model.poly = joblib.load(os.path.join(directory, "poly.pkl"))
-        model.ml_qw = joblib.load(os.path.join(directory, "ml_qw.pkl"))
-
-        return model
-
-
-    def plot_predictions(
-        self,
-        df: pd.DataFrame,
-        y_qo_col="qo_well_test",
-        y_qw_col="qw_well_test",
-        y_qg_col="qg_well_test",
-        time_col=None
-    ):
+    def predict_physics(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Plot actual vs predicted rates per well.
-        One figure per dependent variable.
+        Physics-only prediction (no ML, no lagging).
 
         Parameters
         ----------
         df : pd.DataFrame
-            Full dataframe (train or test)
-        well_id : str
-            Well identifier to plot
-        time_col : str or None
-            Column to use for x-axis (e.g. 'time_idx' or datetime)
-        plot_wgr : bool
-            Whether to also plot WGR
+            Input dataframe with well_id_col present.
+
+        Returns
+        -------
+        pd.DataFrame
+            Physics-only predictions with columns:
+            ['qo_pred', 'qw_pred', 'qg_pred']
+            Index is aligned with input df.
         """
-        well_ids = df["well_id"].unique()
-        for well_id in well_ids:
-            df_well = df[df[self.well_id_col] == well_id].copy()
-            if df_well.empty:
-                raise ValueError(f"No data found for well {well_id}")
+        outputs = []
 
-            pred = self.predict(df_well)
+        for wid, d in df.groupby(self.well_id_col, sort=False):
+            if wid not in self.phys_models:
+                raise KeyError(f"No physics model found for well '{wid}'")
 
-            start_idx = self.lags if self.lags > 0 else 0
+            phys = self.phys_models[wid]
+            p = phys.predict(d)
 
-            df_well = df_well.iloc[start_idx:]
-            pred = pred.iloc[start_idx:]
+            outputs.append(p)
 
-            x = df_well[time_col] if time_col else np.arange(len(df_well))
+        return pd.concat(outputs).sort_index()
 
-            def _plot(y_true, y_pred, title, ylabel):
-                plt.figure()
-                plt.plot(x, y_true, label="Actual")
-                plt.plot(x, y_pred, label="Predicted")
-                plt.xlabel(time_col if time_col else "Index")
-                plt.ylabel(ylabel)
-                plt.title(title)
+
+    # --------------------------------------------------
+    # Physics-only score
+    # --------------------------------------------------
+    def physics_score(self, df,
+                      y_qo_col="qo_mpfm",
+                      y_qg_col="qg_mpfm",
+                      y_qw_col="qw_mpfm"):
+
+        results = {}
+
+        for wid, d in df.groupby(self.well_id_col):
+            p = self.phys_models[wid].predict(d)
+
+            y_wgr = compute_wgr(d[y_qw_col].values, d[y_qg_col].values)
+            p_wgr = compute_wgr(p["qw_pred"].values, p["qg_pred"].values)
+
+            results[wid] = {
+                "qo": dict(zip(METRICS, regression_metrics(d[y_qo_col], p["qo_pred"]))),
+                "qw": dict(zip(METRICS, regression_metrics(d[y_qw_col], p["qw_pred"]))),
+                "qg": dict(zip(METRICS, regression_metrics(d[y_qg_col], p["qg_pred"]))),
+                "wgr": dict(zip(METRICS, regression_metrics(y_wgr, p_wgr))),
+            }
+
+        return results
+
+    # --------------------------------------------------
+    # Hybrid score 
+    # --------------------------------------------------
+    def hybrid_score(
+        self,
+        df,
+        y_qo_col="qo_mpfm",
+        y_qg_col="qg_mpfm",
+        y_qw_col="qw_mpfm",
+    ):
+        # IMPORTANT: use lagged dataframe
+        df_lag = self._create_lagged_features(df)
+        pred = self.predict(df)
+
+        # Water–gas ratio (safe)
+        y_wgr = compute_wgr(
+            df_lag[y_qw_col].values,
+            df_lag[y_qg_col].values
+        )
+        p_wgr = compute_wgr(
+            pred["qw_pred"].values,
+            pred["qg_pred"].values
+        )
+
+        return {
+            "qo": dict(zip(
+                METRICS,
+                regression_metrics(df_lag[y_qo_col], pred["qo_pred"])
+            )),
+            "qw": dict(zip(
+                METRICS,
+                regression_metrics(df_lag[y_qw_col], pred["qw_pred"])
+            )),
+            "qg": dict(zip(
+                METRICS,
+                regression_metrics(df_lag[y_qg_col], pred["qg_pred"])
+            )),
+            "wgr": dict(zip(
+                METRICS,
+                regression_metrics(y_wgr, p_wgr)
+            )),
+        }
+
+
+    # --------------------------------------------------
+    # Dense fill
+    # --------------------------------------------------
+    def generate_dense_well_rates(self, df):
+        mask = df[self.dependant_vars].isna().any(axis=1)
+        if not mask.any():
+            return df
+
+        pred = self.predict(df.loc[mask])
+        for col in self.dependant_vars:
+            df.loc[mask, col] = pred[f"{col.split('_')[0]}_pred"].values
+        return df
+
+    # --------------------------------------------------
+    # Save / Load
+    # --------------------------------------------------
+    def save(self, directory):
+        os.makedirs(directory, exist_ok=True)
+        joblib.dump(self.phys_models, f"{directory}/physics.pkl")
+        joblib.dump(self.scaler, f"{directory}/scaler.pkl")
+        joblib.dump(self.poly, f"{directory}/poly.pkl")
+        joblib.dump(self.ml_residual, f"{directory}/ml.pkl")
+
+    @classmethod
+    def load(cls, directory, **kwargs):
+        model = cls(**kwargs)
+        model.phys_models = joblib.load(f"{directory}/physics.pkl")
+        model.scaler = joblib.load(f"{directory}/scaler.pkl")
+        model.poly = joblib.load(f"{directory}/poly.pkl")
+        model.ml_residual = joblib.load(f"{directory}/ml.pkl")
+        return model
+
+    # --------------------------------------------------
+    # Plotting
+    # --------------------------------------------------
+    def plot_predictions(
+        self,
+        df,
+        y_qo_col="qo_mpfm",
+        y_qw_col="qw_mpfm",
+        y_qg_col="qg_mpfm",
+        time_col="time_idx",
+        is_hybrid_model: bool = True,
+    ):
+        for wid in df[self.well_id_col].unique():
+            d = df[df[self.well_id_col] == wid]
+
+            # IMPORTANT: lagged data for alignment
+            d_lag = self._create_lagged_features(d)
+            if d_lag.empty:
+                continue
+
+            # Predict
+            p = (
+                self.predict(d)
+                if is_hybrid_model
+                else self.predict_physics(d_lag)
+            )
+
+            # X-axis
+            x = d_lag[time_col].values if time_col else np.arange(len(d_lag))
+
+            plot_map = {
+                "qo_pred": y_qo_col,
+                "qw_pred": y_qw_col,
+                "qg_pred": y_qg_col,
+            }
+
+            for pred_col, ycol in plot_map.items():
+                plt.figure(figsize=(10, 4))
+
+                # Actual values (line + markers)
+                plt.plot(
+                    x,
+                    d_lag[ycol].values,
+                    label="Actual",
+                    # linestyle="--",
+                    linewidth=2,
+                    marker="o",
+                    markersize=4,
+                )
+
+                # Predicted values (line + markers)
+                plt.plot(
+                    x,
+                    p[pred_col].values,
+                    label="Predicted",
+                    # linestyle="--",
+                    linewidth=2,
+                    marker="o",
+                    markersize=4,
+                )
+
+                plt.xlabel(time_col)
+                rate_column = pred_col.replace("_pred", "")
+                plt.ylabel(f"{rate_column} (Sm$^3$/h)")
+                plt.title(f"{wid} : {rate_column}")
+
                 plt.legend()
+                plt.grid(True, alpha=0.3)
                 plt.tight_layout()
                 plt.show()
-
-            # ---- Oil ----
-            _plot(
-                df_well[y_qo_col],
-                pred["qo_pred"],
-                f"{well_id} - Oil Rate (qo)",
-                "qo",
-            )
-
-            # ---- Water ----
-            _plot(
-                df_well[y_qw_col],
-                pred["qw_pred"],
-                f"{well_id} - Water Rate (qw)",
-                "qw",
-            )
-
-            # ---- Gas ----
-            _plot(
-                df_well[y_qg_col],
-                pred["qg_pred"],
-                f"{well_id} - Gas Rate (qg)",
-                "qg",
-            )
-
-            # ---- WGR (optional) ----
-            wgr_true = df_well[y_qw_col].values / np.maximum(
-                df_well[y_qg_col].values, EPS
-            )
-            wgr_pred = pred["qw_pred"].values / np.maximum(
-                pred["qg_pred"].values, EPS
-            )
-
-            _plot(
-                wgr_true,
-                wgr_pred,
-                f"{well_id} - Water Gas Ratio (WGR)",
-                "WGR",
-            )

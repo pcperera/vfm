@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 
 def summarize_null(df: pd.DataFrame) -> pd.Series:
@@ -22,11 +23,10 @@ def get_train_test_split_per_well(
     df: pd.DataFrame,
     well_id_col: str = "well_id",
     test_size: float = 0.2,
-    lags: int = 1,
     min_train_points: int = 30,
 ):
     """
-    Per-well temporal train/test split with lag safety.
+    Per-well temporal train/test split WITHOUT lagged features.
 
     Assumes df is already sorted by time_idx.
     """
@@ -41,7 +41,7 @@ def get_train_test_split_per_well(
         n = len(df_well)
 
         # Not enough data → skip well
-        if n < min_train_points + lags + 1:
+        if n < min_train_points + 1:
             continue
 
         split_idx = int((1 - test_size) * n)
@@ -51,7 +51,7 @@ def get_train_test_split_per_well(
             split_idx = min_train_points
 
         df_train = df_well.iloc[:split_idx]
-        df_test = df_well.iloc[split_idx + lags:]  # lag buffer
+        df_test = df_well.iloc[split_idx:]
 
         if len(df_test) == 0:
             continue
@@ -64,6 +64,32 @@ def get_train_test_split_per_well(
 
     return df_train, df_test
 
+def get_random_train_test_split_per_well_with_order_preserved(
+    df: pd.DataFrame,
+    test_size: float = 0.2,
+    random_state: int | None = None,
+):
+    """
+    Random row-wise split.
+    Time order is preserved *within* train and test.
+    """
+
+    rng = np.random.default_rng(random_state)
+
+    n = len(df)
+    test_mask = rng.random(n) < test_size
+
+    df_train = df.loc[~test_mask].sort_index()
+    df_test = df.loc[test_mask].sort_index()
+
+    return df_train, df_test
+
 
 def get_all_wells() -> list[str]:
     return  ["W06", "W08", "W10", "W11", "W15", "W18", "W19"]
+
+def get_depdendent_vars():
+    return ["qo_mpfm", "qg_mpfm", "qw_mpfm"]
+
+def get_independent_vars():
+    return ["well_code", "dhp", "dht", "whp", "wht", "choke", "dcp"]

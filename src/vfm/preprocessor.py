@@ -1,4 +1,5 @@
 import pandas as pd
+from src.utils.descriptive_utils import *
 
 RESAMPLE_MEAN = "mean"
 RESAMPLE_FIRST = "first"
@@ -11,7 +12,6 @@ class Preprocessor:
         self._independent_tp_vars = ["dhp", "dht", "whp", "wht", "dcp"]
         self._independent_vars = self._independent_tp_vars.copy()
         self._independent_vars.append("choke")
-        self._dependent_vars = ["qo_well_test", "qg_well_test", "qw_well_test"]
 
     def preprocess_well(self, df: pd.DataFrame, resample: bool = True) -> pd.DataFrame:
         well_ids = df["well_id"].unique()
@@ -55,21 +55,14 @@ class Preprocessor:
                 limit_direction="both" # Fill start & end gaps
             )
 
-        # Convert pressures from bara to Pa
-        for item in ["dhp", "whp", "dcp"]:
-            df[item] *= 1E5
-
-        # Convert C to K
-        for item in ["dht", "wht"]:
-            df[item] = df[item] + C_TO_K_OFFSET
-
         # Calculate MPFM flow rates from GOR and WC
         df["gor_mpfm"] = df["qg_mpfm"] / df["qo_mpfm"]
         df["qw_mpfm"] = (df["wc_mpfm"] * df["qo_mpfm"]) / (1 - df["wc_mpfm"])
 
         # Training data (based on well test)
         all_vars = self._independent_vars.copy()
-        all_vars.extend(["well_id", "qo_well_test", "qg_well_test", "qw_well_test"])
+        all_vars.extend(["well_id"])
+        all_vars.extend(get_depdendent_vars())
         
         df = df[all_vars]
 
@@ -77,6 +70,8 @@ class Preprocessor:
             df['choke'] = df['choke'].ffill()
             df[self._independent_tp_vars] = df[self._independent_tp_vars].interpolate(method="time", limit_direction="forward")
             df = df.dropna(subset=self._independent_vars)
+
+        df = df[df["qo_mpfm"] > 0]
         
         return df
 
