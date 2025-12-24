@@ -106,28 +106,109 @@ class PhysicsModel:
         ])
 
     def fit(self, df, y_qo, y_qg, y_qw):
-        df = df.dropna(subset=[y_qo, y_qg, y_qw])
-        yqo, yqg, yqw = df[y_qo].values, df[y_qg].values, df[y_qw].values
+        """
+        Calibrate physics model parameters for a single well.
+        """
 
-        dhp_max = df["dhp"].max()
-        qL_mean = np.mean(yqo + yqw)
+        # --------------------------------------------------
+        # 1. Clean input data (CRITICAL)
+        # --------------------------------------------------
+        required_cols = [
+            "dhp", "choke", "dcp", "dht", "wht",
+            y_qo, y_qg, y_qw
+        ]
+
+        df = df.dropna(subset=required_cols)
+
+        if len(df) < 10:
+            raise ValueError("Not enough valid data points for physics calibration")
+
+        yqo = df[y_qo].values.astype(float)
+        yqg = df[y_qg].values.astype(float)
+        yqw = df[y_qw].values.astype(float)
+
+        # --------------------------------------------------
+        # 2. Safe statistics
+        # --------------------------------------------------
+        dhp = df["dhp"].values.astype(float)
+
+        dhp_max = float(np.nanmax(dhp))
+        dhp_min = float(np.nanmin(dhp))
+
+        if not np.isfinite(dhp_max):
+            raise ValueError("Invalid DHP values for physics calibration")
+
+        qL_mean = float(np.nanmean(yqo + yqw))
+        qL_mean = max(qL_mean, EPS)
+
+        # --------------------------------------------------
+        # 3. Robust initial guess + bounds (KEY FIX)
+        # --------------------------------------------------
         n_wc = 8
 
-        x0 = [dhp_max * 1.1, qL_mean, 0.2, 0.6, 50.0, 10.0, 0.3] + [0.0] * n_wc
-        lb = [dhp_max, 0, 0, 0, 0, 0.1, 0] + [-5]*n_wc
-        ub = [dhp_max*2, 1e5, 1, 2, 1e5, 50, 1] + [5]*n_wc
+        # Reservoir pressure
+        P_res0 = max(dhp_max + self.estimate_pres_offset, dhp_max * 1.05)
+        P_res_lb = dhp_max * 1.01
+        P_res_ub = dhp_max * 3.0
 
+        # Initial parameter vector
+        x0 = (
+            [P_res0, qL_mean, 0.2, 0.5, 50.0, 5.0, 0.3]
+            + [0.0] * n_wc
+        )
+
+        lb = (
+            [P_res_lb, 0.0, 0.0, 0.0, 0.0, 0.01, 0.0]
+            + [-5.0] * n_wc
+        )
+
+        ub = (
+            [P_res_ub, 1e5, 1.0, 2.0, 1e5, 50.0, 1.0]
+            + [5.0] * n_wc
+        )
+
+        # --------------------------------------------------
+        # 4. Final numeric safety check
+        # --------------------------------------------------
+        x0 = np.asarray(x0, dtype=float)
+        lb = np.asarray(lb, dtype=float)
+        ub = np.asarray(ub, dtype=float)
+
+        if not np.all((x0 > lb) & (x0 < ub)):
+            raise ValueError("Initial guess x0 is not strictly within bounds")
+
+        # --------------------------------------------------
+        # 5. Least squares optimization
+        # --------------------------------------------------
         res = least_squares(
-            self.residuals, x0, bounds=(lb, ub),
-            args=(df, yqo, yqg, yqw), max_nfev=30000
+            self.residuals,
+            x0,
+            bounds=(lb, ub),
+            args=(df, yqo, yqg, yqw),
+            max_nfev=30000,
+            xtol=1e-8,
+            ftol=1e-8,
+            gtol=1e-8,
         )
 
+        # --------------------------------------------------
+        # 6. Store calibrated parameters
+        # --------------------------------------------------
         P_res, qL_max, a, b, Cg, k_ch, ch0, A = self._unpack(res.x, n_wc)
+
         self.params_ = dict(
-            P_res=P_res, qL_max=qL_max, a=a, b=b,
-            Cg=Cg, k_choke=k_ch, choke0=ch0, A_wc=A
+            P_res=P_res,
+            qL_max=qL_max,
+            a=a,
+            b=b,
+            Cg=Cg,
+            k_choke=k_ch,
+            choke0=ch0,
+            A_wc=A,
         )
+
         return self
+
 
     def predict(self, df):
         p = self.params_
@@ -200,19 +281,30 @@ class PhysicsInformedHybridModel:
             y_qg_col="qg_mpfm",
             y_qw_col="qw_mpfm"):
 
-        # Physics per well
+        # ---- Physics per well
         self.phys_models = {}
         for wid, d in df.groupby(self.well_id_col):
             self.phys_models[wid] = PhysicsModel().fit(
                 d, y_qo_col, y_qg_col, y_qw_col
             )
 
-        # ML residual training
+        # ---- Residual ML
         df_lag = self._create_lagged_features(df)
 
         X_all, y_all = [], []
 
+        required_cols = (
+            self.independent_vars +
+            [y_qo_col, y_qw_col, y_qg_col]
+        )
+
         for wid, d in df_lag.groupby(self.well_id_col):
+
+            # Critical fix: drop unsafe rows
+            d = d.dropna(subset=required_cols)
+            if len(d) < 10:
+                continue
+
             phys = self.phys_models[wid].predict(d)
 
             X = np.column_stack([
@@ -220,18 +312,25 @@ class PhysicsInformedHybridModel:
                 phys[["qo_pred", "qw_pred", "qg_pred"]].values,
             ])
 
-            y_true = d[[y_qo_col, y_qw_col, y_qg_col]].values
-            y_phys = phys.values
+            y_true = np.maximum(
+                d[[y_qo_col, y_qw_col, y_qg_col]].values, EPS
+            )
+            y_phys = np.maximum(phys.values, EPS)
 
-            y_res = np.log1p(y_true) - np.log1p(np.maximum(y_phys, EPS))
+            y_res = np.log1p(y_true) - np.log1p(y_phys)
 
-            X_all.append(X)
-            y_all.append(y_res)
+            mask = np.isfinite(y_res).all(axis=1)
+            X_all.append(X[mask])
+            y_all.append(y_res[mask])
 
         Xs = self.scaler.fit_transform(np.vstack(X_all))
         Xp = self.poly.fit_transform(Xs)
 
-        self.ml_residual.fit(Xp, np.vstack(y_all))
+        Y = np.vstack(y_all)
+        if not np.isfinite(Y).all():
+            raise ValueError("NaNs or infs in residual targets")
+
+        self.ml_residual.fit(Xp, Y)
         return self
 
     # --------------------------------------------------
