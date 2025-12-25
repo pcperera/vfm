@@ -106,11 +106,11 @@ def get_random_train_test_split_per_well_with_order_preserved(
     raise RuntimeError("Could not satisfy split constraints")
 
 
-def get_all_wells() -> list[str]:
-    return  ["W10"]
-
 # def get_all_wells() -> list[str]:
-#     return  ["W06", "W08", "W10", "W11", "W15", "W18", "W19"]
+#     return  ["W10"]
+
+def get_all_wells() -> list[str]:
+    return  ["W06", "W08", "W10", "W11", "W15", "W18", "W19"]
 
 def get_depdendent_vars():
     return ["qo_mpfm", "qg_mpfm", "qw_mpfm"]
