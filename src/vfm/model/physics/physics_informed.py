@@ -16,7 +16,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 # =====================================================
 
 EPS = 1e-6
-METRICS = ["r2", "mae", "rmse"]
+METRICS = ["r2", "mae", "rmse", "mre (%)", "mpe (%)"]
 
 def compute_wgr(qw, qg, min_qg=50.0):
     wgr = np.full_like(qw, np.nan, dtype=float)
@@ -60,7 +60,8 @@ def regression_metrics(y_true, y_pred):
             "r2": np.nan,
             "mae": np.nan,
             "rmse": np.nan,
-            "mre": np.nan,
+            "mre (%)": np.nan,
+            "mpe (%)": np.nan
         }
 
     y_true = y_true[mask]
@@ -70,8 +71,15 @@ def regression_metrics(y_true, y_pred):
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     r2 = r2_score(y_true, y_pred)
     mre = np.mean(np.abs(y_true - y_pred) / np.maximum(np.abs(y_true), EPS)) * 100
+    # Mean Percentage Error (%): signed bias
+    mpe = (
+        np.mean(
+            (y_pred - y_true)
+            / np.maximum(np.abs(y_true), EPS)
+        ) * 100
+    )
 
-    return r2, mae, rmse, mre
+    return r2, mae, rmse, mre, mpe
 
 
 # =====================================================
@@ -861,7 +869,7 @@ class PhysicsInformedHybridModel:
 
                 plt.xlabel(time_col)
                 plt.ylabel("wgr (qw / qg)")
-                plt.title(f"{wid} : Water-Gas Ratio")
+                plt.title(f"{wid} : wgr")
 
                 plt.legend()
                 plt.grid(True, alpha=0.3)
@@ -903,8 +911,8 @@ class PhysicsInformedHybridModel:
                 )
 
                 plt.xlabel(time_col)
-                plt.ylabel("GOR (qg / qo)")
-                plt.title(f"{wid} : Gas-Oil Ratio")
+                plt.ylabel("gor (qg / qo)")
+                plt.title(f"{wid} : gor")
 
                 plt.legend()
                 plt.grid(True, alpha=0.3)
