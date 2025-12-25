@@ -16,7 +16,14 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 # =====================================================
 
 EPS = 1e-6
-METRICS = ["r2", "mae", "rmse", "mre (%)", "mpe (%)"]
+
+METRICS = [
+    "r2",
+    "mae",
+    "rmse",
+    "mape (%)",   # aka MARE
+    "mpe (%)",    # aka signed MRE / avg discrepancy
+]
 
 def compute_wgr(qw, qg, min_qg=50.0):
     wgr = np.full_like(qw, np.nan, dtype=float)
@@ -53,16 +60,14 @@ def regression_metrics(y_true, y_pred):
     y_true = np.asarray(y_true, dtype=float)
     y_pred = np.asarray(y_pred, dtype=float)
 
-    mask = np.isfinite(y_true) & np.isfinite(y_pred)
+    mask = (
+        np.isfinite(y_true)
+        & np.isfinite(y_pred)
+        & (np.abs(y_true) > EPS)
+    )
 
     if mask.sum() < 2:
-        return {
-            "r2": np.nan,
-            "mae": np.nan,
-            "rmse": np.nan,
-            "mre (%)": np.nan,
-            "mpe (%)": np.nan
-        }
+        return {m: np.nan for m in METRICS}
 
     y_true = y_true[mask]
     y_pred = y_pred[mask]
@@ -70,16 +75,11 @@ def regression_metrics(y_true, y_pred):
     mae = mean_absolute_error(y_true, y_pred)
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     r2 = r2_score(y_true, y_pred)
-    mre = np.mean(np.abs(y_true - y_pred) / np.maximum(np.abs(y_true), EPS)) * 100
-    # Mean Percentage Error (%): signed bias
-    mpe = (
-        np.mean(
-            (y_pred - y_true)
-            / np.maximum(np.abs(y_true), EPS)
-        ) * 100
-    )
 
-    return r2, mae, rmse, mre, mpe
+    mape = np.mean(np.abs(y_true - y_pred) / np.abs(y_true)) * 100
+    mpe  = np.mean((y_pred - y_true) / y_true) * 100
+
+    return r2, mae, rmse, mape, mpe
 
 
 # =====================================================
