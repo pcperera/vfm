@@ -9,6 +9,7 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.multioutput import MultiOutputRegressor
+from sklearn.ensemble import HistGradientBoostingRegressor
 
 # =====================================================
 # Constants & helpers
@@ -142,7 +143,7 @@ class PhysicsModel:
         qL_mean = max(qL_mean, EPS)
 
         # --------------------------------------------------
-        # 3. Robust initial guess + bounds (KEY FIX)
+        # 3. Robust initial guess + bounds
         # --------------------------------------------------
         n_wc = 8
 
@@ -250,12 +251,14 @@ class PhysicsInformedHybridModel:
         self.poly = PolynomialFeatures(degree, include_bias=False)
 
         self.ml_residual = MultiOutputRegressor(
-            GradientBoostingRegressor(
-                n_estimators=100,        # ↓ drastically
-                max_depth=2,             # ↓ shallow trees
-                min_samples_leaf=30,     # ↑ strong smoothing
+            HistGradientBoostingRegressor(
+                max_iter=300,
                 learning_rate=0.05,
-                subsample=0.7,
+                max_depth=3,
+                min_samples_leaf=20,
+                early_stopping=True,
+                n_iter_no_change=30,
+                validation_fraction=None,  # we supply validation explicitly
                 random_state=42,
             )
         )
@@ -264,74 +267,132 @@ class PhysicsInformedHybridModel:
     # --------------------------------------------------
     # Lag features
     # --------------------------------------------------
-    def _create_lagged_features(self, df, drop_na=True):
+    def _create_lagged_features(self, df):
         df_lag = df.copy()
+
         for lag in range(1, self.lags + 1):
             for col in ["dhp", "whp"]:
                 df_lag[f"{col}_lag{lag}"] = (
                     df_lag.groupby(self.well_id_col)[col].shift(lag)
                 )
-        return df_lag.dropna() if drop_na else df_lag
+
+        # IMPORTANT: DO NOT drop NaNs here
+        return df_lag
+
 
     # --------------------------------------------------
     # Fit
     # --------------------------------------------------
-    def fit(self, df,
-            y_qo_col="qo_mpfm",
-            y_qg_col="qg_mpfm",
-            y_qw_col="qw_mpfm"):
+    def fit(
+        self,
+        df,
+        df_val=None,
+        y_qo_col="qo_mpfm",
+        y_qg_col="qg_mpfm",
+        y_qw_col="qw_mpfm",
+    ):
+        """
+        Fit physics models per well and a global ML residual model.
+        """
 
-        # ---- Physics per well
+        # --------------------------------------------------
+        # 1. Fit physics models per well (TRAIN ONLY)
+        # --------------------------------------------------
         self.phys_models = {}
+
         for wid, d in df.groupby(self.well_id_col):
             self.phys_models[wid] = PhysicsModel().fit(
                 d, y_qo_col, y_qg_col, y_qw_col
             )
 
-        # ---- Residual ML
-        df_lag = self._create_lagged_features(df)
+        # --------------------------------------------------
+        # 2. Helper to build ML residual dataset
+        # --------------------------------------------------
+        def _build_residual_dataset(df_in):
+            df_lag = self._create_lagged_features(df_in)
 
-        X_all, y_all = [], []
+            X_all, y_all = [], []
 
-        required_cols = (
-            self.independent_vars +
-            [y_qo_col, y_qw_col, y_qg_col]
-        )
-
-        for wid, d in df_lag.groupby(self.well_id_col):
-
-            # Critical fix: drop unsafe rows
-            d = d.dropna(subset=required_cols)
-            if len(d) < 10:
-                continue
-
-            phys = self.phys_models[wid].predict(d)
-
-            X = np.column_stack([
-                d[self.independent_vars].values,
-                phys[["qo_pred", "qw_pred", "qg_pred"]].values,
-            ])
-
-            y_true = np.maximum(
-                d[[y_qo_col, y_qw_col, y_qg_col]].values, EPS
+            # Every column used in X MUST be finite
+            model_input_cols = (
+                self.independent_vars +
+                [y_qo_col, y_qw_col, y_qg_col]
             )
-            y_phys = np.maximum(phys.values, EPS)
 
-            y_res = np.log1p(y_true) - np.log1p(y_phys)
+            # Minimum rows needed AFTER lagging
+            min_rows = max(5, self.lags + 3)
 
-            mask = np.isfinite(y_res).all(axis=1)
-            X_all.append(X[mask])
-            y_all.append(y_res[mask])
+            for wid, d in df_lag.groupby(self.well_id_col):
 
-        Xs = self.scaler.fit_transform(np.vstack(X_all))
-        Xp = self.poly.fit_transform(Xs)
+                if wid not in self.phys_models:
+                    continue
 
-        Y = np.vstack(y_all)
-        if not np.isfinite(Y).all():
-            raise ValueError("NaNs or infs in residual targets")
+                # 🔑 CRITICAL FIX: drop NaNs for ALL used columns
+                d = d.dropna(subset=model_input_cols)
 
-        self.ml_residual.fit(Xp, Y)
+                if len(d) < min_rows:
+                    # Optional debug (leave enabled until stable)
+                    print(f"[SKIP] Well {wid}: only {len(d)} usable rows")
+                    continue
+
+                phys = self.phys_models[wid].predict(d)
+
+                X = np.column_stack([
+                    d[self.independent_vars].values,
+                    phys[["qo_pred", "qw_pred", "qg_pred"]].values,
+                ])
+
+                y_true = np.maximum(
+                    d[[y_qo_col, y_qw_col, y_qg_col]].values, EPS
+                )
+                y_phys = np.maximum(phys.values, EPS)
+
+                y_res = np.log1p(y_true) - np.log1p(y_phys)
+
+                mask = np.isfinite(y_res).all(axis=1)
+                if mask.any():
+                    X_all.append(X[mask])
+                    y_all.append(y_res[mask])
+
+            if not X_all:
+                raise ValueError(
+                    "No valid residual training data found "
+                    "(check lag count, split size, or NaNs)"
+                )
+
+            return np.vstack(X_all), np.vstack(y_all)
+
+
+        # --------------------------------------------------
+        # 3. Build TRAIN residual dataset
+        # --------------------------------------------------
+        X_train, Y_train = _build_residual_dataset(df)
+
+        Xs_train = self.scaler.fit_transform(X_train)
+        Xp_train = self.poly.fit_transform(Xs_train)
+
+        if not np.isfinite(Y_train).all():
+            raise ValueError("NaNs or infs in training residual targets")
+
+        # --------------------------------------------------
+        # 4. Fit ML residual model (TRAIN ONLY)
+        # --------------------------------------------------
+        self.ml_residual.fit(Xp_train, Y_train)
+
+        # --------------------------------------------------
+        # 5. (Optional) Validation dataset — diagnostics only
+        # --------------------------------------------------
+        if df_val is not None:
+            X_val, Y_val = _build_residual_dataset(df_val)
+            Xs_val = self.scaler.transform(X_val)
+            Xp_val = self.poly.transform(Xs_val)
+
+            Y_val_pred = self.ml_residual.predict(Xp_val)
+            rmse_val = np.sqrt(mean_squared_error(Y_val, Y_val_pred))
+            print(f"[Validation] Residual RMSE = {rmse_val:.4f}")
+
         return self
+
 
 
     def predict_physics(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -451,7 +512,7 @@ class PhysicsInformedHybridModel:
     # --------------------------------------------------
     # Physics-only score
     # --------------------------------------------------
-    def physics_score(self, df,
+    def score_physics(self, df,
                       y_qo_col="qo_mpfm",
                       y_qg_col="qg_mpfm",
                       y_qw_col="qw_mpfm"):
@@ -474,47 +535,58 @@ class PhysicsInformedHybridModel:
         return results
 
     # --------------------------------------------------
-    # Hybrid score 
+    # Hybrid score (per well)
     # --------------------------------------------------
-    def hybrid_score(
+    def score_hybrid(
         self,
         df,
         y_qo_col="qo_mpfm",
         y_qg_col="qg_mpfm",
         y_qw_col="qw_mpfm",
     ):
-        # IMPORTANT: use lagged dataframe
+        results = {}
+
+        # IMPORTANT: create lagged features once
         df_lag = self._create_lagged_features(df)
+
+        # Predict once (hybrid model is global)
         pred = self.predict_hybrid(df)
 
-        # Water–gas ratio (safe)
-        y_wgr = compute_wgr(
-            df_lag[y_qw_col].values,
-            df_lag[y_qg_col].values
-        )
-        p_wgr = compute_wgr(
-            pred["qw_pred"].values,
-            pred["qg_pred"].values
-        )
+        # Attach predictions to dataframe
+        df_pred = df_lag.copy()
+        for col in pred.columns:
+            df_pred[col] = pred[col].values
 
-        return {
-            "qo": dict(zip(
-                METRICS,
-                regression_metrics(df_lag[y_qo_col], pred["qo_pred"])
-            )),
-            "qw": dict(zip(
-                METRICS,
-                regression_metrics(df_lag[y_qw_col], pred["qw_pred"])
-            )),
-            "qg": dict(zip(
-                METRICS,
-                regression_metrics(df_lag[y_qg_col], pred["qg_pred"])
-            )),
-            "wgr": dict(zip(
-                METRICS,
-                regression_metrics(y_wgr, p_wgr)
-            )),
-        }
+        for wid, d in df_pred.groupby(self.well_id_col):
+            y_wgr = compute_wgr(
+                d[y_qw_col].values,
+                d[y_qg_col].values
+            )
+            p_wgr = compute_wgr(
+                d["qw_pred"].values,
+                d["qg_pred"].values
+            )
+
+            results[wid] = {
+                "qo": dict(zip(
+                    METRICS,
+                    regression_metrics(d[y_qo_col], d["qo_pred"])
+                )),
+                "qw": dict(zip(
+                    METRICS,
+                    regression_metrics(d[y_qw_col], d["qw_pred"])
+                )),
+                "qg": dict(zip(
+                    METRICS,
+                    regression_metrics(d[y_qg_col], d["qg_pred"])
+                )),
+                "wgr": dict(zip(
+                    METRICS,
+                    regression_metrics(y_wgr, p_wgr)
+                )),
+            }
+
+        return results
 
 
     # --------------------------------------------------
@@ -525,7 +597,7 @@ class PhysicsInformedHybridModel:
         if not mask.any():
             return df
 
-        pred = self.predict(df.loc[mask])
+        pred = self.predict_hybrid(df.loc[mask])
         for col in self.dependant_vars:
             df.loc[mask, col] = pred[f"{col.split('_')[0]}_pred"].values
         return df

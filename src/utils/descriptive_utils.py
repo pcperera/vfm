@@ -65,28 +65,54 @@ def get_train_test_split_per_well(
     return df_train, df_test
 
 def get_random_train_test_split_per_well_with_order_preserved(
-    df: pd.DataFrame,
-    test_size: float = 0.2,
-    random_state: int | None = None,
+    df,
+    well_id_col="well_id",
+    test_size=0.2,
+    val_size=0.1,
+    min_train=20,
+    min_val=5,
+    min_test=5,
+    random_state=None,
+    max_tries=50,
 ):
-    """
-    Random row-wise split.
-    Time order is preserved *within* train and test.
-    """
-
     rng = np.random.default_rng(random_state)
 
-    n = len(df)
-    test_mask = rng.random(n) < test_size
+    for _ in range(max_tries):
+        train, val, test = [], [], []
 
-    df_train = df.loc[~test_mask].sort_index()
-    df_test = df.loc[test_mask].sort_index()
+        for _, d in df.groupby(well_id_col):
+            r = rng.random(len(d))
+            test_mask = r < test_size
+            val_mask = (r >= test_size) & (r < test_size + val_size)
+            train_mask = r >= test_size + val_size
 
-    return df_train, df_test
+            if (
+                train_mask.sum() < min_train or
+                val_mask.sum() < min_val or
+                test_mask.sum() < min_test
+            ):
+                break
+
+            train.append(d.loc[train_mask])
+            val.append(d.loc[val_mask])
+            test.append(d.loc[test_mask])
+        else:
+            return (
+                pd.concat(train).sort_index(),
+                pd.concat(val).sort_index(),
+                pd.concat(test).sort_index(),
+            )
+
+    raise RuntimeError("Could not satisfy split constraints")
 
 
 def get_all_wells() -> list[str]:
-    return  ["W06", "W08", "W10", "W11", "W15", "W18", "W19"]
+    return  ["W06"]
+
+
+# def get_all_wells() -> list[str]:
+#     return  ["W06", "W08", "W10", "W11", "W15", "W18", "W19"]
+
 
 def get_depdendent_vars():
     return ["qo_mpfm", "qg_mpfm", "qw_mpfm"]
