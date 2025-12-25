@@ -107,8 +107,7 @@ def get_random_train_test_split_per_well_with_order_preserved(
 
 
 def get_all_wells() -> list[str]:
-    return  ["W06"]
-
+    return  ["W06", "W08"]
 
 # def get_all_wells() -> list[str]:
 #     return  ["W06", "W08", "W10", "W11", "W15", "W18", "W19"]
@@ -119,3 +118,19 @@ def get_depdendent_vars():
 
 def get_independent_vars():
     return ["well_code", "dhp", "dht", "whp", "wht", "choke", "dcp"]
+
+def get_independent_tp_vars():
+    return ["dhp", "dht", "whp", "wht", "dcp"]
+
+def get_independent_vars_with_no_well_code():
+    vars = get_independent_vars()
+    vars.remove("well_code")
+    return vars
+
+def get_all_vars():
+    all_vars = []
+    all_vars.extend(get_depdendent_vars())
+    all_vars.extend(get_independent_vars())
+    all_vars.append("well_id")
+
+    return all_vars

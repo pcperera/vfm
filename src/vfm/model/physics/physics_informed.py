@@ -36,11 +36,29 @@ def logistic(x):
     return 1 / (1 + np.exp(-x))
 
 def regression_metrics(y_true, y_pred):
+    y_true = np.asarray(y_true, dtype=float)
+    y_pred = np.asarray(y_pred, dtype=float)
+
+    mask = np.isfinite(y_true) & np.isfinite(y_pred)
+
+    if mask.sum() < 2:
+        return {
+            "r2": np.nan,
+            "mae": np.nan,
+            "rmse": np.nan,
+            "mre": np.nan,
+        }
+
+    y_true = y_true[mask]
+    y_pred = y_pred[mask]
+
     mae = mean_absolute_error(y_true, y_pred)
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     r2 = r2_score(y_true, y_pred)
     mre = np.mean(np.abs(y_true - y_pred) / np.maximum(np.abs(y_true), EPS)) * 100
+
     return r2, mae, rmse, mre
+
 
 # =====================================================
 # Physics Model

@@ -9,11 +9,10 @@ class Preprocessor:
 
     def __init__(self):
         self._resample_period_min = 1
-        self._independent_tp_vars = ["dhp", "dht", "whp", "wht", "dcp"]
-        self._independent_vars = self._independent_tp_vars.copy()
-        self._independent_vars.append("choke")
+        self._independent_tp_vars = get_independent_tp_vars()
+        self._independent_vars = get_independent_vars_with_no_well_code()
 
-    def preprocess_well(self, df: pd.DataFrame, resample: bool = True) -> pd.DataFrame:
+    def preprocess_well(self, df: pd.DataFrame) -> pd.DataFrame:
         well_ids = df["well_id"].unique()
         assert len(well_ids) == 1, "DataFrame contains multiple well IDs."
         well_id = well_ids[0]
@@ -28,51 +27,58 @@ class Preprocessor:
         df = df[df["wht"] != 0]
         df = df[df["choke"] != 0]
 
-        if resample:
-            df = df.resample(f"{self._resample_period_min}T").agg({
-                "whp": RESAMPLE_MEAN,
-                "wht": RESAMPLE_MEAN,
-                "dhp": RESAMPLE_MEAN,
-                "dht": RESAMPLE_MEAN,
-                "choke": RESAMPLE_MEAN,
-                "dcp": RESAMPLE_MEAN,
-                "qo_well_test": RESAMPLE_MEAN,
-                "qg_well_test": RESAMPLE_MEAN,
-                "qw_well_test": RESAMPLE_MEAN,
-                "qo_mpfm": RESAMPLE_MEAN,
-                "qg_mpfm": RESAMPLE_MEAN,
-                "wc_mpfm": RESAMPLE_MEAN,
-            })
-
         df["well_id"] = well_id
+        df["well_code"] = (
+            df["well_id"]
+                .astype("category")
+                .cat.codes
+                .astype(float)   # ML-friendly
+            ) 
 
         # Convert choke to fraction
         df["choke"] /= 100
-
-        if resample:
-            df[self._independent_tp_vars] = df[self._independent_tp_vars].interpolate(
-                method="time",
-                limit_direction="both" # Fill start & end gaps
-            )
 
         # Calculate MPFM flow rates from GOR and WC
         df["gor_mpfm"] = df["qg_mpfm"] / df["qo_mpfm"]
         df["qw_mpfm"] = (df["wc_mpfm"] * df["qo_mpfm"]) / (1 - df["wc_mpfm"])
 
-        # Training data (based on well test)
-        all_vars = self._independent_vars.copy()
-        all_vars.extend(["well_id"])
-        all_vars.extend(get_depdendent_vars())
+        df.dropna(subset=get_all_vars(), inplace=True)
         
-        df = df[all_vars]
-
-        if resample:
-            df['choke'] = df['choke'].ffill()
-            df[self._independent_tp_vars] = df[self._independent_tp_vars].interpolate(method="time", limit_direction="forward")
-            df = df.dropna(subset=self._independent_vars)
-
-        df = df[(df["qo_mpfm"] > 0) & (df["qw_mpfm"] >= 0)]
+        df = df[get_all_vars()]
+        # df = df[(df["qo_mpfm"] > 0) & (df["qw_mpfm"] >= 0)]
         
+        return df    
+
+    def resample_well(self, df: pd.DataFrame) -> pd.DataFrame:
+        well_ids = df["well_id"].unique()
+        assert len(well_ids) == 1, "DataFrame contains multiple well IDs."
+        well_id = well_ids[0]
+
+        # Data transformation
+        df.sort_index(inplace=True)  # Ensure chronological order
+
+        df = df.resample(f"{self._resample_period_min}T").agg({
+            "whp": RESAMPLE_MEAN,
+            "wht": RESAMPLE_MEAN,
+            "dhp": RESAMPLE_MEAN,
+            "dht": RESAMPLE_MEAN,
+            "choke": RESAMPLE_MEAN,
+            "dcp": RESAMPLE_MEAN,
+            "qo_well_test": RESAMPLE_MEAN,
+            "qg_well_test": RESAMPLE_MEAN,
+            "qw_well_test": RESAMPLE_MEAN,
+            "qo_mpfm": RESAMPLE_MEAN,
+            "qg_mpfm": RESAMPLE_MEAN,
+            "wc_mpfm": RESAMPLE_MEAN,
+        })
+
+        df[self._independent_tp_vars] = df[self._independent_tp_vars].interpolate(
+            method="time",
+            limit_direction="both" # Fill start & end gaps
+        )
+
+        df['choke'] = df['choke'].ffill()
+        df[self._independent_tp_vars] = df[self._independent_tp_vars].interpolate(method="time", limit_direction="forward")
         return df
 
     def preprocess_timeseries(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -92,12 +98,5 @@ class Preprocessor:
             dfs.append(df_well)
 
         df = pd.concat(dfs, ignore_index=False)
-
-        df["well_code"] = (
-            df["well_id"]
-                .astype("category")
-                .cat.codes
-                .astype(float)   # ML-friendly
-            ) 
 
         return df   
