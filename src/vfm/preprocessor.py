@@ -28,31 +28,27 @@ class Preprocessor:
         df = df[df["choke"] != 0]
 
         df["well_id"] = well_id
-        df["well_code"] = (
-            df["well_id"]
-                .astype("category")
-                .cat.codes
-                .astype(float)   # ML-friendly
-            ) 
+        df["well_code"] = well_id
 
         # Convert choke to fraction
         df["choke"] /= 100
 
         # Calculate MPFM flow rates from GOR and WC
         df["gor_mpfm"] = df["qg_mpfm"] / df["qo_mpfm"]
-        df["qw_mpfm"] = (df["wc_mpfm"] * df["qo_mpfm"]) / (1 - df["wc_mpfm"])
+        df["wc_mpfm_ratio"] = df["wc_mpfm"] / 100
+        df["qw_mpfm"] = (df["wc_mpfm_ratio"] * df["qo_mpfm"]) / (1 - df["wc_mpfm_ratio"])
 
-        df.dropna(subset=get_all_vars(), inplace=True)
-        
+        df.dropna(subset=get_depdendent_vars(), inplace=True)
+        df.dropna(subset=get_independent_vars_with_no_well_code(), inplace=True)
+
         df = df[get_all_vars()]
-        # df = df[(df["qo_mpfm"] > 0) & (df["qw_mpfm"] >= 0)]
+        df = df[(df["qo_mpfm"] >= 0) & (df["qw_mpfm"] >= 0)]
         
         return df    
 
     def resample_well(self, df: pd.DataFrame) -> pd.DataFrame:
         well_ids = df["well_id"].unique()
         assert len(well_ids) == 1, "DataFrame contains multiple well IDs."
-        well_id = well_ids[0]
 
         # Data transformation
         df.sort_index(inplace=True)  # Ensure chronological order
@@ -98,5 +94,11 @@ class Preprocessor:
             dfs.append(df_well)
 
         df = pd.concat(dfs, ignore_index=False)
+        df["well_code"] = (
+            df["well_id"]
+                .astype("category")
+                .cat.codes
+                .astype(float)   # ML-friendly
+            )
 
         return df   
