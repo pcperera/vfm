@@ -31,6 +31,20 @@ def compute_wgr(qw, qg, min_qg=50.0):
     wgr[mask] = qw[mask] / qg[mask]
     return wgr
 
+def compute_gor(qg, qo, min_qo=5.0):
+    gor = np.full_like(qg, np.nan, dtype=float)
+
+    mask = (
+        (qo > min_qo) &
+        ~np.isnan(qg) &
+        ~np.isnan(qo) &
+        (qo != 0)
+    )
+
+    gor[mask] = qg[mask] / qo[mask]
+    return gor
+
+
 def logistic(x):
     x = np.clip(x, -50, 50)
     return 1 / (1 + np.exp(-x))
@@ -482,9 +496,23 @@ class PhysicsInformedHybridModel:
             res = self.ml_residual.predict(Xp)
 
             # -------------------------------
-            # Oil: physics only (frozen)
+            # Oil: gated ML correction
             # -------------------------------
-            qo = np.maximum(phys["qo_pred"].values, 0.0)
+            qo_phys = np.maximum(phys["qo_pred"].values, EPS)
+            qo = qo_phys.copy()
+
+            # Example gate 1: high water cut
+            wc = phys["qw_pred"].values / np.maximum(qo_phys + phys["qw_pred"].values, EPS)
+            oil_gate = wc > 0.3   # tune threshold
+
+            # Example gate 2: large residual magnitude
+            oil_gate |= np.abs(res[:, 0]) > 0.15  # log-space threshold
+
+            qo[oil_gate] = np.expm1(
+                np.log1p(qo_phys[oil_gate]) + res[oil_gate, 0]
+            )
+
+            qo = np.maximum(qo, 0.0)
 
             # -------------------------------
             # Gas: physics + ML residual
@@ -530,27 +558,79 @@ class PhysicsInformedHybridModel:
     # --------------------------------------------------
     # Physics-only score
     # --------------------------------------------------
-    def score_physics(self, df,
-                      y_qo_col="qo_mpfm",
-                      y_qg_col="qg_mpfm",
-                      y_qw_col="qw_mpfm"):
-
+    def score_physics(
+        self,
+        df,
+        y_qo_col="qo_mpfm",
+        y_qg_col="qg_mpfm",
+        y_qw_col="qw_mpfm",
+    ):
         results = {}
 
         for wid, d in df.groupby(self.well_id_col):
             p = self.phys_models[wid].predict(d)
 
-            y_wgr = compute_wgr(d[y_qw_col].values, d[y_qg_col].values)
-            p_wgr = compute_wgr(p["qw_pred"].values, p["qg_pred"].values)
+            # -----------------------------
+            # WGR
+            # -----------------------------
+            y_wgr = compute_wgr(
+                d[y_qw_col].values,
+                d[y_qg_col].values
+            )
+            p_wgr = compute_wgr(
+                p["qw_pred"].values,
+                p["qg_pred"].values
+            )
+
+            mask_wgr = np.isfinite(y_wgr) & np.isfinite(p_wgr)
+
+            # -----------------------------
+            # GOR
+            # -----------------------------
+            y_gor = compute_gor(
+                d[y_qg_col].values,
+                d[y_qo_col].values
+            )
+            p_gor = compute_gor(
+                p["qg_pred"].values,
+                p["qo_pred"].values
+            )
+
+            mask_gor = np.isfinite(y_gor) & np.isfinite(p_gor)
 
             results[wid] = {
-                "qo": dict(zip(METRICS, regression_metrics(d[y_qo_col], p["qo_pred"]))),
-                "qw": dict(zip(METRICS, regression_metrics(d[y_qw_col], p["qw_pred"]))),
-                "qg": dict(zip(METRICS, regression_metrics(d[y_qg_col], p["qg_pred"]))),
-                "wgr": dict(zip(METRICS, regression_metrics(y_wgr, p_wgr))),
+                "qo": dict(zip(
+                    METRICS,
+                    regression_metrics(d[y_qo_col], p["qo_pred"])
+                )),
+                "qw": dict(zip(
+                    METRICS,
+                    regression_metrics(d[y_qw_col], p["qw_pred"])
+                )),
+                "qg": dict(zip(
+                    METRICS,
+                    regression_metrics(d[y_qg_col], p["qg_pred"])
+                )),
+                "wgr": (
+                    dict(zip(
+                        METRICS,
+                        regression_metrics(y_wgr[mask_wgr], p_wgr[mask_wgr])
+                    ))
+                    if mask_wgr.sum() >= 2
+                    else {m: np.nan for m in METRICS}
+                ),
+                "gor": (
+                    dict(zip(
+                        METRICS,
+                        regression_metrics(y_gor[mask_gor], p_gor[mask_gor])
+                    ))
+                    if mask_gor.sum() >= 2
+                    else {m: np.nan for m in METRICS}
+                ),
             }
 
         return results
+
 
     # --------------------------------------------------
     # Hybrid score (per well)
@@ -576,6 +656,10 @@ class PhysicsInformedHybridModel:
             df_pred[col] = pred[col].values
 
         for wid, d in df_pred.groupby(self.well_id_col):
+
+            # -----------------------------
+            # WGR
+            # -----------------------------
             y_wgr = compute_wgr(
                 d[y_qw_col].values,
                 d[y_qg_col].values
@@ -584,6 +668,22 @@ class PhysicsInformedHybridModel:
                 d["qw_pred"].values,
                 d["qg_pred"].values
             )
+
+            mask_wgr = np.isfinite(y_wgr) & np.isfinite(p_wgr)
+
+            # -----------------------------
+            # GOR
+            # -----------------------------
+            y_gor = compute_gor(
+                d[y_qg_col].values,
+                d[y_qo_col].values
+            )
+            p_gor = compute_gor(
+                d["qg_pred"].values,
+                d["qo_pred"].values
+            )
+
+            mask_gor = np.isfinite(y_gor) & np.isfinite(p_gor)
 
             results[wid] = {
                 "qo": dict(zip(
@@ -598,10 +698,22 @@ class PhysicsInformedHybridModel:
                     METRICS,
                     regression_metrics(d[y_qg_col], d["qg_pred"])
                 )),
-                "wgr": dict(zip(
-                    METRICS,
-                    regression_metrics(y_wgr, p_wgr)
-                )),
+                "wgr": (
+                    dict(zip(
+                        METRICS,
+                        regression_metrics(y_wgr[mask_wgr], p_wgr[mask_wgr])
+                    ))
+                    if mask_wgr.sum() >= 2
+                    else {m: np.nan for m in METRICS}
+                ),
+                "gor": (
+                    dict(zip(
+                        METRICS,
+                        regression_metrics(y_gor[mask_gor], p_gor[mask_gor])
+                    ))
+                    if mask_gor.sum() >= 2
+                    else {m: np.nan for m in METRICS}
+                ),
             }
 
         return results
@@ -654,12 +766,16 @@ class PhysicsInformedHybridModel:
         for wid in df[self.well_id_col].unique():
             d = df[df[self.well_id_col] == wid]
 
-            # IMPORTANT: lagged data for alignment
+            # --------------------------------------------------
+            # Lagged data for alignment
+            # --------------------------------------------------
             d_lag = self._create_lagged_features(d)
             if d_lag.empty:
                 continue
 
-            # Predict
+            # --------------------------------------------------
+            # Predictions
+            # --------------------------------------------------
             p = (
                 self.predict_hybrid(d)
                 if is_hybrid_model
@@ -669,6 +785,9 @@ class PhysicsInformedHybridModel:
             # X-axis
             x = d_lag[time_col].values if time_col else np.arange(len(d_lag))
 
+            # --------------------------------------------------
+            # Rate plots: qo, qw, qg
+            # --------------------------------------------------
             plot_map = {
                 "qo_pred": y_qo_col,
                 "qw_pred": y_qw_col,
@@ -678,32 +797,114 @@ class PhysicsInformedHybridModel:
             for pred_col, ycol in plot_map.items():
                 plt.figure(figsize=(10, 4))
 
-                # Actual values (line + markers)
                 plt.plot(
                     x,
                     d_lag[ycol].values,
                     label="MPFM (Actual)",
-                    # linestyle="--",
                     linewidth=2,
                     marker="o",
                     markersize=4,
                 )
 
-                # Predicted values (line + markers)
                 plt.plot(
                     x,
                     p[pred_col].values,
                     label="Predicted",
-                    # linestyle="--",
                     linewidth=2,
                     marker="o",
                     markersize=4,
                 )
 
                 plt.xlabel(time_col)
-                rate_column = pred_col.replace("_pred", "")
-                plt.ylabel(f"{rate_column} (Sm$^3$/h)")
-                plt.title(f"{wid} : {rate_column}")
+                rate_name = pred_col.replace("_pred", "")
+                plt.ylabel(f"{rate_name} (Sm$^3$/h)")
+                plt.title(f"{wid} : {rate_name}")
+
+                plt.legend()
+                plt.grid(True, alpha=0.3)
+                plt.tight_layout()
+                plt.show()
+
+            # --------------------------------------------------
+            # WGR plot (qw / qg)
+            # --------------------------------------------------
+            y_wgr = compute_wgr(
+                d_lag[y_qw_col].values,
+                d_lag[y_qg_col].values,
+            )
+            p_wgr = compute_wgr(
+                p["qw_pred"].values,
+                p["qg_pred"].values,
+            )
+
+            mask = np.isfinite(y_wgr) & np.isfinite(p_wgr)
+            if mask.sum() >= 2:
+                plt.figure(figsize=(10, 4))
+
+                plt.plot(
+                    x[mask],
+                    y_wgr[mask],
+                    label="WGR (Actual)",
+                    linewidth=2,
+                    marker="o",
+                    markersize=4,
+                )
+
+                plt.plot(
+                    x[mask],
+                    p_wgr[mask],
+                    label="WGR (Predicted)",
+                    linewidth=2,
+                    marker="o",
+                    markersize=4,
+                )
+
+                plt.xlabel(time_col)
+                plt.ylabel("wgr (qw / qg)")
+                plt.title(f"{wid} : Water-Gas Ratio")
+
+                plt.legend()
+                plt.grid(True, alpha=0.3)
+                plt.tight_layout()
+                plt.show()
+
+            # --------------------------------------------------
+            # GOR plot (qg / qo)
+            # --------------------------------------------------
+            y_gor = compute_gor(
+                d_lag[y_qg_col].values,
+                d_lag[y_qo_col].values,
+            )
+            p_gor = compute_gor(
+                p["qg_pred"].values,
+                p["qo_pred"].values,
+            )
+
+            mask = np.isfinite(y_gor) & np.isfinite(p_gor)
+            if mask.sum() >= 2:
+                plt.figure(figsize=(10, 4))
+
+                plt.plot(
+                    x[mask],
+                    y_gor[mask],
+                    label="gor (Actual)",
+                    linewidth=2,
+                    marker="o",
+                    markersize=4,
+                )
+
+                plt.plot(
+                    x[mask],
+                    p_gor[mask],
+                    label="GOR (Predicted)",
+                    linewidth=2,
+                    marker="o",
+                    markersize=4,
+                )
+
+                plt.xlabel(time_col)
+                plt.ylabel("GOR (qg / qo)")
+                plt.title(f"{wid} : Gas-Oil Ratio")
 
                 plt.legend()
                 plt.grid(True, alpha=0.3)
