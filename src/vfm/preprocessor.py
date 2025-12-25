@@ -8,7 +8,7 @@ C_TO_K_OFFSET = 273.15
 class Preprocessor:
 
     def __init__(self):
-        self._resample_period_min = 5
+        self._resample_period_min = 1
         self._independent_tp_vars = ["dhp", "dht", "whp", "wht", "dcp"]
         self._independent_vars = self._independent_tp_vars.copy()
         self._independent_vars.append("choke")
@@ -71,7 +71,7 @@ class Preprocessor:
             df[self._independent_tp_vars] = df[self._independent_tp_vars].interpolate(method="time", limit_direction="forward")
             df = df.dropna(subset=self._independent_vars)
 
-        df = df[df["qo_mpfm"] > 0]
+        df = df[(df["qo_mpfm"] > 0) & (df["qw_mpfm"] >= 0)]
         
         return df
 

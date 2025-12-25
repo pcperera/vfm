@@ -15,7 +15,7 @@ from sklearn.multioutput import MultiOutputRegressor
 # =====================================================
 
 EPS = 1e-6
-METRICS = ["r2", "mae", "rmse", "mre"]
+METRICS = ["r2", "mae", "rmse"]
 
 def compute_wgr(qw, qg, min_qg=50.0):
     wgr = np.full_like(qw, np.nan, dtype=float)
@@ -333,38 +333,7 @@ class PhysicsInformedHybridModel:
         self.ml_residual.fit(Xp, Y)
         return self
 
-    # --------------------------------------------------
-    # Predict
-    # --------------------------------------------------
-    def predict(self, df):
-        df_lag = self._create_lagged_features(df)
-        outputs = []
 
-        for wid, d in df_lag.groupby(self.well_id_col):
-            phys = self.phys_models[wid].predict(d)
-
-            X = np.column_stack([
-                d[self.independent_vars].values,
-                phys.values,
-            ])
-
-            Xp = self.poly.transform(self.scaler.transform(X))
-            res = self.ml_residual.predict(Xp)
-
-            y_hat = np.expm1(np.log1p(np.maximum(phys.values, EPS)) + res)
-
-            qL = phys["qo_pred"].values + phys["qw_pred"].values
-            qw = np.clip(y_hat[:,1], 0, qL)
-            qo = np.maximum(0.0, qL - qw)
-            qg = y_hat[:,2]
-
-            outputs.append(pd.DataFrame(
-                {"qo_pred": qo, "qw_pred": qw, "qg_pred": qg},
-                index=d.index
-            ))
-
-        return pd.concat(outputs).sort_index()
-    
     def predict_physics(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Physics-only prediction (no ML, no lagging).
@@ -394,6 +363,90 @@ class PhysicsInformedHybridModel:
 
         return pd.concat(outputs).sort_index()
 
+
+    # --------------------------------------------------
+    # Predict from hybrid model
+    # --------------------------------------------------
+    def predict_hybrid(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Hybrid prediction with:
+        - Oil frozen to physics
+        - Water residual learning with regime gating
+        - Gas residual learning always on
+        """
+
+        # Threshold below which we consider the well "dry"
+        WATER_GATE_THRESHOLD = 2.0  # Sm3/h (tune if needed)
+
+        df_lag = self._create_lagged_features(df)
+        outputs = []
+
+        for wid, d in df_lag.groupby(self.well_id_col, sort=False):
+
+            if wid not in self.phys_models:
+                raise KeyError(f"No physics model found for well '{wid}'")
+
+            # -------------------------------
+            # Physics prediction
+            # -------------------------------
+            phys = self.phys_models[wid].predict(d)
+
+            # -------------------------------
+            # ML features
+            # -------------------------------
+            X = np.column_stack([
+                d[self.independent_vars].values,
+                phys[["qo_pred", "qw_pred", "qg_pred"]].values,
+            ])
+
+            Xp = self.poly.transform(self.scaler.transform(X))
+            res = self.ml_residual.predict(Xp)
+
+            # -------------------------------
+            # Oil: physics only (frozen)
+            # -------------------------------
+            qo = np.maximum(phys["qo_pred"].values, 0.0)
+
+            # -------------------------------
+            # Gas: physics + ML residual
+            # -------------------------------
+            qg = np.expm1(
+                np.log1p(np.maximum(phys["qg_pred"].values, EPS)) + res[:, 2]
+            )
+            qg = np.maximum(qg, 0.0)
+
+            # -------------------------------
+            # Water: regime-gated ML
+            # -------------------------------
+            qw_phys = np.maximum(phys["qw_pred"].values, 0.0)
+            qw = np.zeros_like(qw_phys)
+
+            # Only allow ML correction when water is already flowing
+            mask = qw_phys > WATER_GATE_THRESHOLD
+
+            qw[mask] = np.expm1(
+                np.log1p(qw_phys[mask]) + res[mask, 1]
+            )
+
+            qw = np.maximum(qw, 0.0)
+
+            # -------------------------------
+            # Liquid consistency
+            # -------------------------------
+            qL = qo + qw
+            qw = np.clip(qw, 0.0, qL)
+            qo = np.maximum(0.0, qL - qw)
+
+            outputs.append(pd.DataFrame(
+                {
+                    "qo_pred": qo,
+                    "qw_pred": qw,
+                    "qg_pred": qg,
+                },
+                index=d.index,
+            ))
+
+        return pd.concat(outputs).sort_index()
 
     # --------------------------------------------------
     # Physics-only score
@@ -432,7 +485,7 @@ class PhysicsInformedHybridModel:
     ):
         # IMPORTANT: use lagged dataframe
         df_lag = self._create_lagged_features(df)
-        pred = self.predict(df)
+        pred = self.predict_hybrid(df)
 
         # Water–gas ratio (safe)
         y_wgr = compute_wgr(
@@ -518,7 +571,7 @@ class PhysicsInformedHybridModel:
 
             # Predict
             p = (
-                self.predict(d)
+                self.predict_hybrid(d)
                 if is_hybrid_model
                 else self.predict_physics(d_lag)
             )
@@ -539,7 +592,7 @@ class PhysicsInformedHybridModel:
                 plt.plot(
                     x,
                     d_lag[ycol].values,
-                    label="Actual",
+                    label="MPFM (Actual)",
                     # linestyle="--",
                     linewidth=2,
                     marker="o",
