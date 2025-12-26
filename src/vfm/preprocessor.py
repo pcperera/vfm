@@ -3,7 +3,6 @@ from src.utils.descriptive_utils import *
 
 RESAMPLE_MEAN = "mean"
 RESAMPLE_FIRST = "first"
-C_TO_K_OFFSET = 273.15
 
 class Preprocessor:
 
