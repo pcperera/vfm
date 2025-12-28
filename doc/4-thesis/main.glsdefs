@@ -614,34 +614,6 @@ parent={},%
 %
 }%
 
-\glsdefs@newdocentry{ASN}%
-{%
-name={\acronymfont {\glsentryshort {ASN}}},%
-sort={ASN},%
-type={acronym},%
-first={ASN},%
-firstplural={ASNs},%
-text={ASN},%
-plural={ASNs},%
-description={Adaptive Simulated Annealing},%
-descriptionplural={Adaptive Simulated Annealing},%
-symbol={\relax },%
-symbolplural={\relax },%
-user1={},%
-user2={},%
-user3={},%
-user4={},%
-user5={},%
-user6={},%
-long={Adaptive Simulated Annealing},%
-longplural={Adaptive Simulated Annealings},%
-short={ASN},%
-shortplural={ASNs},%
-counter={page},%
-parent={},%
-%
-}%
-
 \glsdefs@newdocentry{BNN}%
 {%
 name={\acronymfont {\glsentryshort {BNN}}},%
@@ -665,6 +637,34 @@ long={Bayesian Neural Network},%
 longplural={Bayesian Neural Networks},%
 short={BNN},%
 shortplural={BNNs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ASN}%
+{%
+name={\acronymfont {\glsentryshort {ASN}}},%
+sort={ASN},%
+type={acronym},%
+first={ASN},%
+firstplural={ASNs},%
+text={ASN},%
+plural={ASNs},%
+description={Adaptive Simulated Annealing},%
+descriptionplural={Adaptive Simulated Annealing},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Adaptive Simulated Annealing},%
+longplural={Adaptive Simulated Annealings},%
+short={ASN},%
+shortplural={ASNs},%
 counter={page},%
 parent={},%
 %

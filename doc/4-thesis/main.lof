@@ -1,10 +1,10 @@
 \contentsline {figure}{\numberline {1.1}{\ignorespaces Well downhole and surface instrumentation}}{5}{figure.caption.8}%
 \contentsline {figure}{\numberline {1.2}{\ignorespaces Multi phase flow meter}}{8}{figure.caption.10}%
-\contentsline {figure}{\numberline {2.1}{\ignorespaces VFM types}}{17}{figure.caption.11}%
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Component-level architecture of the proposed hybrid physics-informed residual learning framework}}{23}{figure.caption.12}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces W10 - down-hole pressure}}{44}{figure.caption.14}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces W10 - down-hole temperature}}{44}{figure.caption.15}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces W10 - well-head pressure}}{44}{figure.caption.16}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces W10 - well-head temperature}}{44}{figure.caption.17}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces W10 - Downstream choke pressure}}{44}{figure.caption.18}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces W10 - Downstream choke regulation}}{45}{figure.caption.19}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces VFM types}}{23}{figure.caption.11}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Component-level architecture of the proposed hybrid physics-informed residual learning framework}}{27}{figure.caption.12}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces W10 - down-hole pressure}}{49}{figure.caption.14}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces W10 - down-hole temperature}}{50}{figure.caption.15}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces W10 - well-head pressure}}{50}{figure.caption.16}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces W10 - well-head temperature}}{50}{figure.caption.17}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces W10 - Downstream choke pressure}}{50}{figure.caption.18}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces W10 - Downstream choke regulation}}{50}{figure.caption.19}%

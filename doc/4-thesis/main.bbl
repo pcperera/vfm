@@ -56,6 +56,11 @@ Corneliussen, S., for Oil, N.~S., Measurement, G., and (Organization), T.
 \newblock {\em Handbook of Multiphase Flow Metering}.
 \newblock Norwegian Society for Oil and Gas Measurement.
 
+\bibitem[Dake and Dake, 1978]{dake1978developments}
+Dake, L.~P. and Dake, L. (1978).
+\newblock {\em Developments in petroleum science}.
+\newblock Elsevier Publishing Company.
+
 \bibitem[Dutta and Kumar, 2018]{dutta2018modeling}
 Dutta, P. and Kumar, A. (2018).
 \newblock Modeling and optimization of a liquid flow process using an
@@ -74,6 +79,13 @@ Grimstad, B., Hotvedt, M., Sandnes, A.~T., Kolbj{\o}rnsen, O., and Imsland,
 \newblock Bayesian neural networks for virtual flow metering: An empirical
   study.
 \newblock {\em Applied Soft Computing}, 112:107776.
+
+\bibitem[Gryzlov et~al., 2023]{gryzlov2023combining}
+Gryzlov, A., Safonov, S., Krasnopolsky, B., and Arsalan, M. (2023).
+\newblock Combining machine learning and a multiphase flow model for hybrid
+  virtual flow metering.
+\newblock In {\em Abu Dhabi International Petroleum Exhibition and Conference},
+  page D031S108R005. SPE.
 
 \bibitem[Hansen et~al., 2019]{hansen2019multi}
 Hansen, L.~S., Pedersen, S., and Durdevic, P. (2019).
@@ -94,6 +106,12 @@ Ishak, M.~A., Al-qutami, T. A.~H., and Ismail, I. (2022).
 \newblock {\em International Journal on Smart Sensing and Intelligent Systems},
   15(1):1--21.
 
+\bibitem[Lim et~al., 2021]{lim2021temporal}
+Lim, B., Ar{\i}k, S.~{\"O}., Loeff, N., and Pfister, T. (2021).
+\newblock Temporal fusion transformers for interpretable multi-horizon time
+  series forecasting.
+\newblock {\em International Journal of Forecasting}, 37(4):1748--1764.
+
 \bibitem[Marfo and Kporxah, 2021]{marfo2021predicting}
 Marfo, S. and Kporxah, C. (2021).
 \newblock Predicting oil production rate using artificial neural network and
@@ -102,6 +120,11 @@ Marfo, S. and Kporxah, C. (2021).
   mineral conference, Tarkwa, Ghana. http://conference. umat. edu.
   gh/wp-content/uploads/2020/08/Predicting-Oil-Production-Rate-Using-Artificial-Neural-Network-and-Decline-Curve-Analytical-Methods.
   pdf. Accessed}, volume~21.
+
+\bibitem[Mercante and Netto, 2022]{mercante2022virtual}
+Mercante, R. and Netto, T.~A. (2022).
+\newblock Virtual flow predictor using deep neural networks.
+\newblock {\em Journal of Petroleum Science and Engineering}, 213:110338.
 
 \bibitem[Meribout et~al., 2020]{meribout2020multiphase}
 Meribout, M., Azzi, A., Ghendour, N., Kharoua, N., Khezzar, L., and AlHosani,

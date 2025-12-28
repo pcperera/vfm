@@ -1,6 +1,6 @@
-PWD c:\Users\perer\Documents\Code\pcperera\vfm\doc\thesis
+PWD c:\Users\perer\Documents\Code\pcperera\vfm\doc\4-thesis
 INPUT C:\Users\perer\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT c:\Users\perer\Documents\Code\pcperera\vfm\doc\thesis\main.tex
+INPUT c:\Users\perer\Documents\Code\pcperera\vfm\doc\4-thesis\main.tex
 OUTPUT main.log
 INPUT .\uomthesis.cls
 INPUT uomthesis.cls

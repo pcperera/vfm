@@ -56,7 +56,7 @@ urlcolor    =  blue
 \degreemonth{December}
 \degreeyear{2025}
 \faculty{Faculty of Engineering}
-\keywords{Virtual Flow Meter, Oil and Gas Industry, Transformers}
+\keywords{Virtual Flow Meter, Oil and Gas Industry, Physics Informed Machine Learning}
 \supervisorName{Dr. Uthayasanker Thayasivam}
 
 
@@ -309,33 +309,117 @@ This research focuses on the development and evaluation of a physics-informed re
 
 \chapter{Literature Review}
 \label{sec:literature}
-The literature review focuses on the research advancements in the area of VFM during last 6 years since 2017. A wide range of different VFM have been implemented spreading across physics based, ML based and hybrid VFM.
 
-\begin{figure}[!htb]
-\uomFig{VFM types}{fig:vfm-types}{\includegraphics[width=1.2\textwidth]{images/vfm-types.png}}{}
-\end{figure}
+\section{Introduction}
+
+The accurate estimation of oil, gas, and water production rates is a fundamental requirement in petroleum production engineering, underpinning reservoir management, production optimization, flow assurance, and economic decision-making. Traditionally, phase flow rates are measured using physical multiphase flow meters (MPFMs). While MPFMs provide direct measurements, their widespread deployment is limited by high capital cost, maintenance requirements, calibration complexity, and installation constraints, particularly in offshore, subsea, and marginal field developments \citep{corneliussen2005handbook,meribout2020multiphase,hansen2019multi}.
+
+As a cost-effective alternative, Virtual Flow Metering (VFM) has emerged as a key enabling technology. VFM systems estimate phase flow rates indirectly using routinely available surface and downhole measurements such as pressures, temperatures, and choke settings. Over the past two decades, VFM methodologies have evolved from purely physics-based models to data-driven machine learning approaches and, more recently, to hybrid physics--data architectures \citep{bikmukhametov2020first}. This chapter reviews these developments, critically examines their strengths and limitations, and establishes the motivation for a physics-informed hybrid residual learning architecture for virtual flow metering.
+
+\section{Physics-Based Virtual Flow Metering}
+
+\subsection{Foundations of Petroleum Production Modeling}
+
+Physics-based VFM approaches rely on first-principles models derived from reservoir engineering, fluid mechanics, and thermodynamics. Classical petroleum engineering formulations describe the relationship between reservoir pressure, flowing bottom-hole pressure, and production rate using inflow performance relationships (IPRs) \citep{dake1978developments}. These formulations are widely used in nodal analysis to predict well performance under steady-state conditions.
+
+IPR models typically assume homogeneous reservoir properties, steady-state flow, and known fluid characteristics. While these assumptions are reasonable during early production or controlled testing, they are frequently violated during long-term field operation, leading to systematic prediction errors.
+
+\subsection{Choke Flow and Surface Constraints}
+
+Surface choke flow models form a critical component of physics-based VFMs by linking upstream pressure, downstream pressure, and choke opening to flow rates. Numerous empirical and semi-empirical correlations have been developed to model multiphase flow through chokes \citep{agwu2022modelling,alrumah2019new}. These correlations are often calibrated for specific flow regimes and fluid compositions.
+
+Although choke models provide physically interpretable relationships, their accuracy is highly sensitive to operating conditions. Flow regime transitions, changing gas–liquid ratios, and water breakthrough can significantly degrade predictive performance. Consequently, choke correlations often require frequent recalibration, limiting their robustness for long-term monitoring.
+
+\subsection{Strengths and Limitations of Physics-Based VFMs}
+
+Physics-based VFMs offer several advantages, including interpretability, compliance with physical laws, and the ability to extrapolate beyond observed data ranges. However, they suffer from key limitations. Uncertain reservoir parameters, incomplete representation of multiphase flow physics, and measurement noise can lead to biased predictions \citep{bikmukhametov2020first}. Moreover, mechanistic models struggle to capture complex nonlinear interactions between operational variables, motivating the exploration of data-driven alternatives.
+
+\section{Data-Driven Virtual Flow Metering}
+
+\subsection{Early Machine Learning Approaches}
+
+The application of machine learning to VFM began with artificial neural networks (ANNs) and regression-based soft sensors \citep{al2017development,al2017radial}. These models learned direct mappings between sensor measurements and phase flow rates, often outperforming physics-based models under stable operating conditions.
+
+However, early ANN-based VFMs exhibited limited generalization capability and were prone to overfitting, particularly when training datasets were small or unevenly distributed across operating regimes.
+
+\subsection{Advanced Data-Driven Models}
+
+Subsequent research explored ensemble learning, adaptive optimization techniques, and Bayesian neural networks to improve robustness and uncertainty quantification \citep{al2018virtual,grimstad2021bayesian}. Ensemble methods reduced variance by combining multiple learners, while Bayesian approaches provided probabilistic estimates of prediction uncertainty.
+\citep{grimstad2021bayesian} develops a ML based VFM, implemented on \abbr{Bayesian Neural Network}{BNN}. BNN provide a probabilistic distribution over weights and predictions unlike traditional neural networks, which produce point estimates for weights and predictions. They have trained the model on a large and heterogeneous data-set, consisting of 60 wells across five different oil and gas assets. The predictive performance is analyzed on historical and future test data, where an average error of 4\%–6\% and 8\%–13\% is achieved for the 50\% best performing models, respectively. 
+
+More recently, deep learning architectures have been applied to VFM, demonstrating strong predictive performance in data-rich environments \citep{song2022intelligent,mercante2022virtual}. Despite these advances, purely data-driven VFMs remain fundamentally dependent on large, high-quality datasets and often lack physical interpretability.
+
+\citep{muchsin2023virtual} proposed a VFM model using a time series-time delay artificial neural network technique in predicting the multi-phase flow rate accurately with the best average discrepancy of Qgas (6.0\%), Qoil (-16.4\%), and Qwater (-2.4\%) compared with actual measurement by MPFM. The training of the VFM model, which takes less than 7 minutes and has acceptable values for MSE, R, and MAPE, demonstrates that this method is reliable enough to be used in the oil and gas industries, which often require conducting dozens of individual well tests in their daily activities. The utilization of data measurement of existing well orifice meter combined with data measurement from choke valve and well head as parameter data input of the network has proven effective to improve the accuracy of the VFM model. In addition, the greater the number of data used in training phase determines the accuracy performance of the VFM model. However, concerning that this study only uses limited well reference data, it is recommended to implement this VFM model on other wells in different fields to validate its performance accuracy during well testing.
+
+\citep{al2018virtual} introduces a VFM system employing ensemble learning tailored for fields with limited data from a shared metering setup. The method creates diverse neural network learners by manipulating training data, neural network structure, and learning approach. Using \abbr{Adaptive Simulated Annealing}{ASN} optimization, it selects the best subset of learners and an optimal combining strategy. Assessment using real well test data shows exceptional performance, with average errors of 4.7\% and 2.4\% for liquid and gas flow rates respectively. The accuracy of their VFM was further confirmed through cumulative deviation analysis, where predictions fall within a maximum deviation of ±15\%. Comparisons with standard bagging and stacking techniques demonstrate significant enhancements in both accuracy and ensemble size. The proposed VFM system offers ease in development and maintenance compared to traditional model-driven VFM, requiring only well test samples for model tuning. It is anticipated that this developed VFM can complement physical meters, improve data consistency, aid in reservoir management and flow assurance, ultimately resulting in more efficient oil recovery and reduced operational and maintenance costs.
 
 \citep{al2017radial} introduces a radial basis function network designed to create a virtual flow meter (VFM) specifically for estimating gas flow rates within multi-phase production lines. Validating the model with real well test data demonstrates its outstanding performance and ability to generalize effectively. Furthermore, the paper delves into the importance of down-hole and choke valve measurements in ensuring precise predictions. This proposed VFM model presents a potentially appealing and cost-efficient solution for real-time production monitoring needs while simultaneously reducing operational and maintenance expenses.
 
 In a separate work also by \citep{al2017development} proposes a method for estimating phase flow rates in oil and gas production wells using readily available measurements. By overcoming the limitations of traditional metering facilities, their system offers a cost-effective way to monitor production in real time. It not only cuts operational and maintenance expenses but also serves as a reliable backup to multi-phase flow meters. The technique involves creating a soft-sensor through a feed-forward neural network. To ensure accuracy without excessive complexity, the system uses K-fold cross-validation and an early stopping technique to regulate generalization and network intricacy. Validation using real well test data demonstrates the sensor's effectiveness, evaluated through cumulative deviation and flow plots. Their results indicate promising performance, with an average error of approximately 4\% and less than 10\% deviation for 90\% of the samples.
 
+
+\subsection{Time-Series and Attention-Based Models}
+
+The increasing availability of time-stamped production data has motivated the use of time-series models in VFM. Recurrent neural networks and long short-term memory (LSTM) networks have been used to capture temporal dependencies in production behavior \citep{andrianov2018machine}.
+This is because unlike feed-forward neural network, which process input data in a one-way, LSTM-RNN are designed to process sequential data, such as time series. \citep{andrianov2018machine} has achieved the best accuracy when the lengths of the input and output sequences to LSTM are equal. 
+
+\subsection{Limitations of Purely Data-Driven VFMs}
+
+Despite strong predictive performance, purely data-driven VFMs exhibit fundamental limitations. They lack explicit physical grounding, struggle with extrapolation beyond the training domain, and may violate physical constraints such as non-negativity or phase consistency \citep{bikmukhametov2020first}. The black-box nature of deep learning models also reduces trust and hinders adoption in industrial decision-making contexts.
+
+\section{Hybrid Physics - Data Virtual Flow Metering}
+
+\subsection{Motivation for Hybrid Modeling}
+
+Hybrid modeling approaches seek to combine the strengths of physics-based and data-driven models. In VFM applications, physics-based models capture dominant flow behavior, while machine learning models excel at learning unmodeled nonlinearities and systematic discrepancies \citep{hotvedt2020developing}.
 The hybrid VFM proposed by \citep{ishak2022virtual} uses ensemble learning to develop the data driven model by incorporating multiple ML models. The data driven model is then combined with the physics model using a combiner. They have achieved a 50\% improvement in performance using the combiner compared to their stand-alone performance of physics based and ML based VFM. 
-
-\citep{al2018virtual} introduces a VFM system employing ensemble learning tailored for fields with limited data from a shared metering setup. The method creates diverse neural network learners by manipulating training data, neural network structure, and learning approach. Using \abbr{Adaptive Simulated Annealing}{ASN} optimization, it selects the best subset of learners and an optimal combining strategy. Assessment using real well test data shows exceptional performance, with average errors of 4.7\% and 2.4\% for liquid and gas flow rates respectively. The accuracy of their VFM was further confirmed through cumulative deviation analysis, where predictions fall within a maximum deviation of ±15\%. Comparisons with standard bagging and stacking techniques demonstrate significant enhancements in both accuracy and ensemble size. The proposed VFM system offers ease in development and maintenance compared to traditional model-driven VFM, requiring only well test samples for model tuning. It is anticipated that this developed VFM can complement physical meters, improve data consistency, aid in reservoir management and flow assurance, ultimately resulting in more efficient oil recovery and reduced operational and maintenance costs.
-
-\citep{andrianov2018machine} have successfully developed a LSTM-RNN based model not only to predict multi-phase rates at present but also to predict future flow rates as a time-series. This is because unlike feed-forward neural network, which process input data in a one-way, LSTM-RNN are designed to process sequential data, such as time series. \citep{andrianov2018machine} has achieved the best accuracy when the lengths of the input and output sequences to LSTM are equal. 
-
-\citep{grimstad2021bayesian} develops a ML based VFM, implemented on \abbr{Bayesian Neural Network}{BNN}. BNN provide a probabilistic distribution over weights and predictions unlike traditional neural networks, which produce point estimates for weights and predictions. They have trained the model on a large and heterogeneous data-set, consisting of 60 wells across five different oil and gas assets. The predictive performance is analyzed on historical and future test data, where an average error of 4\%–6\% and 8\%–13\% is achieved for the 50\% best performing models, respectively. 
-
-\citep{franklin2022physics} proposes a hybrid VFM combining \abbr{Physics Informed Neural Networks}{PINN} based physics model and LSTM-RNN based ML model. Their resulting hybrid model is capable of predicting the average flow rate some time-steps ahead using the measurements available in the oil well information system. Unlike the ML based LSTM-RNN model proposed by \citep{andrianov2018machine}, the system proposed by \citep{franklin2022physics} is hybrid model using neural networks for physics based model as well as the ML based model. 
-
-\citep{song2022intelligent} employs \abbr{Back Propogation Neural Network}{BPNN}, LSTM network, and \abbr{Random Forest}{RF} algorithm to develop an intelligent ML based model for virtual flow meters in oil and gas development. Their data-set is constructed using actual data from two oil wells in an offshore oil field in the South China Sea. Among the three models, the LSTM model has demonstrated the highest accuracy, with a Mean Absolute Error (MAE) of 3.9\%. LSTM has also demonstrated the highest stability and requires a moderate amount of data volume. BP network on the other hand have exhibited the lowest accuracy, with a MAE of 12.1\%, as well as the lowest stability. BP however has shown the smallest data volume requirement. The Random Forest model has shown moderate accuracy, high stability, but has required the highest data volume.
-
-\citep{muchsin2023virtual} proposed a VFM model using a time series-time delay artificial neural network technique in predicting the multi-phase flow rate accurately with the best average discrepancy of Qgas (6.0\%), Qoil (-16.4\%), and Qwater (-2.4\%) compared with actual measurement by MPFM. The training of the VFM model, which takes less than 7 minutes and has acceptable values for MSE, R, and MAPE, demonstrates that this method is reliable enough to be used in the oil and gas industries, which often require conducting dozens of individual well tests in their daily activities. The utilization of data measurement of existing well orifice meter combined with data measurement from choke valve and well head as parameter data input of the network has proven effective to improve the accuracy of the VFM model. In addition, the greater the number of data used in training phase determines the accuracy performance of the VFM model. However, concerning that this study only uses limited well reference data, it is recommended to implement this VFM model on other wells in different fields to validate its performance accuracy during well testing.
 
 \citep{nemoto2023cloud} introduces a cloud-based VFM that combines physics and data techniques to accurately estimate water production per well within a gas field. By integrating physics-based models tailored for high gas volume fraction gas-liquid flows in the wellbore and employing a data-driven approach to fine-tune these models with actual well test data, this hybrid method ensures precise real-time estimations. Its adaptability to evolving well performance and increased water production creates a self-calibrating solution, ensuring ongoing accuracy and relevance despite changing production and well conditions. Their VFM system demonstrates substantial alignment with well test data under steady-state conditions, affirming its reliability. Operating remotely through a cloud-based Cognite DataOps platform, this system conducts calculations and stores results, facilitating continual access to live sensor data for other applications or visualization via a web interface. Utilizing existing sensors within the wells, the VFM system offers cost efficiency by minimizing both initial investment and operational expenses in comparison to installing multi-phase flow meters or separators.
 
-Hybird VFM models have become increasingly popular since 2018 and increase usage of neural networks seen for developing both physics and ML based models. Although many types of neural networks have been evaluated, author at the time did not discover Transformer based neural networks for implementing VFM. Transformers, with the ability to capture long-range patterns in sequential data, can be applied to time-series data obtained from sensors. \ref{tab:literature-summary} summarizes the performance metrics of the literature evaluated.
+\subsection{Residual Learning Frameworks}
+
+Residual learning has emerged as a particularly effective hybrid strategy. In this framework, a physics-based model provides baseline predictions, and a machine learning model is trained to learn residual errors between predictions and measurements \citep{bikmukhametov2020combining}. This separation improves data efficiency, stabilizes training, and preserves physical interpretability.
+
+Residual hybrid VFMs have demonstrated improved accuracy and robustness compared to both purely physics-based and purely data-driven approaches \citep{ishak2022virtual,gryzlov2023combining}.
+
+\subsection{Industrial Applications}
+
+Hybrid VFMs have been successfully deployed in industrial environments, including cloud-based real-time monitoring systems for offshore fields \citep{nemoto2023cloud}. These studies highlight the scalability and operational relevance of hybrid architectures, particularly in settings with sparse instrumentation and limited well-test data.
+
+\section{Physics-Informed Machine Learning}
+
+\subsection{Physics-Informed Neural Networks}
+
+Physics-Informed Neural Networks (PINNs) incorporate governing equations directly into the training process and have been explored for flow metering applications \citep{franklin2022physics}. While PINNs offer a principled approach to enforcing physical laws, their application to multiphase well flow remains challenging due to incomplete or uncertain governing equations.
+\citep{franklin2022physics} proposes a hybrid VFM combining \abbr{Physics Informed Neural Networks}{PINN} based physics model and LSTM-RNN based ML model. Their resulting hybrid model is capable of predicting the average flow rate some time-steps ahead using the measurements available in the oil well information system. Unlike the ML based LSTM-RNN model proposed by \citep{andrianov2018machine}, the system proposed by \citep{franklin2022physics} is hybrid model using neural networks for physics based model as well as the ML based model. 
+
+\subsection{Soft Physics Constraints and Closure Laws}
+
+An alternative to strict physics enforcement is the use of soft physical constraints embedded in model architecture. Examples include bounded logistic water-cut closures and explicit non-negativity constraints on phase rates \citep{bikmukhametov2020first}. These approaches improve physical realism while retaining flexibility and numerical stability.
+
+\section{Rationale for a Physics-Informed Hybrid Residual Architecture}
+
+The reviewed literature reveals a clear gap between interpretable but brittle physics-based VFMs and accurate but opaque data-driven models. This motivates a physics-informed hybrid residual architecture in which:
+
+\begin{itemize}
+    \item Dominant production behavior is modeled using simplified, physically interpretable inflow and choke flow relationships \citep{dake1978developments,agwu2022modelling}.
+    \item Phase consistency is enforced through bounded closure laws \citep{ishak2022virtual}.
+    \item Machine learning models correct systematic residual errors rather than replacing physics entirely \citep{bikmukhametov2020combining}.
+    \item Temporal learning can be incorporated independently when forecasting capability is required \citep{lim2021temporal}.
+\end{itemize}
+
+Such an architecture aligns with contemporary best practices in hybrid modeling and satisfies industrial requirements for robustness, interpretability, scalability, and data efficiency.
+
+\begin{figure}[!htb]
+\uomFig{VFM types}{fig:vfm-types}{\includegraphics[width=1.2\textwidth]{images/vfm-types.png}}{}
+\end{figure}
+
+
+
+\citep{song2022intelligent} employs \abbr{Back Propogation Neural Network}{BPNN}, LSTM network, and \abbr{Random Forest}{RF} algorithm to develop an intelligent ML based model for virtual flow meters in oil and gas development. Their data-set is constructed using actual data from two oil wells in an offshore oil field in the South China Sea. Among the three models, the LSTM model has demonstrated the highest accuracy, with a Mean Absolute Error (MAE) of 3.9\%. LSTM has also demonstrated the highest stability and requires a moderate amount of data volume. BP network on the other hand have exhibited the lowest accuracy, with a MAE of 12.1\%, as well as the lowest stability. BP however has shown the smallest data volume requirement. The Random Forest model has shown moderate accuracy, high stability, but has required the highest data volume.
+
+
+Hybird VFM models have become increasingly popular since 2018 and increase usage of neural networks seen for developing both physics and ML based models.
 
 \begin{longtable}[!htb]{p{0.2\textwidth}p{0.1\textwidth}p{0.2\textwidth}p{0.35\textwidth}}
 \uomTable{Literature summary}{tab:literature-summary}{}{}
@@ -397,9 +481,9 @@ At the core of the proposed framework lies a physics-based virtual flow metering
 The physics model incorporates:
 
 \begin{itemize}
-    \item a pressure-driven liquid inflow relationship governed by an effective reservoir pressure,
-    \item a water-cut formulation expressed through a logistic function of pressure, temperature, and choke-related features, and
-    \item a gas flow component modeled as a pressure-drop-driven relationship modulated by choke effectiveness.
+    \item A pressure-driven liquid inflow relationship governed by an effective reservoir pressure
+    \item A water-cut formulation expressed through a logistic function of pressure, temperature, and choke-related features
+    \item A gas flow component modeled as a pressure-drop-driven relationship modulated by choke effectiveness
 \end{itemize}
 
 Model parameters are calibrated on a per-well basis using nonlinear least-squares optimization against available multiphase flow meter measurements. This calibration step ensures that the physics model remains interpretable, physically consistent, and tailored to individual well characteristics while avoiding excessive model complexity.
@@ -619,10 +703,10 @@ In practical production environments, detailed mechanistic multiphase flow model
 The physics-based model is designed to:
 
 \begin{itemize}
-    \item capture first-order relationships between pressure, choke setting, and flow rates,
-    \item maintain physical plausibility across operating regimes,
-    \item provide smooth and stable predictions suitable for residual learning,
-    \item allow independent calibration for each well.
+    \item Capture first-order relationships between pressure, choke setting, and flow rates
+    \item Maintain physical plausibility across operating regimes
+    \item Provide smooth and stable predictions suitable for residual learning
+    \item Allow independent calibration for each well
 \end{itemize}
 
 \subsection{Model Assumptions and Physical Basis}
@@ -1356,15 +1440,50 @@ true production history, combining the strengths of physics-based modelling,
 residual learning, and controlled temporal reconstruction.
 
 
-\section{Model Integration and Full Workflow}
+\section{Model Integration}
 \label{sec:model_integration}
 
 \subsection{Step-by-Step Pipeline Summary}
 \label{subsec:pipeline_summary}
 
-
 \subsection{Computational Considerations}
-\label{subsec:computational}
+\label{sec:computational_considerations}
+
+The proposed hybrid modeling framework combines a physics-based flow model with a data-driven residual learning component. While this integration improves predictive accuracy and generalization under sparse data conditions, it introduces several computational considerations related to efficiency, scalability, numerical stability, and deployment feasibility. These aspects are discussed below.
+
+\subsubsection{Model Decomposition and Computational Load}
+
+The hybrid architecture is deliberately decomposed into two stages: (i) a physics-based forward model and (ii) a machine learning model trained to predict residual errors. This decomposition allows the majority of physical computations to remain lightweight, relying on closed-form or low-dimensional parametric equations. Consequently, the computational complexity of the physics layer scales linearly with the number of samples, i.e.,
+\begin{equation}
+\mathcal{O}(N),
+\end{equation}
+where $N$ denotes the number of time steps.
+
+The machine learning residual model operates on a reduced feature space, typically consisting of selected operational variables and physics-derived quantities. As a result, the hybrid model avoids the high-dimensional input spaces commonly encountered in end-to-end deep learning approaches, thereby reducing both training time and memory requirements.
+
+\subsubsection{Parameter Calibration and Training Efficiency}
+
+Parameter calibration in the physics layer is performed using nonlinear least squares optimization. Given the low dimensionality of the parameter vector, convergence is typically achieved within a small number of iterations. The computational cost of this calibration step is therefore modest and well-suited for per-well or batched multi-well calibration.
+
+The residual learning component is trained after physics model calibration, which decouples physical parameter estimation from machine learning optimization. This sequential training strategy improves numerical stability and reduces the risk of ill-conditioned joint optimization. Furthermore, it allows reuse of calibrated physics parameters when transferring the model to new wells with limited data.
+
+\subsubsection{Scalability Across Multiple Wells}
+
+From a scalability perspective, the hybrid framework supports both per-well and global learning paradigms. Physics model calibration can be executed independently for each well, enabling embarrassingly parallel computation across wells. The residual model, on the other hand, may be trained globally using pooled data to capture cross-well patterns, with computational complexity depending on the chosen learning algorithm.
+
+This modular design allows the framework to scale efficiently with the number of wells while maintaining manageable computational overhead, making it suitable for field-scale virtual flow metering applications.
+
+\subsubsection{Numerical Stability and Robustness}
+
+The inclusion of physics-based constraints inherently improves numerical stability by restricting predictions to physically plausible regimes. Additionally, normalization of inputs and careful handling of unit consistency (e.g., pressure in bar absolute and temperature in degrees Celsius) are employed to prevent numerical scaling issues during training.
+
+Gating mechanisms used to combine physics predictions and residual corrections further enhance robustness by attenuating machine learning corrections under extrapolative or low-confidence conditions. This design reduces sensitivity to noisy measurements and mitigates the risk of unphysical predictions.
+
+\subsubsection{Inference Time and Deployment Considerations}
+
+At inference time, the hybrid model requires a single forward evaluation of the physics equations followed by a lightweight residual prediction. This results in low-latency predictions suitable for near–real-time applications. Compared to purely data-driven deep learning models, the proposed approach offers significantly reduced inference cost, making it amenable to deployment in production monitoring systems with limited computational resources.
+
+Overall, the computational design of the hybrid model achieves a favorable balance between accuracy, interpretability, and efficiency, enabling practical deployment in real-world well surveillance and production optimization workflows.
 
 
 \section{Limitations and Assumptions}
@@ -1376,8 +1495,6 @@ residual learning, and controlled temporal reconstruction.
 \subsection{Machine-Learning Model Assumptions}
 \label{subsec:ml_assumptions}
 
-\subsection{Data Limitations}
-\label{subsec:data_limitations}
 
 
 \begin{figure}[!htb]
