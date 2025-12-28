@@ -357,6 +357,7 @@ More recently, deep learning architectures have been applied to VFM, demonstrati
 
 In a separate work also by \citep{al2017development} proposes a method for estimating phase flow rates in oil and gas production wells using readily available measurements. By overcoming the limitations of traditional metering facilities, their system offers a cost-effective way to monitor production in real time. It not only cuts operational and maintenance expenses but also serves as a reliable backup to multi-phase flow meters. The technique involves creating a soft-sensor through a feed-forward neural network. To ensure accuracy without excessive complexity, the system uses K-fold cross-validation and an early stopping technique to regulate generalization and network intricacy. Validation using real well test data demonstrates the sensor's effectiveness, evaluated through cumulative deviation and flow plots. Their results indicate promising performance, with an average error of approximately 4\% and less than 10\% deviation for 90\% of the samples.
 
+\citep{song2022intelligent} employs \abbr{Back Propogation Neural Network}{BPNN}, LSTM network, and \abbr{Random Forest}{RF} algorithm to develop an intelligent ML based model for virtual flow meters in oil and gas development. Their data-set is constructed using actual data from two oil wells in an offshore oil field in the South China Sea. Among the three models, the LSTM model has demonstrated the highest accuracy, with a Mean Absolute Error (MAE) of 3.9\%. LSTM has also demonstrated the highest stability and requires a moderate amount of data volume. BP network on the other hand have exhibited the lowest accuracy, with a MAE of 12.1\%, as well as the lowest stability. BP however has shown the smallest data volume requirement. The Random Forest model has shown moderate accuracy, high stability, but has required the highest data volume.
 
 \subsection{Time-Series and Attention-Based Models}
 
@@ -375,6 +376,8 @@ Hybrid modeling approaches seek to combine the strengths of physics-based and da
 The hybrid VFM proposed by \citep{ishak2022virtual} uses ensemble learning to develop the data driven model by incorporating multiple ML models. The data driven model is then combined with the physics model using a combiner. They have achieved a 50\% improvement in performance using the combiner compared to their stand-alone performance of physics based and ML based VFM. 
 
 \citep{nemoto2023cloud} introduces a cloud-based VFM that combines physics and data techniques to accurately estimate water production per well within a gas field. By integrating physics-based models tailored for high gas volume fraction gas-liquid flows in the wellbore and employing a data-driven approach to fine-tune these models with actual well test data, this hybrid method ensures precise real-time estimations. Its adaptability to evolving well performance and increased water production creates a self-calibrating solution, ensuring ongoing accuracy and relevance despite changing production and well conditions. Their VFM system demonstrates substantial alignment with well test data under steady-state conditions, affirming its reliability. Operating remotely through a cloud-based Cognite DataOps platform, this system conducts calculations and stores results, facilitating continual access to live sensor data for other applications or visualization via a web interface. Utilizing existing sensors within the wells, the VFM system offers cost efficiency by minimizing both initial investment and operational expenses in comparison to installing multi-phase flow meters or separators.
+
+Hybird VFM models have become increasingly popular since 2018 and increase usage of neural networks seen for developing both physics and ML based models.
 
 \subsection{Residual Learning Frameworks}
 
@@ -415,12 +418,6 @@ Such an architecture aligns with contemporary best practices in hybrid modeling 
 \end{figure}
 
 
-
-\citep{song2022intelligent} employs \abbr{Back Propogation Neural Network}{BPNN}, LSTM network, and \abbr{Random Forest}{RF} algorithm to develop an intelligent ML based model for virtual flow meters in oil and gas development. Their data-set is constructed using actual data from two oil wells in an offshore oil field in the South China Sea. Among the three models, the LSTM model has demonstrated the highest accuracy, with a Mean Absolute Error (MAE) of 3.9\%. LSTM has also demonstrated the highest stability and requires a moderate amount of data volume. BP network on the other hand have exhibited the lowest accuracy, with a MAE of 12.1\%, as well as the lowest stability. BP however has shown the smallest data volume requirement. The Random Forest model has shown moderate accuracy, high stability, but has required the highest data volume.
-
-
-Hybird VFM models have become increasingly popular since 2018 and increase usage of neural networks seen for developing both physics and ML based models.
-
 \begin{longtable}[!htb]{p{0.2\textwidth}p{0.1\textwidth}p{0.2\textwidth}p{0.35\textwidth}}
 \uomTable{Literature summary}{tab:literature-summary}{}{}
 \cr 
@@ -455,11 +452,11 @@ Research & VFM Type & ML Model & Evaluation Metrics \\
 
 
 \chapter{Methodology}
-\label{chap:ptrtfm}
+\label{chap:methodology}
 
-\section {Overview of the Proposed Framework}
+\section {Overview of the Proposed Architecture}
 
-This thesis proposes a physics-informed residual learning framework for virtual flow metering that combines first-principles physical modeling with data-driven machine learning to estimate multiphase flow rates in oil and gas production wells. The framework is designed to exploit the complementary strengths of physics-based models and data-driven approaches while addressing the practical constraints of sparse and irregular flow rate measurements typically encountered in industrial environments.
+This thesis proposes a physics-informed residual learning architecture for virtual flow metering that combines first-principles physical modeling with data-driven machine learning to estimate multiphase flow rates in oil and gas production wells. The framework is designed to exploit the complementary strengths of physics-based models and data-driven approaches while addressing the practical constraints of sparse and irregular flow rate measurements typically encountered in industrial environments.
 
 The overall architecture consists of three main components:
 
@@ -469,7 +466,7 @@ The overall architecture consists of three main components:
     \item \textbf{A hybrid inference mechanism}, which combines the physics-based predictions with the learned residual corrections under physically motivated gating rules to ensure robustness, physical plausibility, and stable performance under varying operating conditions.
 \end{enumerate}
 
-A schematic representation of the framework is conceptually illustrated in Figure~\ref{fig:component_architecture}.
+A schematic representation of the architecture is conceptually illustrated in Figure~\ref{fig:component_architecture}.
 
 \begin{figure}[!htb]
 \uomFig{Component-level architecture of the proposed hybrid physics-informed residual learning framework}{fig:component_architecture}{\includegraphics[width=1.0\textwidth]{images/component_architecture.png}}{}
@@ -496,9 +493,9 @@ Rather than predicting flow rates directly, the machine learning model is traine
 The residual model:
 
 \begin{itemize}
-    \item operates globally across all wells to leverage shared flow behavior,
-    \item uses both measured operational variables and physics model predictions as input features, and
-    \item is implemented using a gradient-boosted ensemble regressor capable of modeling nonlinear interactions while maintaining robustness under limited data.
+    \item Operates globally across all wells to leverage shared flow behavior
+    \item Uses both measured operational variables and physics model predictions as input features
+    \item Implemented using a gradient-boosted ensemble regressor capable of modeling nonlinear interactions while maintaining robustness under limited data
 \end{itemize}
 
 Lagged pressure features are incorporated to provide limited temporal context without imposing strong sequential assumptions, enabling the model to capture delayed system responses while remaining compatible with sparse measurement regimes.
@@ -509,9 +506,9 @@ During inference, physics-based predictions and machine-learned residuals are co
 For example:
 
 \begin{itemize}
-    \item oil rate corrections are selectively applied under high water-cut or large residual conditions,
-    \item water rate corrections are activated only when water production exceeds a minimum threshold, and
-    \item gas rate predictions are consistently corrected due to higher uncertainty in gas modeling under varying choke and pressure conditions.
+    \item Oil rate corrections are selectively applied under high water-cut or large residual conditions
+    \item Water rate corrections are activated only when water production exceeds a minimum threshold
+    \item Gas rate predictions are consistently corrected due to higher uncertainty in gas modeling under varying choke and pressure conditions
 \end{itemize}
 
 These gating strategies preserve physical plausibility, prevent non-physical predictions, and enhance model robustness when extrapolating beyond the calibration range.
@@ -609,6 +606,29 @@ rather than MPFM-derived flow rates. This choice is justified as follows:
 As a consequence, MPFM measurements are excluded from model training and evaluation,
 while all available wellhead operational variables are retained as independent features.
 
+\begin{figure}[!htb]
+\uomFig{W10 - down-hole pressure}{fig:dhp}{\includegraphics[width=0.5\textwidth]{images/W10_dhp.png}}{}
+\end{figure}
+
+\begin{figure}[!htb]
+\uomFig{W10 - down-hole temperature}{fig:dht}{\includegraphics[width=0.5\textwidth]{images/W10_dht.png}}{}
+\end{figure}
+
+\begin{figure}[!htb]
+\uomFig{W10 - well-head pressure}{fig:whp}{\includegraphics[width=0.5\textwidth]{images/W10_whp.png}}{}
+\end{figure}
+
+\begin{figure}[!htb]
+\uomFig{W10 - well-head temperature}{fig:wht}{\includegraphics[width=0.5\textwidth]{images/W10_wht.png}}{}
+\end{figure}
+
+\begin{figure}[!htb]
+\uomFig{W10 - Downstream choke pressure}{fig:dcp}{\includegraphics[width=0.5\textwidth]{images/W10_dcp.png}}{}
+\end{figure}
+
+\begin{figure}[!htb]
+\uomFig{W10 - Downstream choke regulation}{fig:dcr}{\includegraphics[width=0.5\textwidth]{images/W10_choke.png}}{}
+\end{figure}
 
 \subsection{Well-Level Preprocessing}
 
@@ -1494,32 +1514,6 @@ Overall, the computational design of the hybrid model achieves a favorable balan
 
 \subsection{Machine-Learning Model Assumptions}
 \label{subsec:ml_assumptions}
-
-
-
-\begin{figure}[!htb]
-\uomFig{W10 - down-hole pressure}{fig:dhp}{\includegraphics[width=0.5\textwidth]{images/W10_dhp.png}}{}
-\end{figure}
-
-\begin{figure}[!htb]
-\uomFig{W10 - down-hole temperature}{fig:dht}{\includegraphics[width=0.5\textwidth]{images/W10_dht.png}}{}
-\end{figure}
-
-\begin{figure}[!htb]
-\uomFig{W10 - well-head pressure}{fig:whp}{\includegraphics[width=0.5\textwidth]{images/W10_whp.png}}{}
-\end{figure}
-
-\begin{figure}[!htb]
-\uomFig{W10 - well-head temperature}{fig:wht}{\includegraphics[width=0.5\textwidth]{images/W10_wht.png}}{}
-\end{figure}
-
-\begin{figure}[!htb]
-\uomFig{W10 - Downstream choke pressure}{fig:dcp}{\includegraphics[width=0.5\textwidth]{images/W10_dcp.png}}{}
-\end{figure}
-
-\begin{figure}[!htb]
-\uomFig{W10 - Downstream choke regulation}{fig:dcr}{\includegraphics[width=0.5\textwidth]{images/W10_choke.png}}{}
-\end{figure}
 
 
 \chapter{Experimentation}
