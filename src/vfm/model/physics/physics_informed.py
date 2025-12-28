@@ -3,27 +3,18 @@ import joblib
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import matplotlib.dates as mdates
 from scipy.optimize import least_squares
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import HistGradientBoostingRegressor
+from src.vfm.constants import *
 
 # =====================================================
 # Constants & helpers
 # =====================================================
-
-EPS = 1e-6
-
-METRICS = [
-    "r2",
-    "mae",
-    "rmse",
-    "mape (%)",   # aka MARE
-    "mpe (%)",    # aka signed MRE / avg discrepancy
-]
 
 def compute_wgr(qw, qg, min_qg=50.0):
     wgr = np.full_like(qw, np.nan, dtype=float)
@@ -764,15 +755,24 @@ class PhysicsInformedHybridModel:
     # --------------------------------------------------
     def plot_predictions(
         self,
-        df,
-        y_qo_col="qo_mpfm",
-        y_qw_col="qw_mpfm",
-        y_qg_col="qg_mpfm",
-        time_col="time_idx",
+        df: pd.DataFrame,
+        y_qo_col: str = "qo_mpfm",
+        y_qw_col: str = "qw_mpfm",
+        y_qg_col: str = "qg_mpfm",
         is_hybrid_model: bool = True,
     ):
+        """
+        Plot predictions using DatetimeIndex as X-axis.
+        """
+
+        # --------------------------------------------------
+        # Safety check
+        # --------------------------------------------------
+        if not isinstance(df.index, pd.DatetimeIndex):
+            raise TypeError("DataFrame index must be a DatetimeIndex")
+
         for wid in df[self.well_id_col].unique():
-            d = df[df[self.well_id_col] == wid]
+            d = df[df[self.well_id_col] == wid].sort_index()
 
             # --------------------------------------------------
             # Lagged data for alignment
@@ -790,8 +790,10 @@ class PhysicsInformedHybridModel:
                 else self.predict_physics(d_lag)
             )
 
-            # X-axis
-            x = d_lag[time_col].values if time_col else np.arange(len(d_lag))
+            # --------------------------------------------------
+            # X-axis → DatetimeIndex
+            # --------------------------------------------------
+            x = d_lag.index
 
             # --------------------------------------------------
             # Rate plots: qo, qw, qg
@@ -803,9 +805,9 @@ class PhysicsInformedHybridModel:
             }
 
             for pred_col, ycol in plot_map.items():
-                plt.figure(figsize=(10, 4))
+                fig, ax = plt.subplots(figsize=(10, 4))
 
-                plt.plot(
+                ax.plot(
                     x,
                     d_lag[ycol].values,
                     label="MPFM (Actual)",
@@ -814,7 +816,7 @@ class PhysicsInformedHybridModel:
                     markersize=4,
                 )
 
-                plt.plot(
+                ax.plot(
                     x,
                     p[pred_col].values,
                     label="Predicted",
@@ -823,13 +825,18 @@ class PhysicsInformedHybridModel:
                     markersize=4,
                 )
 
-                plt.xlabel(time_col)
+                ax.set_xlabel("Time")
                 rate_name = pred_col.replace("_pred", "")
-                plt.ylabel(f"{rate_name} (Sm$^3$/h)")
-                plt.title(f"{wid} : {rate_name}")
+                ax.set_ylabel(f"{rate_name} (Sm$^3$/h)")
+                ax.set_title(f"{wid} : {rate_name}")
 
-                plt.legend()
-                plt.grid(True, alpha=0.3)
+                ax.legend()
+                ax.grid(True, alpha=0.3)
+
+                ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+                ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+
+                fig.autofmt_xdate()
                 plt.tight_layout()
                 plt.show()
 
@@ -847,9 +854,9 @@ class PhysicsInformedHybridModel:
 
             mask = np.isfinite(y_wgr) & np.isfinite(p_wgr)
             if mask.sum() >= 2:
-                plt.figure(figsize=(10, 4))
+                fig, ax = plt.subplots(figsize=(10, 4))
 
-                plt.plot(
+                ax.plot(
                     x[mask],
                     y_wgr[mask],
                     label="WGR (Actual)",
@@ -858,7 +865,7 @@ class PhysicsInformedHybridModel:
                     markersize=4,
                 )
 
-                plt.plot(
+                ax.plot(
                     x[mask],
                     p_wgr[mask],
                     label="WGR (Predicted)",
@@ -867,12 +874,17 @@ class PhysicsInformedHybridModel:
                     markersize=4,
                 )
 
-                plt.xlabel(time_col)
-                plt.ylabel("wgr (qw / qg)")
-                plt.title(f"{wid} : wgr")
+                ax.set_xlabel("Time")
+                ax.set_ylabel("wgr (qw / qg)")
+                ax.set_title(f"{wid} : wgr")
 
-                plt.legend()
-                plt.grid(True, alpha=0.3)
+                ax.legend()
+                ax.grid(True, alpha=0.3)
+
+                ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+                ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+
+                fig.autofmt_xdate()
                 plt.tight_layout()
                 plt.show()
 
@@ -890,18 +902,18 @@ class PhysicsInformedHybridModel:
 
             mask = np.isfinite(y_gor) & np.isfinite(p_gor)
             if mask.sum() >= 2:
-                plt.figure(figsize=(10, 4))
+                fig, ax = plt.subplots(figsize=(10, 4))
 
-                plt.plot(
+                ax.plot(
                     x[mask],
                     y_gor[mask],
-                    label="gor (Actual)",
+                    label="GOR (Actual)",
                     linewidth=2,
                     marker="o",
                     markersize=4,
                 )
 
-                plt.plot(
+                ax.plot(
                     x[mask],
                     p_gor[mask],
                     label="GOR (Predicted)",
@@ -910,11 +922,17 @@ class PhysicsInformedHybridModel:
                     markersize=4,
                 )
 
-                plt.xlabel(time_col)
-                plt.ylabel("gor (qg / qo)")
-                plt.title(f"{wid} : gor")
+                ax.set_xlabel("Time")
+                ax.set_ylabel("gor (qg / qo)")
+                ax.set_title(f"{wid} : gor")
 
-                plt.legend()
-                plt.grid(True, alpha=0.3)
+                ax.legend()
+                ax.grid(True, alpha=0.3)
+
+                ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+                ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+
+                fig.autofmt_xdate()
                 plt.tight_layout()
                 plt.show()
+    
