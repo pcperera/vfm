@@ -53,14 +53,14 @@ class Preprocessor:
         well_ids = df["well_id"].unique()
 
         # # Calculate the time steps
-        # reference_time = df.index.min()
+        reference_time = df.index.min()
 
         for well_id in well_ids:
             print(f"Preprocessing well {well_id} with columns {df.columns.tolist()}")
             df_well = df[df["well_id"] == well_id]
             df_well = self._preprocess_well(df=df_well)
-            # df_well["time_idx"] = (df_well.index - reference_time).total_seconds() // (60 * self._time_idx_resolution_min)
-            # df_well["time_idx"] = df_well["time_idx"].astype(int)
+            df_well["time_idx"] = (df_well.index - reference_time).total_seconds() // 30 # Unit is 30s
+            df_well["time_idx"] = df_well["time_idx"].astype(int)
             dfs.append(df_well)
 
         df = pd.concat(dfs, ignore_index=False)
