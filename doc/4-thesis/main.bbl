@@ -1,0 +1,133 @@
+\begin{thebibliography}{}
+
+\bibitem[Agwu et~al., 2022]{agwu2022modelling}
+Agwu, O.~E., Okoro, E.~E., and Sanni, S.~E. (2022).
+\newblock Modelling oil and gas flow rate through chokes: A critical review of
+  extant models.
+\newblock {\em Journal of Petroleum Science and Engineering}, 208:109775.
+
+\bibitem[Al-Qutami et~al., 2017]{al2017development}
+Al-Qutami, T.~A., Ibrahim, R., Ismail, I., and Ishak, M.~A. (2017).
+\newblock Development of soft sensor to estimate multiphase flow rates using
+  neural networks and early stopping.
+\newblock {\em International Journal on Smart Sensing and Intelligent Systems},
+  10(1):1--24.
+
+\bibitem[AL-Qutami et~al., 2017]{al2017radial}
+AL-Qutami, T.~A., Ibrahim, R., Ismail, I., and Ishak, M.~A. (2017).
+\newblock Radial basis function network to predict gas flow rate in multiphase
+  flow.
+\newblock In {\em Proceedings of the 9th international conference on machine
+  learning and computing}, pages 141--146.
+
+\bibitem[AL-Qutami et~al., 2018]{al2018virtual}
+AL-Qutami, T.~A., Ibrahim, R., Ismail, I., and Ishak, M.~A. (2018).
+\newblock Virtual multiphase flow metering using diverse neural network
+  ensemble and adaptive simulated annealing.
+\newblock {\em Expert Systems with Applications}, 93:72--85.
+
+\bibitem[Alrumah and Alenezi, 2019]{alrumah2019new}
+Alrumah, M. and Alenezi, R.~A. (2019).
+\newblock New universal two-phase choke correlations developed using non-linear
+  multivariable optimization technique.
+\newblock {\em Journal of Engineering Research (2307-1877)}, 7(3).
+
+\bibitem[Andrianov, 2018]{andrianov2018machine}
+Andrianov, N. (2018).
+\newblock A machine learning approach for virtual flow metering and
+  forecasting.
+\newblock {\em IFAC-PapersOnLine}, 51(8):191--196.
+
+\bibitem[Bikmukhametov and J{\"a}schke, 2020a]{bikmukhametov2020combining}
+Bikmukhametov, T. and J{\"a}schke, J. (2020a).
+\newblock Combining machine learning and process engineering physics towards
+  enhanced accuracy and explainability of data-driven models.
+\newblock {\em Computers \& Chemical Engineering}, 138:106834.
+
+\bibitem[Bikmukhametov and J{\"a}schke, 2020b]{bikmukhametov2020first}
+Bikmukhametov, T. and J{\"a}schke, J. (2020b).
+\newblock First principles and machine learning virtual flow metering: a
+  literature review.
+\newblock {\em Journal of Petroleum Science and Engineering}, 184:106487.
+
+\bibitem[Corneliussen et~al., 2005]{corneliussen2005handbook}
+Corneliussen, S., for Oil, N.~S., Measurement, G., and (Organization), T.
+  (2005).
+\newblock {\em Handbook of Multiphase Flow Metering}.
+\newblock Norwegian Society for Oil and Gas Measurement.
+
+\bibitem[Dutta and Kumar, 2018]{dutta2018modeling}
+Dutta, P. and Kumar, A. (2018).
+\newblock Modeling and optimization of a liquid flow process using an
+  artificial neural network-based flower pollination algorithm.
+\newblock {\em Journal of Intelligent Systems}, 29(1):787--798.
+
+\bibitem[Franklin et~al., 2022]{franklin2022physics}
+Franklin, T.~S., Souza, L.~S., Fontes, R.~M., and Martins, M.~A. (2022).
+\newblock A physics-informed neural networks (pinn) oriented approach to flow
+  metering in oil wells: an esp lifted oil well system as a case study.
+\newblock {\em Digital Chemical Engineering}, 5:100056.
+
+\bibitem[Grimstad et~al., 2021]{grimstad2021bayesian}
+Grimstad, B., Hotvedt, M., Sandnes, A.~T., Kolbj{\o}rnsen, O., and Imsland,
+  L.~S. (2021).
+\newblock Bayesian neural networks for virtual flow metering: An empirical
+  study.
+\newblock {\em Applied Soft Computing}, 112:107776.
+
+\bibitem[Hansen et~al., 2019]{hansen2019multi}
+Hansen, L.~S., Pedersen, S., and Durdevic, P. (2019).
+\newblock Multi-phase flow metering in offshore oil and gas transportation
+  pipelines: Trends and perspectives.
+\newblock {\em Sensors}, 19(9):2184.
+
+\bibitem[Hotvedt et~al., 2020]{hotvedt2020developing}
+Hotvedt, M., Grimstad, B., and Imsland, L. (2020).
+\newblock Developing a hybrid data-driven, mechanistic virtual flow meter-a
+  case study.
+\newblock {\em IFAC-PapersOnLine}, 53(2):11692--11697.
+
+\bibitem[Ishak et~al., 2022]{ishak2022virtual}
+Ishak, M.~A., Al-qutami, T. A.~H., and Ismail, I. (2022).
+\newblock Virtual multiphase flow meter using combination of ensemble learning
+  and first principle physics based.
+\newblock {\em International Journal on Smart Sensing and Intelligent Systems},
+  15(1):1--21.
+
+\bibitem[Marfo and Kporxah, 2021]{marfo2021predicting}
+Marfo, S. and Kporxah, C. (2021).
+\newblock Predicting oil production rate using artificial neural network and
+  decline curve analytical methods.
+\newblock In {\em Proceedings of 6th UMaT biennial international mining and
+  mineral conference, Tarkwa, Ghana. http://conference. umat. edu.
+  gh/wp-content/uploads/2020/08/Predicting-Oil-Production-Rate-Using-Artificial-Neural-Network-and-Decline-Curve-Analytical-Methods.
+  pdf. Accessed}, volume~21.
+
+\bibitem[Meribout et~al., 2020]{meribout2020multiphase}
+Meribout, M., Azzi, A., Ghendour, N., Kharoua, N., Khezzar, L., and AlHosani,
+  E. (2020).
+\newblock Multiphase flow meters targeting oil \& gas industries.
+\newblock {\em Measurement}, 165:108111.
+
+\bibitem[Muchsin et~al., 2023]{muchsin2023virtual}
+Muchsin, F. A.~S., Joelianto, E., and Kurniadi, D. (2023).
+\newblock Virtual multiphase flow meter with time series-time delay artificial
+  neural network utilizing measurement data from well orifice flow meter.
+\newblock {\em Available at SSRN 4525653}.
+
+\bibitem[Nemoto et~al., 2023]{nemoto2023cloud}
+Nemoto, R.~H., Ibarra, R., Staff, G., Akhiiartdinov, A., Brett, D., Dalby, P.,
+  Casolo, S., and Piebalgs, A. (2023).
+\newblock Cloud-based virtual flow metering system powered by a hybrid
+  physics-data approach for water production monitoring in an offshore gas
+  field.
+\newblock {\em Digital Chemical Engineering}, 9:100124.
+
+\bibitem[Song et~al., 2022]{song2022intelligent}
+Song, S., Wu, M., Qi, J., Wu, H., Kang, Q., Shi, B., Shen, S., Li, Q., Yao, H.,
+  Chen, H., et~al. (2022).
+\newblock An intelligent data-driven model for virtual flow meters in oil and
+  gas development.
+\newblock {\em Chemical Engineering Research and Design}, 186:398--406.
+
+\end{thebibliography}

@@ -1,0 +1,756 @@
+\glsdefs@newdocentry{VFM}%
+{%
+name={\acronymfont {\glsentryshort {VFM}}},%
+sort={VFM},%
+type={acronym},%
+first={VFM},%
+firstplural={VFMs},%
+text={VFM},%
+plural={VFMs},%
+description={Virtual Flow Meter},%
+descriptionplural={Virtual Flow Meter},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Virtual Flow Meter},%
+longplural={Virtual Flow Meters},%
+short={VFM},%
+shortplural={VFMs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ESP}%
+{%
+name={\acronymfont {\glsentryshort {ESP}}},%
+sort={ESP},%
+type={acronym},%
+first={ESP},%
+firstplural={ESPs},%
+text={ESP},%
+plural={ESPs},%
+description={Electric Submersible Pumps},%
+descriptionplural={Electric Submersible Pumps},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Electric Submersible Pumps},%
+longplural={Electric Submersible Pumpss},%
+short={ESP},%
+shortplural={ESPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{PCP}%
+{%
+name={\acronymfont {\glsentryshort {PCP}}},%
+sort={PCP},%
+type={acronym},%
+first={PCP},%
+firstplural={PCPs},%
+text={PCP},%
+plural={PCPs},%
+description={Progressive Cavity Pumps},%
+descriptionplural={Progressive Cavity Pumps},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Progressive Cavity Pumps},%
+longplural={Progressive Cavity Pumpss},%
+short={PCP},%
+shortplural={PCPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{RP}%
+{%
+name={\acronymfont {\glsentryshort {RP}}},%
+sort={RP},%
+type={acronym},%
+first={RP},%
+firstplural={RPs},%
+text={RP},%
+plural={RPs},%
+description={Rod Pumps},%
+descriptionplural={Rod Pumps},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Rod Pumps},%
+longplural={Rod Pumpss},%
+short={RP},%
+shortplural={RPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{EOR}%
+{%
+name={\acronymfont {\glsentryshort {EOR}}},%
+sort={EOR},%
+type={acronym},%
+first={EOR},%
+firstplural={EORs},%
+text={EOR},%
+plural={EORs},%
+description={Enhanced Oil Recovery},%
+descriptionplural={Enhanced Oil Recovery},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Enhanced Oil Recovery},%
+longplural={Enhanced Oil Recoverys},%
+short={EOR},%
+shortplural={EORs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{WDH}%
+{%
+name={\acronymfont {\glsentryshort {WDH}}},%
+sort={WDH},%
+type={acronym},%
+first={WDH},%
+firstplural={WDHs},%
+text={WDH},%
+plural={WDHs},%
+description={Well Down Hole},%
+descriptionplural={Well Down Hole},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Well Down Hole},%
+longplural={Well Down Holes},%
+short={WDH},%
+shortplural={WDHs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{WH}%
+{%
+name={\acronymfont {\glsentryshort {WH}}},%
+sort={WH},%
+type={acronym},%
+first={WH},%
+firstplural={WHs},%
+text={WH},%
+plural={WHs},%
+description={Well Head},%
+descriptionplural={Well Head},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Well Head},%
+longplural={Well Heads},%
+short={WH},%
+shortplural={WHs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{DC}%
+{%
+name={\acronymfont {\glsentryshort {DC}}},%
+sort={DC},%
+type={acronym},%
+first={DC},%
+firstplural={DCs},%
+text={DC},%
+plural={DCs},%
+description={Downstream Choke},%
+descriptionplural={Downstream Choke},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Downstream Choke},%
+longplural={Downstream Chokes},%
+short={DC},%
+shortplural={DCs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{DHP}%
+{%
+name={\acronymfont {\glsentryshort {DHP}}},%
+sort={DHP},%
+type={acronym},%
+first={DHP},%
+firstplural={DHPs},%
+text={DHP},%
+plural={DHPs},%
+description={Down Hole Pressure},%
+descriptionplural={Down Hole Pressure},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Down Hole Pressure},%
+longplural={Down Hole Pressures},%
+short={DHP},%
+shortplural={DHPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{DHT}%
+{%
+name={\acronymfont {\glsentryshort {DHT}}},%
+sort={DHT},%
+type={acronym},%
+first={DHT},%
+firstplural={DHTs},%
+text={DHT},%
+plural={DHTs},%
+description={Down Hole Temperature},%
+descriptionplural={Down Hole Temperature},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Down Hole Temperature},%
+longplural={Down Hole Temperatures},%
+short={DHT},%
+shortplural={DHTs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{WHP}%
+{%
+name={\acronymfont {\glsentryshort {WHP}}},%
+sort={WHP},%
+type={acronym},%
+first={WHP},%
+firstplural={WHPs},%
+text={WHP},%
+plural={WHPs},%
+description={Well Head Pressure},%
+descriptionplural={Well Head Pressure},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Well Head Pressure},%
+longplural={Well Head Pressures},%
+short={WHP},%
+shortplural={WHPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{WHT}%
+{%
+name={\acronymfont {\glsentryshort {WHT}}},%
+sort={WHT},%
+type={acronym},%
+first={WHT},%
+firstplural={WHTs},%
+text={WHT},%
+plural={WHTs},%
+description={Well Head Temperature},%
+descriptionplural={Well Head Temperature},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Well Head Temperature},%
+longplural={Well Head Temperatures},%
+short={WHT},%
+shortplural={WHTs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{DCR}%
+{%
+name={\acronymfont {\glsentryshort {DCR}}},%
+sort={DCR},%
+type={acronym},%
+first={DCR},%
+firstplural={DCRs},%
+text={DCR},%
+plural={DCRs},%
+description={Downstream Choke Valve},%
+descriptionplural={Downstream Choke Valve},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Downstream Choke Valve},%
+longplural={Downstream Choke Valves},%
+short={DCR},%
+shortplural={DCRs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{DCP}%
+{%
+name={\acronymfont {\glsentryshort {DCP}}},%
+sort={DCP},%
+type={acronym},%
+first={DCP},%
+firstplural={DCPs},%
+text={DCP},%
+plural={DCPs},%
+description={Downstream Choke Pressure},%
+descriptionplural={Downstream Choke Pressure},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Downstream Choke Pressure},%
+longplural={Downstream Choke Pressures},%
+short={DCP},%
+shortplural={DCPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{SPFM}%
+{%
+name={\acronymfont {\glsentryshort {SPFM}}},%
+sort={SPFM},%
+type={acronym},%
+first={SPFM},%
+firstplural={SPFMs},%
+text={SPFM},%
+plural={SPFMs},%
+description={Single Phase Flow Meter},%
+descriptionplural={Single Phase Flow Meter},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Single Phase Flow Meter},%
+longplural={Single Phase Flow Meters},%
+short={SPFM},%
+shortplural={SPFMs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{WT}%
+{%
+name={\acronymfont {\glsentryshort {WT}}},%
+sort={WT},%
+type={acronym},%
+first={WT},%
+firstplural={WTs},%
+text={WT},%
+plural={WTs},%
+description={Well Test},%
+descriptionplural={Well Test},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Well Test},%
+longplural={Well Tests},%
+short={WT},%
+shortplural={WTs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{MPFM}%
+{%
+name={\acronymfont {\glsentryshort {MPFM}}},%
+sort={MPFM},%
+type={acronym},%
+first={MPFM},%
+firstplural={MPFMs},%
+text={MPFM},%
+plural={MPFMs},%
+description={Multi Phase Flow Meters},%
+descriptionplural={Multi Phase Flow Meters},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Multi Phase Flow Meters},%
+longplural={Multi Phase Flow Meterss},%
+short={MPFM},%
+shortplural={MPFMs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{PVT}%
+{%
+name={\acronymfont {\glsentryshort {PVT}}},%
+sort={PVT},%
+type={acronym},%
+first={PVT},%
+firstplural={PVTs},%
+text={PVT},%
+plural={PVTs},%
+description={Pressure Volume Temperature},%
+descriptionplural={Pressure Volume Temperature},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Pressure Volume Temperature},%
+longplural={Pressure Volume Temperatures},%
+short={PVT},%
+shortplural={PVTs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{IPR}%
+{%
+name={\acronymfont {\glsentryshort {IPR}}},%
+sort={IPR},%
+type={acronym},%
+first={IPR},%
+firstplural={IPRs},%
+text={IPR},%
+plural={IPRs},%
+description={Inflow Performance Relationship},%
+descriptionplural={Inflow Performance Relationship},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Inflow Performance Relationship},%
+longplural={Inflow Performance Relationships},%
+short={IPR},%
+shortplural={IPRs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{VLP}%
+{%
+name={\acronymfont {\glsentryshort {VLP}}},%
+sort={VLP},%
+type={acronym},%
+first={VLP},%
+firstplural={VLPs},%
+text={VLP},%
+plural={VLPs},%
+description={Vertical Lift Performance},%
+descriptionplural={Vertical Lift Performance},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Vertical Lift Performance},%
+longplural={Vertical Lift Performances},%
+short={VLP},%
+shortplural={VLPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{GOR}%
+{%
+name={\acronymfont {\glsentryshort {GOR}}},%
+sort={GOR},%
+type={acronym},%
+first={GOR},%
+firstplural={GORs},%
+text={GOR},%
+plural={GORs},%
+description={Gas-Oil Ratio},%
+descriptionplural={Gas-Oil Ratio},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Gas-Oil Ratio},%
+longplural={Gas-Oil Ratios},%
+short={GOR},%
+shortplural={GORs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ML}%
+{%
+name={\acronymfont {\glsentryshort {ML}}},%
+sort={ML},%
+type={acronym},%
+first={ML},%
+firstplural={MLs},%
+text={ML},%
+plural={MLs},%
+description={Machine Learning},%
+descriptionplural={Machine Learning},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Machine Learning},%
+longplural={Machine Learnings},%
+short={ML},%
+shortplural={MLs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ASN}%
+{%
+name={\acronymfont {\glsentryshort {ASN}}},%
+sort={ASN},%
+type={acronym},%
+first={ASN},%
+firstplural={ASNs},%
+text={ASN},%
+plural={ASNs},%
+description={Adaptive Simulated Annealing},%
+descriptionplural={Adaptive Simulated Annealing},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Adaptive Simulated Annealing},%
+longplural={Adaptive Simulated Annealings},%
+short={ASN},%
+shortplural={ASNs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{BNN}%
+{%
+name={\acronymfont {\glsentryshort {BNN}}},%
+sort={BNN},%
+type={acronym},%
+first={BNN},%
+firstplural={BNNs},%
+text={BNN},%
+plural={BNNs},%
+description={Bayesian Neural Network},%
+descriptionplural={Bayesian Neural Network},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Bayesian Neural Network},%
+longplural={Bayesian Neural Networks},%
+short={BNN},%
+shortplural={BNNs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{PINN}%
+{%
+name={\acronymfont {\glsentryshort {PINN}}},%
+sort={PINN},%
+type={acronym},%
+first={PINN},%
+firstplural={PINNs},%
+text={PINN},%
+plural={PINNs},%
+description={Physics Informed Neural Networks},%
+descriptionplural={Physics Informed Neural Networks},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Physics Informed Neural Networks},%
+longplural={Physics Informed Neural Networkss},%
+short={PINN},%
+shortplural={PINNs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{BPNN}%
+{%
+name={\acronymfont {\glsentryshort {BPNN}}},%
+sort={BPNN},%
+type={acronym},%
+first={BPNN},%
+firstplural={BPNNs},%
+text={BPNN},%
+plural={BPNNs},%
+description={Back Propogation Neural Network},%
+descriptionplural={Back Propogation Neural Network},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Back Propogation Neural Network},%
+longplural={Back Propogation Neural Networks},%
+short={BPNN},%
+shortplural={BPNNs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{RF}%
+{%
+name={\acronymfont {\glsentryshort {RF}}},%
+sort={RF},%
+type={acronym},%
+first={RF},%
+firstplural={RFs},%
+text={RF},%
+plural={RFs},%
+description={Random Forest},%
+descriptionplural={Random Forest},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Random Forest},%
+longplural={Random Forests},%
+short={RF},%
+shortplural={RFs},%
+counter={page},%
+parent={},%
+%
+}%
+
