@@ -40,7 +40,7 @@ urlcolor    =  blue
 \usepackage{pdflscape}
 \usepackage{amsfonts}
 \usepackage{booktabs}
-
+\usepackage{array}
 
 \begin{document}
 % Update the following variables. Doing so will auto-generate the first three pages:
@@ -204,13 +204,13 @@ Fluid flow within an oil and gas well occurs through a complex piping network an
 Fluid flow in oil and gas wells typically consists of a multiphase mixture of oil, gas, and water. The relative proportions of these phases vary spatially along the wellbore and temporally with changing reservoir and operating conditions. Multiphase interactions give rise to complex flow phenomena such as phase slip, interfacial instabilities, and regime transitions, which significantly complicate both physical measurement and data-driven estimation of flow rates.
 The piping network of an oil and gas well may include vertical, deviated, inclined, and horizontal sections. As a result, fluid flow can occur in upward, downward, or mixed directions depending on the well trajectory. Changes in inclination strongly affect phase distribution, gravitational segregation, and pressure losses, thereby influencing the observed flow behavior and sensor measurements along the well.
 
-\subsection{Steady-State Flow}
+\subsection{Steady State Flow}
 
-Steady-state flow refers to operating conditions under which the pressure, flow rates, and phase fractions of the produced fluids remain approximately constant over time. In this regime, spatial and temporal gradients of flow variables are relatively small, and the system can be reasonably assumed to be in equilibrium. Steady-state assumptions are commonly employed in analytical flow models and production surveillance due to their mathematical simplicity and reduced computational complexity. However, such assumptions may not fully capture the dynamic behavior of multiphase flow in real well operations.
+Steady state flow refers to operating conditions under which the pressure, flow rates, and phase fractions of the produced fluids remain approximately constant over time. In this regime, spatial and temporal gradients of flow variables are relatively small, and the system can be reasonably assumed to be in equilibrium. Steady-state assumptions are commonly employed in analytical flow models and production surveillance due to their mathematical simplicity and reduced computational complexity. However, such assumptions may not fully capture the dynamic behavior of multiphase flow in real well operations.
 
-\subsection{Unsteady-State Flow}
+\subsection{Unsteady State Flow}
 
-Unsteady-state flow is characterized by temporal variations in pressure, flow rates, and phase distribution within the wellbore. These fluctuations may arise from operational changes such as choke adjustments, variations in reservoir inflow, or transient flow phenomena including slugging and phase redistribution. In unsteady conditions, the flow variables are continuously evolving, violating steady-state assumptions and increasing the uncertainty of flow-rate measurements. Capturing unsteady-state behavior is therefore critical for accurate production monitoring and motivates the use of advanced data-driven and hybrid modeling approaches.
+Unsteady state flow is characterized by temporal variations in pressure, flow rates, and phase distribution within the wellbore. These fluctuations may arise from operational changes such as choke adjustments, variations in reservoir inflow, or transient flow phenomena including slugging and phase redistribution. In unsteady conditions, the flow variables are continuously evolving, violating steady-state assumptions and increasing the uncertainty of flow-rate measurements. Capturing unsteady-state behavior is therefore critical for accurate production monitoring and motivates the use of advanced data-driven and hybrid modeling approaches.
 
 \subsection{Implications for Flow Measurement}
 
@@ -224,10 +224,6 @@ Traditional \abbr{Single Phase Flow Meter}{SPFM} systems necessitate the complet
  
 \subsection{Multi Phase Flow Meter}
 \abbr{Multi Phase Flow Meters}{MPFM} in the oil industry is a specialized device designed to measure the flow rates of oil, gas, and water as they are produced from a well. MPFM measure the flow rates of different phases simultaneously without separation. MPFM can provide continuous measurement of flow rates at sensor locations with decent accuracy but they are considered extremely expensive and requires regular calibration. Multi-phase flow measurement technology may be an attractive alternative since it enables measurement of unprocessed well streams very close to the well. The use of MPFM may lead to cost savings in the initial installation. However, due to increased measurement uncertainty, a cost-benefit analysis should be performed over the life cycle of the project to justify its application. It operates by determining the individual oil, gas and water phase fractions and their flow rates within a single pipeline or wellbore. MPFM also considered less accurate outside the normal operational range. SPFM are considered more accurate than MPFM since the phases are measured after separation in SPFM \citep{meribout2020multiphase}. 
-
-\begin{figure}[!htb]
-\uomFig{Multi phase flow meter}{fig:mpfm-1}{\includegraphics[width=0.9\textwidth]{images/mpfm-1.png}}{}
-\end{figure}
 
 \section{Virtual Flow Meters}
 VFM are virtual model for predicting flow rates. Unlike the physical flow meters, VFM doesn't require deployment of dedicated hardware for flow rate measurement. Both VFM and physical flow meters measure the flow rates indirectly. Physical flow meters bring their own set of sensors whereas VFM use the existing sensors in the well. Over the past two decades, the evolution of VFM has led to the creation of diverse techniques for estimating multi-phase flow rates using field data. This progress has seen the emergence of commercial VFM systems from various companies, widely adopted by oil and gas companies globally. Physical flow meters use physics based mathematical equations to calculate the flow rates whereas VFM can use physics equations and/or ML based models for prediction. VFM, therefore can be categorized into 3 types; physics based, ML based and hybrid flow meters.
@@ -266,7 +262,7 @@ Hybrid VFM combines the physics based and ML based models to improve the perform
 \label{sec:problem}
 Accurate estimation of multiphase flow rates in producing oil and gas wells is a fundamental requirement for effective production monitoring, reservoir management, and operational decision-making. Traditionally, this task is performed using MPFMs, which provide direct measurements of oil, gas, and water flow rates. However, MPFMs are capital-intensive, require regular calibration and maintenance, and are often deployed at limited locations due to cost and operational constraints. As a result, continuous and comprehensive flow rate measurements are rarely available across all wells and operating conditions.
 
-To address these limitations, VFM techniques have been developed as software-based alternatives to physical flow meters. Conventional VFM approaches rely on {first-principles physics-based models, which use pressure, temperature, choke settings, and fluid properties to estimate flow rates. While these models are grounded in physical laws and offer interpretability, their accuracy is often limited by simplifying assumptions, uncertainty in model parameters, unmodeled multiphase flow phenomena, and changing well and reservoir conditions over time. Consequently, purely physics-based VFMs may exhibit systematic bias or degraded performance when applied outside their calibration envelope.
+To address these limitations, VFM techniques have been developed as software-based alternatives to physical flow meters. The conventional VFM approaches rely on {first-principles physics-based models, which use pressure, temperature, choke settings, and fluid properties to estimate flow rates. While these models are grounded in physical laws and offer interpretability, their accuracy is often limited by simplifying assumptions, uncertainty in model parameters, unmodeled multiphase flow phenomena, and changing well and reservoir conditions over time. Consequently, purely physics-based VFMs may exhibit systematic bias or degraded performance when applied outside their calibration envelope.
 
 Recent advances in data-driven and machine learning techniques have demonstrated strong predictive capabilities for complex nonlinear systems, including multiphase flow behavior. However, purely data-driven models typically require large volumes of high-quality labeled data, which are seldom available in production environments due to sparse MPFM measurements and irregular well testing schedules. Furthermore, black-box ML models often lack physical interpretability and may generate non-physical predictions when extrapolated beyond the training data, limiting their acceptance in safety-critical industrial applications.
 
@@ -274,7 +270,7 @@ This situation highlights a fundamental challenge in Virtual Flow Metering: phys
 
 A promising approach to overcome these limitations is the development of hybrid or physics-informed learning architectures, in which physical models and machine learning are combined in a complementary manner. In particular, \textit{residual learning} offers a structured framework whereby a physics-based model produces a baseline estimate of flow rates, and a data-driven component learns to model the residual errors arising from unmodeled dynamics, parameter uncertainty, and measurement noise. This formulation preserves physical interpretability while enabling data-driven correction of systematic model deficiencies.
 
-Despite increasing interest in hybrid modeling approaches, there remains a lack of systematic investigation into \textit{physics-informed residual learning architectures for Virtual Flow Metering under sparse and irregular measurement conditions}, particularly in multi-well production systems. 
+Despite increasing interest in hybrid modeling approaches, there remains a lack of systematic investigation into physics-informed residual learning architectures for Virtual Flow Metering under sparse and irregular measurement conditions, particularly in multi-well production systems. 
 Key open questions include how residual models can be trained effectively with limited ground-truth flow measurements, how physics-generated states can be leveraged as informative context without introducing data leakage, and how such architectures compare against traditional physics-only and purely data-driven methods in terms of accuracy, robustness, and generalization.
 Therefore, the research problem addressed in this thesis can be stated as follows:
 
@@ -455,9 +451,109 @@ The reviewed literature reveals a clear gap between interpretable but brittle ph
 
 Such an architecture aligns with contemporary best practices in hybrid modeling and satisfies industrial requirements for robustness, interpretability, scalability, and data efficiency.
 
-\begin{figure}[!htb]
-\uomFig{VFM types}{fig:vfm-types}{\includegraphics[width=1.2\textwidth]{images/vfm-types.png}}{}
-\end{figure}
+\newcolumntype{Z}{>{\raggedright\arraybackslash}p{3cm}}
+\begin{longtable}{p{2.7cm} Z Z Z Z}
+\caption{Comparative evaluation of flow metering and virtual flow metering approaches}
+\label{tab:flow_metering_comparison} \\
+
+\hline
+\textbf{Criterion} 
+& \textbf{MPFM} 
+& \textbf{Physics-Based VFM} 
+& \textbf{ML-Based VFM} 
+& \textbf{Hybrid Physics--ML VFM} \\
+\hline
+\endfirsthead
+
+\multicolumn{5}{c}{{\tablename\ \thetable{} -- continued}} \\
+\hline
+\textbf{Criterion} 
+& \textbf{MPFM} 
+& \textbf{Physics-Based VFM} 
+& \textbf{ML-Based VFM} 
+& \textbf{Hybrid Physics--ML VFM} \\
+\hline
+\endhead
+
+\hline \multicolumn{5}{r}{{continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+Measurement principle 
+& Direct physical measurement using nuclear, differential pressure, impedance, or venturi-based sensors 
+& Governing mass, momentum, and energy balance equations with empirical closure relations 
+& Statistical or machine-learning-based mapping between sensor inputs and flow rates 
+& Physics-guided data-driven inference combining physical laws and machine learning \\
+
+Accuracy under ideal conditions 
+& High when calibrated and operated within design envelope 
+& Moderate to high, depending on model fidelity and calibration 
+& High within training data domain 
+& High across wide operating ranges due to physics-guided learning \\
+
+Performance under changing flow regimes 
+& Degrades under slugging, emulsions, and severe regime transitions 
+& Sensitive to regime assumptions and closure law validity 
+& Poor extrapolation beyond trained regimes 
+& Robust due to physical consistency and adaptive correction \\
+
+Data requirements 
+& Minimal (sensor signals only) 
+& Low to moderate (well geometry, PVT properties, boundary conditions) 
+& High (large, labeled datasets required) 
+& Moderate (limited labeled data supplemented by physics constraints) \\
+
+Dependence on well tests 
+& Required periodically for recalibration 
+& Strong dependence for parameter estimation 
+& Strong dependence for supervised learning 
+& Reduced dependence due to physics-informed training \\
+
+Generalization capability 
+& Limited to hardware operating envelope 
+& Limited across wells due to well-specific parameters 
+& Limited; prone to overfitting 
+& Improved cross-well and cross-condition generalization \\
+
+Physical interpretability 
+& High (direct physical measurements) 
+& High (explicit physical meaning of parameters) 
+& Low (black-box behavior) 
+& High to moderate with interpretable residual structure \\
+
+Computational cost 
+& Low during operation; high installation and maintenance cost 
+& Moderate due to nonlinear solvers 
+& Low inference cost; high training cost 
+& Moderate; suitable for near real-time deployment \\
+
+Installation and operational cost 
+& Very high (CAPEX and OPEX) 
+& Low (software-based) 
+& Low (software-based) 
+& Low (software-based) \\
+
+Sensitivity to sensor noise 
+& Moderate; hardware filtering required 
+& High sensitivity due to noise propagation through equations 
+& High unless explicitly regularized 
+& Reduced through physics-based regularization \\
+
+Scalability across fields 
+& Poor due to hardware deployment constraints 
+& Moderate with per-well calibration 
+& High if sufficient data exists 
+& High with minimal re-calibration \\
+
+Long-term maintainability 
+& Challenging due to sensor drift and failures 
+& Moderate; requires periodic recalibration 
+& Challenging due to model drift and retraining 
+& Improved stability via physics constraints \\
+
+\end{longtable}
 
 
 \begin{longtable}[!htb]{p{0.2\textwidth}p{0.1\textwidth}p{0.2\textwidth}p{0.35\textwidth}}

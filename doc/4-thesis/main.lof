@@ -1,10 +1,8 @@
 \contentsline {figure}{\numberline {1.1}{\ignorespaces Well downhole and surface instrumentation}}{6}{figure.caption.8}%
-\contentsline {figure}{\numberline {1.2}{\ignorespaces Multi phase flow meter}}{10}{figure.caption.10}%
-\contentsline {figure}{\numberline {2.1}{\ignorespaces VFM types}}{24}{figure.caption.11}%
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Component-level architecture of the proposed hybrid physics-informed residual learning framework}}{28}{figure.caption.12}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces W10 - downhole pressure}}{32}{figure.caption.14}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces W10 - downhole temperature}}{32}{figure.caption.15}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces W10 - wellhead pressure}}{32}{figure.caption.16}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces W10 - wellhead temperature}}{33}{figure.caption.17}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces W10 - Downstream choke pressure}}{33}{figure.caption.18}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces W10 - Downstream choke regulation}}{33}{figure.caption.19}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Component-level architecture of the proposed hybrid physics-informed residual learning framework}}{29}{figure.caption.10}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces W10 - downhole pressure}}{33}{figure.caption.12}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces W10 - downhole temperature}}{33}{figure.caption.13}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces W10 - wellhead pressure}}{33}{figure.caption.14}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces W10 - wellhead temperature}}{34}{figure.caption.15}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces W10 - Downstream choke pressure}}{34}{figure.caption.16}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces W10 - Downstream choke regulation}}{34}{figure.caption.17}%
