@@ -451,8 +451,8 @@ The reviewed literature reveals a clear gap between interpretable but brittle ph
 
 Such an architecture aligns with contemporary best practices in hybrid modeling and satisfies industrial requirements for robustness, interpretability, scalability, and data efficiency.
 
-\newcolumntype{Z}{>{\raggedright\arraybackslash}p{3cm}}
-\begin{longtable}{p{2.7cm} Z Z Z Z}
+\newcolumntype{Z}{>{\raggedright\arraybackslash}p{2.5cm}}
+\begin{longtable}{p{2cm} Z Z Z Z}
 \caption{Comparative evaluation of flow metering and virtual flow metering approaches}
 \label{tab:flow_metering_comparison} \\
 
@@ -461,7 +461,7 @@ Such an architecture aligns with contemporary best practices in hybrid modeling 
 & \textbf{MPFM} 
 & \textbf{Physics-Based VFM} 
 & \textbf{ML-Based VFM} 
-& \textbf{Hybrid Physics--ML VFM} \\
+& \textbf{Hybrid Physics-ML VFM} \\
 \hline
 \endfirsthead
 
@@ -471,7 +471,7 @@ Such an architecture aligns with contemporary best practices in hybrid modeling 
 & \textbf{MPFM} 
 & \textbf{Physics-Based VFM} 
 & \textbf{ML-Based VFM} 
-& \textbf{Hybrid Physics--ML VFM} \\
+& \textbf{Hybrid Physics-ML VFM} \\
 \hline
 \endhead
 
@@ -1701,48 +1701,33 @@ Signed mean relative error (average discrepancy) &
 
 \chapter{Results and Analysis}
 
-\begin{table}[htbp]
+\begin{table}[!htb]
 \centering
-\caption{W10 Performance Comparison: Physics vs Physics-Informed Hybrid Model}
-\label{tab:w10_physics_vs_hybrid}
-\begin{tabular}{llccccc}
+\caption{Performance comparison on Well W10 against well test (reference) rates}
+\label{tab:w10_comparison}
+\begin{tabular}{lcccc}
 \hline
-\textbf{Variable} 
-& \textbf{Model}
-& \textbf{R$^2$ (-)}
-& \textbf{MAE}
-& \textbf{RMSE}
-& \textbf{MAPE (\%)}
-& \textbf{MPE (\%)} \\
+\textbf{Rate} & \textbf{Model} & $\mathbf{R^2}$ & \textbf{RMSE} & \textbf{MAE} \\
+ &  &  & (Sm$^3$/h) & (Sm$^3$/h) \\
 \hline
-
-\multirow{2}{*}{Oil rate $q_o$ (Sm$^3$/h)}
-& Physics        & 0.38 & 20.82 & 26.96 & 21.38 & 7.72 \\
-& Hybrid         & 0.87 & 10.49 & 12.18 & 9.57  & 4.42 \\
-
+\multirow{3}{*}{Oil ($q_o$)}
+ & Physics-only & 0.40 & 25.77 & 19.71 \\
+ & Hybrid (Physics--ML) & \textbf{0.75} & \textbf{16.64} & \textbf{12.55} \\
+ & MPFM & 0.97 & 5.53 & 4.02 \\
 \hline
-\multirow{2}{*}{Water rate $q_w$ (Sm$^3$/h)}
-& Physics        & 0.57 & 4.25  & 6.60  & 70.45 & -0.11 \\
-& Hybrid         & 0.86 & 2.80  & 3.77  & 57.17 & -33.25 \\
-
+\multirow{3}{*}{Gas ($q_g$)}
+ & Physics-only & 0.72 & 2320.17 & 1677.23 \\
+ & Hybrid (Physics--ML) & \textbf{0.91} & \textbf{1306.14} & \textbf{1027.52} \\
+ & MPFM & 0.95 & 974.13 & 453.14 \\
 \hline
-\multirow{2}{*}{Gas rate $q_g$ (Sm$^3$/h)}
-& Physics        & 0.74 & 1358.29 & 1995.35 & 8.51 & -4.50 \\
-& Hybrid         & 0.95 & 718.55  & 879.48  & 5.09 & 0.84 \\
-
-\hline
-\multirow{2}{*}{WGR (Sm$^3$/Sm$^3$)}
-& Physics        & 0.51 & $2.99 \times 10^{-4}$ & $4.56 \times 10^{-4}$ & 81.58 & 13.03 \\
-& Hybrid         & 0.83 & $1.97 \times 10^{-4}$ & $2.71 \times 10^{-4}$ & 56.68 & -34.02 \\
-
-% \hline
-% \multirow{2}{*}{GOR (Sm$^3$/Sm$^3$)}
-% & Physics        & -1.77 & 15.61 & 25.52 & 12.00 & -5.75 \\
-% & Hybrid         & 0.19  & 10.25 & 13.79 & 8.13  & -2.52 \\
-
+\multirow{3}{*}{Water ($q_w$)}
+ & Physics-only & 0.10 & 7.28 & 3.22 \\
+ & Hybrid (Physics--ML) & \textbf{0.30} & \textbf{6.41} & \textbf{2.51} \\
+ & MPFM & 0.83 & 3.22 & 2.71 \\
 \hline
 \end{tabular}
 \end{table}
+
 
 \section{Code Availability and Reproducibility}
 

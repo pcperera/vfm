@@ -39,10 +39,12 @@ class Preprocessor:
         df.dropna(subset=get_independent_vars_with_no_well_code(), inplace=True)
 
         df = df[get_all_vars()]
-        df = df[(df["qo_mpfm"] >= 0) & (df["qg_mpfm"] >= 0) & (df["qw_mpfm"] >= 0)]
+        # df = df[(df["qo_mpfm"] >= 0) & (df["qg_mpfm"] >= 0) & (df["qw_mpfm"] >= 0)]
+        df = df[(df["qo_well_test"] >= 0) & (df["qg_well_test"] >= 0) & (df["qw_well_test"] >= 0)]
 
         # Drop rows where oil and gas rates are both zero.
-        df = df[~((df["qo_mpfm"] == 0) & (df["qg_mpfm"] == 0))]
+        # df = df[~((df["qo_mpfm"] == 0) & (df["qg_mpfm"] == 0))]
+        df = df[~((df["qo_well_test"] == 0) & (df["qg_well_test"] == 0))]
 
         return df    
 

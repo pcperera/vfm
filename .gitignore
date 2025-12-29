@@ -162,4 +162,4 @@ checkpoints
 lightning_logs
 
 metrics
-data/*.csv
+data/*

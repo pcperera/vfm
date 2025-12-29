@@ -70,9 +70,9 @@ class Connection:
             mapping["DCP"]   = f"{well}_WELL_TEST_DOWNSTREAM_CHOKE_PRES"
 
             # Well test rates (naming convention preserved)
-            mapping["QO_WELL_TEST"] = f"LER_Q_OIL_WELL_TEST_WELL{well[1:]}"
-            mapping["QG_WELL_TEST"] = f"LER_Q_GAS_WELL_TEST_WELL{well[1:]}"
-            mapping["QW_WELL_TEST"] = f"LER_Q_WATER_WELL_TEST_WELL{well[1:]}"
+            mapping["QO_WELL_TEST"] = f"{well}_WELL_TEST_OIL_RATE_TEST_SEPARATOR"
+            mapping["QG_WELL_TEST"] = f"{well}_WELL_TEST_GAS_RATE_TEST_SEPARATOR"
+            mapping["QW_WELL_TEST"] = f"{well}_WELL_TEST_QW_TEST_SEPARATOR"
 
             # MPFM
             mapping["QO_MPFM"] = f"{well}_WELL_TEST_OIL_RATE_MPFM"

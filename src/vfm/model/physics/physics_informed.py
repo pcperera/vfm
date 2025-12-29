@@ -78,14 +78,60 @@ def regression_metrics(y_true, y_pred):
 # =====================================================
 
 class PhysicsModel:
-    P_SCALE = 100.0       # ~100 bar
-    T_SCALE = 100.0       # ~100 °C (scaling only)
+    """
+    Physics-based well flow model with:
+    - Liquid inflow relationship
+    - Logistic water-cut closure
+    - Pressure-driven gas-rate formulation
 
-    def __init__(self, estimate_pres_offset=10.0, fit_pres=True):
+    This class supports optional geometry-informed constraints and
+    partial pooling of physics parameters. When geometry or global
+    priors are not available, the model automatically falls back to
+    the original calibration behavior.
+    """
+
+    # --------------------------------------------------
+    # Scaling constants
+    # --------------------------------------------------
+    P_SCALE = 100.0       # ~100 bar (numerical scaling only)
+    T_SCALE = 100.0       # ~100 °C (numerical scaling only)
+
+    def __init__(
+        self,
+        estimate_pres_offset: float = 10.0,
+        fit_pres: bool = True,
+        geometry: dict | None = None,        # optional
+        global_params: dict | None = None,   # optional
+        n_ref: int = 50,                     # reference data size
+    ):
+        """
+        Parameters
+        ----------
+        estimate_pres_offset : float
+            Fallback pressure offset when reservoir pressure
+            cannot be estimated from geometry.
+        fit_pres : bool
+            Whether to estimate reservoir pressure explicitly.
+        geometry : dict, optional
+            Well geometry parameters (e.g., BH_TVD).
+        global_params : dict, optional
+            Global physics parameter priors for partial pooling.
+        n_ref : int
+            Reference number of samples for full parameter freedom.
+        """
         self.fit_pres = fit_pres
         self.estimate_pres_offset = estimate_pres_offset
+
+        # NEW: optional geometry and global priors
+        self.geometry = geometry or {}
+        self.global_params = global_params
+        self.n_ref = n_ref
+
         self.params_ = None
 
+    # --------------------------------------------------
+    # Feature matrix for water-cut closure
+    # --------------------------------------------------
     def _feature_matrix_for_wc(self, df):
         choke = df["choke"].values
         dcp = df["dcp"].values / self.P_SCALE
@@ -103,6 +149,9 @@ class PhysicsModel:
             dcp * wht,
         ]).T
 
+    # --------------------------------------------------
+    # Parameter unpacking helper
+    # --------------------------------------------------
     def _unpack(self, x, n_wc):
         i = 0
         P_res = x[i] if self.fit_pres else None; i += self.fit_pres
@@ -111,6 +160,9 @@ class PhysicsModel:
         A_wc = x[i:i+n_wc]
         return P_res, qL_max, a, b, Cg, k_ch, ch0, A_wc
 
+    # --------------------------------------------------
+    # Residual function for least squares
+    # --------------------------------------------------
     def residuals(self, x, df, y_qo, y_qg, y_qw):
         n_wc = 8
         P_res, qL_max, a, b, Cg, k_ch, ch0, A = self._unpack(x, n_wc)
@@ -137,19 +189,28 @@ class PhysicsModel:
             (qg - y_qg) / max(np.std(y_qg), EPS),
         ])
 
+    # --------------------------------------------------
+    # Fit physics model
+    # --------------------------------------------------
     def fit(self, df, y_qo, y_qg, y_qw):
         """
         Calibrate physics model parameters for a single well.
+
+        This method supports:
+        - Geometry-informed reservoir pressure bounds (if available)
+        - Partial pooling of physics parameters (if global priors exist)
+
+        When geometry or global priors are unavailable, the calibration
+        defaults to the original unconstrained formulation.
         """
 
         # --------------------------------------------------
-        # 1. Clean input data (CRITICAL)
+        # 1. Clean input data
         # --------------------------------------------------
         required_cols = [
             "dhp", "choke", "dcp", "dht", "wht",
             y_qo, y_qg, y_qw
         ]
-
         df = df.dropna(subset=required_cols)
 
         if len(df) < 10:
@@ -163,27 +224,37 @@ class PhysicsModel:
         # 2. Safe statistics
         # --------------------------------------------------
         dhp = df["dhp"].values.astype(float)
-
         dhp_max = float(np.nanmax(dhp))
-        dhp_min = float(np.nanmin(dhp))
-
-        if not np.isfinite(dhp_max):
-            raise ValueError("Invalid DHP values for physics calibration")
 
         qL_mean = float(np.nanmean(yqo + yqw))
         qL_mean = max(qL_mean, EPS)
 
         # --------------------------------------------------
-        # 3. Robust initial guess + bounds
+        # 3. Geometry-informed reservoir pressure bounds
+        # --------------------------------------------------
+        BH_TVD = self.geometry.get("BH_TVD")
+
+        RHO_LIQ = 850.0  # kg/m3 (representative liquid density)
+        G = 9.81         # m/s2
+
+        if BH_TVD is not None and np.isfinite(BH_TVD):
+            # Hydrostatic pressure estimate (Pa → bar)
+            hydro = RHO_LIQ * G * BH_TVD / 1e5
+
+            P_res0 = dhp_max + hydro
+            P_res_lb = dhp_max + 0.7 * hydro
+            P_res_ub = dhp_max + 1.3 * hydro
+        else:
+            # Fallback to original heuristic bounds
+            P_res0 = max(dhp_max + self.estimate_pres_offset, dhp_max * 1.05)
+            P_res_lb = dhp_max * 1.01
+            P_res_ub = dhp_max * 3.0
+
+        # --------------------------------------------------
+        # 4. Initial guess and bounds
         # --------------------------------------------------
         n_wc = 8
 
-        # Reservoir pressure
-        P_res0 = max(dhp_max + self.estimate_pres_offset, dhp_max * 1.05)
-        P_res_lb = dhp_max * 1.01
-        P_res_ub = dhp_max * 3.0
-
-        # Initial parameter vector
         x0 = (
             [P_res0, qL_mean, 0.2, 0.5, 50.0, 5.0, 0.3]
             + [0.0] * n_wc
@@ -200,17 +271,7 @@ class PhysicsModel:
         )
 
         # --------------------------------------------------
-        # 4. Final numeric safety check
-        # --------------------------------------------------
-        x0 = np.asarray(x0, dtype=float)
-        lb = np.asarray(lb, dtype=float)
-        ub = np.asarray(ub, dtype=float)
-
-        if not np.all((x0 > lb) & (x0 < ub)):
-            raise ValueError("Initial guess x0 is not strictly within bounds")
-
-        # --------------------------------------------------
-        # 5. Least squares optimization
+        # 5. Least-squares optimization
         # --------------------------------------------------
         res = least_squares(
             self.residuals,
@@ -223,11 +284,26 @@ class PhysicsModel:
             gtol=1e-8,
         )
 
-        # --------------------------------------------------
-        # 6. Store calibrated parameters
-        # --------------------------------------------------
         P_res, qL_max, a, b, Cg, k_ch, ch0, A = self._unpack(res.x, n_wc)
 
+        # --------------------------------------------------
+        # 6. Partial pooling of physics parameters
+        # --------------------------------------------------
+        if self.global_params is not None:
+            n_obs = len(df)
+            alpha = min(1.0, n_obs / self.n_ref)
+
+            # Shrink sparse-well parameters toward global physics
+            qL_max = alpha * qL_max + (1 - alpha) * self.global_params.get("qL_max", qL_max)
+            a       = alpha * a       + (1 - alpha) * self.global_params.get("a", a)
+            b       = alpha * b       + (1 - alpha) * self.global_params.get("b", b)
+            Cg      = alpha * Cg      + (1 - alpha) * self.global_params.get("Cg", Cg)
+            k_ch    = alpha * k_ch    + (1 - alpha) * self.global_params.get("k_choke", k_ch)
+            ch0     = alpha * ch0     + (1 - alpha) * self.global_params.get("choke0", ch0)
+
+        # --------------------------------------------------
+        # 7. Store calibrated parameters
+        # --------------------------------------------------
         self.params_ = dict(
             P_res=P_res,
             qL_max=qL_max,
@@ -240,7 +316,6 @@ class PhysicsModel:
         )
 
         return self
-
 
     def predict(self, df):
         p = self.params_
@@ -267,14 +342,20 @@ class PhysicsModel:
 # =============================
 class PhysicsInformedHybridModel:
 
-    def __init__(self, dependant_vars, independent_vars,
-                 well_id_col="well_id", degree=1, lags=1):
+    def __init__(self, 
+                 dependant_vars, 
+                 independent_vars,
+                 well_id_col="well_id", 
+                 degree=1, 
+                 lags=1,
+                 well_geometry: dict | None = None):
 
         self.dependant_vars = dependant_vars
         self.independent_vars = independent_vars
         self.well_id_col = well_id_col
         self.degree = degree
         self.lags = lags
+        self.well_geometry = well_geometry or {}
 
         self.phys_models = {}
 
@@ -316,41 +397,114 @@ class PhysicsInformedHybridModel:
     # --------------------------------------------------
     def fit(
         self,
-        df,
-        df_val=None,
-        y_qo_col="qo_mpfm",
-        y_qg_col="qg_mpfm",
-        y_qw_col="qw_mpfm",
+        df: pd.DataFrame,
+        df_val: pd.DataFrame | None = None,
+        y_qo_col: str = "qo_well_test",
+        y_qg_col: str = "qg_well_test",
+        y_qw_col: str = "qw_well_test",
     ):
         """
         Fit physics models per well and a global ML residual model.
+
+        Enhancements over the base implementation:
+        -------------------------------------------
+        1. Geometry-informed hard constraints during physics calibration
+        (only when geometry is available).
+        2. Partial pooling (hierarchical regularization) of physics parameters
+        across wells to improve robustness for sparse wells.
+
+        If geometry or global physics priors are not available, the method
+        automatically falls back to the original per-well independent
+        physics calibration strategy.
         """
 
-        # --------------------------------------------------
-        # 1. Fit physics models per well (TRAIN ONLY)
-        # --------------------------------------------------
+        # ==================================================
+        # 1. First pass: fit physics models independently
+        #    (used to compute global physics priors)
+        # ==================================================
+        temp_phys_models: dict[str, PhysicsModel] = {}
+
+        for wid, d in df.groupby(self.well_id_col):
+            try:
+                temp_phys_models[wid] = PhysicsModel().fit(
+                    d, y_qo_col, y_qg_col, y_qw_col
+                )
+            except Exception as e:
+                # Fail-safe: skip wells that cannot be calibrated
+                print(f"[WARN] Initial physics fit failed for well {wid}: {e}")
+
+        # ==================================================
+        # 2. Compute global physics priors (if possible)
+        # ==================================================
+        def _compute_global_physics_priors(phys_models: dict):
+            """
+            Compute global mean physics parameters across wells.
+            Used for partial pooling. Returns None if insufficient data.
+            """
+            params = [m.params_ for m in phys_models.values() if m.params_ is not None]
+            if not params:
+                return None
+
+            keys = ["qL_max", "a", "b", "Cg", "k_choke", "choke0"]
+            priors = {}
+
+            for k in keys:
+                values = [p[k] for p in params if np.isfinite(p.get(k, np.nan))]
+                if values:
+                    priors[k] = float(np.mean(values))
+
+            return priors if priors else None
+
+        global_physics_params = _compute_global_physics_priors(temp_phys_models)
+
+        # ==================================================
+        # 3. Second pass: refit physics models with
+        #    geometry constraints + partial pooling
+        # ==================================================
         self.phys_models = {}
 
         for wid, d in df.groupby(self.well_id_col):
-            self.phys_models[wid] = PhysicsModel().fit(
-                d, y_qo_col, y_qg_col, y_qw_col
-            )
+            # Fetch geometry for this well (if available)
+            geom = None
+            if hasattr(self, "well_geometry"):
+                geom = self.well_geometry.get(wid)
 
-        # --------------------------------------------------
-        # 2. Helper to build ML residual dataset
-        # --------------------------------------------------
-        def _build_residual_dataset(df_in):
+            try:
+                self.phys_models[wid] = PhysicsModel(
+                    geometry=geom,
+                    global_params=global_physics_params,
+                ).fit(d, y_qo_col, y_qg_col, y_qw_col)
+            except Exception as e:
+                # Fallback: original unconstrained physics model
+                print(f"[WARN] Geometry-aware fit failed for well {wid}, falling back: {e}")
+                self.phys_models[wid] = PhysicsModel().fit(
+                    d, y_qo_col, y_qg_col, y_qw_col
+                )
+
+        # ==================================================
+        # 4. Helper to build ML residual dataset
+        # ==================================================
+        def _build_residual_dataset(df_in: pd.DataFrame):
+            """
+            Construct input/output pairs for ML residual learning.
+
+            Inputs:
+            - Independent variables
+            - Physics model predictions
+
+            Outputs:
+            - Log-space residuals between measured and physics-predicted rates
+            """
+
             df_lag = self._create_lagged_features(df_in)
 
             X_all, y_all = [], []
 
-            # Every column used in X MUST be finite
             model_input_cols = (
                 self.independent_vars +
                 [y_qo_col, y_qw_col, y_qg_col]
             )
 
-            # Minimum rows needed AFTER lagging
             min_rows = max(5, self.lags + 3)
 
             for wid, d in df_lag.groupby(self.well_id_col):
@@ -358,11 +512,10 @@ class PhysicsInformedHybridModel:
                 if wid not in self.phys_models:
                     continue
 
-                # 🔑 CRITICAL FIX: drop NaNs for ALL used columns
+                # IMPORTANT: drop rows with NaNs in any required column
                 d = d.dropna(subset=model_input_cols)
 
                 if len(d) < min_rows:
-                    # Optional debug (leave enabled until stable)
                     print(f"[SKIP] Well {wid}: only {len(d)} usable rows")
                     continue
 
@@ -378,6 +531,7 @@ class PhysicsInformedHybridModel:
                 )
                 y_phys = np.maximum(phys.values, EPS)
 
+                # Residuals in log-space (stabilizes scale)
                 y_res = np.log1p(y_true) - np.log1p(y_phys)
 
                 mask = np.isfinite(y_res).all(axis=1)
@@ -393,10 +547,9 @@ class PhysicsInformedHybridModel:
 
             return np.vstack(X_all), np.vstack(y_all)
 
-
-        # --------------------------------------------------
-        # 3. Build TRAIN residual dataset
-        # --------------------------------------------------
+        # ==================================================
+        # 5. Build TRAIN residual dataset
+        # ==================================================
         X_train, Y_train = _build_residual_dataset(df)
 
         Xs_train = self.scaler.fit_transform(X_train)
@@ -405,14 +558,14 @@ class PhysicsInformedHybridModel:
         if not np.isfinite(Y_train).all():
             raise ValueError("NaNs or infs in training residual targets")
 
-        # --------------------------------------------------
-        # 4. Fit ML residual model (TRAIN ONLY)
-        # --------------------------------------------------
+        # ==================================================
+        # 6. Fit ML residual model (GLOBAL)
+        # ==================================================
         self.ml_residual.fit(Xp_train, Y_train)
 
-        # --------------------------------------------------
-        # 5. (Optional) Validation dataset — diagnostics only
-        # --------------------------------------------------
+        # ==================================================
+        # 7. Optional validation diagnostics (unchanged)
+        # ==================================================
         if df_val is not None:
             X_val, Y_val = _build_residual_dataset(df_val)
             Xs_val = self.scaler.transform(X_val)
@@ -423,7 +576,6 @@ class PhysicsInformedHybridModel:
             print(f"[Validation] Residual RMSE = {rmse_val:.4f}")
 
         return self
-
 
 
     def predict_physics(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -560,9 +712,9 @@ class PhysicsInformedHybridModel:
     def score_physics(
         self,
         df,
-        y_qo_col="qo_mpfm",
-        y_qg_col="qg_mpfm",
-        y_qw_col="qw_mpfm",
+        y_qo_col="qo_well_test",
+        y_qg_col="qg_well_test",
+        y_qw_col="qw_well_test",
     ):
         results = {}
 
@@ -637,9 +789,9 @@ class PhysicsInformedHybridModel:
     def score_hybrid(
         self,
         df,
-        y_qo_col="qo_mpfm",
-        y_qg_col="qg_mpfm",
-        y_qw_col="qw_mpfm",
+        y_qo_col="qo_well_test",
+        y_qg_col="qg_well_test",
+        y_qw_col="qw_well_test",
     ):
         results = {}
 
@@ -716,6 +868,96 @@ class PhysicsInformedHybridModel:
             }
 
         return results
+    
+    def score_mpfm(
+        self,
+        df,
+        y_qo_col="qo_well_test",
+        y_qg_col="qg_well_test",
+        y_qw_col="qw_well_test",
+        mpfm_qo_col="qo_mpfm",
+        mpfm_qg_col="qg_mpfm",
+        mpfm_qw_col="qw_mpfm",
+    ):
+        """
+        Compute MPFM performance metrics with respect to well test (reference),
+        using the same output format as score_hybrid.
+        """
+
+        results = {}
+
+        # IMPORTANT: create lagged features once (for alignment consistency)
+        df_lag = self._create_lagged_features(df)
+
+        for wid, d in df_lag.groupby(self.well_id_col):
+
+            # -----------------------------
+            # WGR
+            # -----------------------------
+            y_wgr = compute_wgr(
+                d[y_qw_col].values,
+                d[y_qg_col].values
+            )
+            p_wgr = compute_wgr(
+                d[mpfm_qw_col].values,
+                d[mpfm_qg_col].values
+            )
+
+            mask_wgr = np.isfinite(y_wgr) & np.isfinite(p_wgr)
+
+            # -----------------------------
+            # GOR
+            # -----------------------------
+            y_gor = compute_gor(
+                d[y_qg_col].values,
+                d[y_qo_col].values
+            )
+            p_gor = compute_gor(
+                d[mpfm_qg_col].values,
+                d[mpfm_qo_col].values
+            )
+
+            mask_gor = np.isfinite(y_gor) & np.isfinite(p_gor)
+
+            results[wid] = {
+                "qo": dict(zip(
+                    METRICS,
+                    regression_metrics(d[y_qo_col], d[mpfm_qo_col])
+                )),
+                "qw": dict(zip(
+                    METRICS,
+                    regression_metrics(d[y_qw_col], d[mpfm_qw_col])
+                )),
+                "qg": dict(zip(
+                    METRICS,
+                    regression_metrics(d[y_qg_col], d[mpfm_qg_col])
+                )),
+                "wgr": (
+                    dict(zip(
+                        METRICS,
+                        regression_metrics(
+                            y_wgr[mask_wgr],
+                            p_wgr[mask_wgr]
+                        )
+                    ))
+                    if mask_wgr.sum() >= 2
+                    else {m: np.nan for m in METRICS}
+                ),
+                "gor": (
+                    dict(zip(
+                        METRICS,
+                        regression_metrics(
+                            y_gor[mask_gor],
+                            p_gor[mask_gor]
+                        )
+                    ))
+                    if mask_gor.sum() >= 2
+                    else {m: np.nan for m in METRICS}
+                ),
+            }
+
+        return results
+
 
 
     # --------------------------------------------------
@@ -756,13 +998,21 @@ class PhysicsInformedHybridModel:
     def plot_predictions(
         self,
         df: pd.DataFrame,
-        y_qo_col: str = "qo_mpfm",
-        y_qw_col: str = "qw_mpfm",
-        y_qg_col: str = "qg_mpfm",
+        y_qo_col: str = "qo_well_test",
+        y_qg_col: str = "qg_well_test",
+        y_qw_col: str = "qw_well_test",
+        mpfm_qo_col: str = "qo_mpfm",
+        mpfm_qg_col: str = "qg_mpfm",
+        mpfm_qw_col: str = "qw_mpfm",
         is_hybrid_model: bool = True,
     ):
         """
         Plot predictions using DatetimeIndex as X-axis.
+
+        Comparison:
+        - Well Test rates → reference / ground truth
+        - MPFM rates → baseline measurement system
+        - Model predictions → physics or hybrid VFM
         """
 
         # --------------------------------------------------
@@ -785,7 +1035,7 @@ class PhysicsInformedHybridModel:
             # Predictions
             # --------------------------------------------------
             p = (
-                self.predict_hybrid(d)
+                self.predict_hybrid(d_lag)
                 if is_hybrid_model
                 else self.predict_physics(d_lag)
             )
@@ -798,45 +1048,74 @@ class PhysicsInformedHybridModel:
             # --------------------------------------------------
             # Rate plots: qo, qw, qg
             # --------------------------------------------------
-            plot_map = {
-                "qo_pred": y_qo_col,
-                "qw_pred": y_qw_col,
-                "qg_pred": y_qg_col,
+            rate_cfg = {
+                "qo": {
+                    "truth": y_qo_col,
+                    "mpfm": mpfm_qo_col,
+                    "pred": "qo_pred",
+                    "label": "Oil rate",
+                },
+                "qw": {
+                    "truth": y_qw_col,
+                    "mpfm": mpfm_qw_col,
+                    "pred": "qw_pred",
+                    "label": "Water rate",
+                },
+                "qg": {
+                    "truth": y_qg_col,
+                    "mpfm": mpfm_qg_col,
+                    "pred": "qg_pred",
+                    "label": "Gas rate",
+                },
             }
 
-            for pred_col, ycol in plot_map.items():
+            for rate, cfg in rate_cfg.items():
                 fig, ax = plt.subplots(figsize=(10, 4))
 
+                # --- Well test (reference) ---
                 ax.plot(
                     x,
-                    d_lag[ycol].values,
-                    label="MPFM (Actual)",
-                    linewidth=2,
+                    d_lag[cfg["truth"]].values,
+                    label="Well Test (Reference)",
+                    linewidth=2.5,
                     marker="o",
                     markersize=4,
+                    color="black",
                 )
 
+                # --- MPFM ---
+                if cfg["mpfm"] in d_lag.columns:
+                    ax.plot(
+                        x,
+                        d_lag[cfg["mpfm"]].values,
+                        label="MPFM",
+                        linewidth=2,
+                        linestyle="--",
+                        marker="x",
+                        markersize=4,
+                    )
+
+                # --- Model prediction ---
                 ax.plot(
                     x,
-                    p[pred_col].values,
-                    label="Predicted",
+                    p[cfg["pred"]].values,
+                    label="Hybrid Prediction" if is_hybrid_model else "Physics Prediction",
                     linewidth=2,
                     marker="o",
                     markersize=4,
                 )
 
                 ax.set_xlabel("Time")
-                rate_name = pred_col.replace("_pred", "")
-                ax.set_ylabel(f"{rate_name} (Sm$^3$/h)")
-                ax.set_title(f"{wid} : {rate_name}")
+                ax.set_ylabel(f"{rate} (Sm$^3$/h)")
+                ax.set_title(f"{wid} : {cfg['label']}")
 
                 ax.legend()
                 ax.grid(True, alpha=0.3)
 
                 ax.xaxis.set_major_locator(mdates.AutoDateLocator())
                 ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
-
                 fig.autofmt_xdate()
+
                 plt.tight_layout()
                 plt.show()
 
@@ -859,10 +1138,10 @@ class PhysicsInformedHybridModel:
                 ax.plot(
                     x[mask],
                     y_wgr[mask],
-                    label="WGR (Actual)",
-                    linewidth=2,
+                    label="WGR (Well Test)",
+                    linewidth=2.5,
                     marker="o",
-                    markersize=4,
+                    color="black",
                 )
 
                 ax.plot(
@@ -871,20 +1150,19 @@ class PhysicsInformedHybridModel:
                     label="WGR (Predicted)",
                     linewidth=2,
                     marker="o",
-                    markersize=4,
                 )
 
                 ax.set_xlabel("Time")
-                ax.set_ylabel("wgr (qw / qg)")
-                ax.set_title(f"{wid} : wgr")
+                ax.set_ylabel("WGR (qw / qg)")
+                ax.set_title(f"{wid} : WGR")
 
                 ax.legend()
                 ax.grid(True, alpha=0.3)
 
                 ax.xaxis.set_major_locator(mdates.AutoDateLocator())
                 ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
-
                 fig.autofmt_xdate()
+
                 plt.tight_layout()
                 plt.show()
 
@@ -907,10 +1185,10 @@ class PhysicsInformedHybridModel:
                 ax.plot(
                     x[mask],
                     y_gor[mask],
-                    label="GOR (Actual)",
-                    linewidth=2,
+                    label="GOR (Well Test)",
+                    linewidth=2.5,
                     marker="o",
-                    markersize=4,
+                    color="black",
                 )
 
                 ax.plot(
@@ -919,20 +1197,38 @@ class PhysicsInformedHybridModel:
                     label="GOR (Predicted)",
                     linewidth=2,
                     marker="o",
-                    markersize=4,
                 )
 
                 ax.set_xlabel("Time")
-                ax.set_ylabel("gor (qg / qo)")
-                ax.set_title(f"{wid} : gor")
+                ax.set_ylabel("GOR (qg / qo)")
+                ax.set_title(f"{wid} : GOR")
 
                 ax.legend()
                 ax.grid(True, alpha=0.3)
 
                 ax.xaxis.set_major_locator(mdates.AutoDateLocator())
                 ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
-
                 fig.autofmt_xdate()
+
                 plt.tight_layout()
                 plt.show()
-    
+
+    def calibrate_physics_only(
+        self,
+        df: pd.DataFrame,
+        y_qo_col="qo_well_test",
+        y_qg_col="qg_well_test",
+        y_qw_col="qw_well_test",
+    ):
+        """
+        Calibrate physics model for a new (unseen) well
+        without retraining the ML residual model.
+        """
+
+        for wid, d in df.groupby(self.well_id_col):
+            geom = self.well_geometry.get(wid)
+
+            self.phys_models[wid] = PhysicsModel(
+                geometry=geom,
+                global_params=None,  # IMPORTANT: do not update global priors
+            ).fit(d, y_qo_col, y_qg_col, y_qw_col)
