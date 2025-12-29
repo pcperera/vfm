@@ -943,9 +943,9 @@ Initial parameter estimates are chosen based on engineering heuristics and prior
 To mitigate overfitting under sparse measurement conditions, implicit regularization is achieved through:
 
 \begin{itemize}
-    \item bounded parameter constraints
-    \item joint calibration across all available phases
-    \item smooth functional forms in the physics model
+    \item Bounded parameter constraints
+    \item Joint calibration across all available phases
+    \item Smooth functional forms in the physics model
 \end{itemize}
 
 Explicit regularization terms are not introduced to preserve the interpretability of calibrated parameters.
@@ -972,532 +972,430 @@ The physics-based inflow model provides physically consistent baseline predictio
 water, and gas production. However, real production behaviour is often influenced by
 complex wellbore dynamics, operational disturbances, multiphase interactions, and other
 effects that are not explicitly captured by the simplified analytical physics model.
-To account for these discrepancies, a machine-learning (ML) correction stage is introduced.
+To account for these discrepancies, a machine learning correction stage is introduced.
 This stage learns the residual structure between observed rates and their corresponding
-physics-based predictions, producing a hybrid physics--ML model with substantially improved
+physics-based predictions, producing a hybrid physics - ML model with substantially improved
 accuracy and generalisation.
 
-The ML residual subsystem operates on a feature set derived from instantaneous measurements
-and lagged historical values, and predicts additive corrections for oil rate, gas rate,
-and water cut.
+The machine-learning residual subsystem operates on a feature set derived from instantaneous measurements and lagged historical values, and predicts additive corrections in logarithmic space for oil, gas, and water flow rates.
 
 
-\subsection{Motivation for Residual Learning}
-\label{subsec:residual_motivation}
+\subsection{Residual Learning Model Philosophy}
+\label{subsec:residual_learning_model_philosophy}
 
 The use of residual learning instead of direct rate prediction provides several advantages:
 
 \begin{itemize}
     \item \textbf{Preservation of physical structure:}  
-          The physics model enforces consistency between pressure, choke, water cut,
-          liquid rate, and gas rate. By learning residuals, the ML model augments rather
-          than replaces physically plausible behaviour.
+          The physics model enforces consistency between pressure, choke settings,
+          phase split, liquid rate, and gas rate. By learning residuals, the machine-learning
+          model augments rather than replaces physically plausible behaviour.
 
     \item \textbf{Reduction of model complexity:}  
-          The ML component learns only deviations from physics, which are typically
-          smoother and of smaller magnitude. This lowers the variance of the ML estimator.
+          The machine-learning component learns only deviations from the physics-based
+          predictions, which are typically smoother and of smaller magnitude. This reduces
+          the effective variance of the learned model.
 
     \item \textbf{Improved generalisation:}  
-          Because the ML model does not need to learn basic inflow relationships,
-          it generalises better to unseen operating conditions.
+          Because the residual model does not need to learn fundamental inflow and choke
+          relationships, it exhibits improved generalisation to unseen operating conditions
+          and wells.
 
-    \item \textbf{Better interpretability:}  
-          The residuals provide direct insight into where and when the physics model
-          diverges from the observations, enabling diagnostic analysis.
+    \item \textbf{Enhanced interpretability:}  
+          The learned residuals provide direct insight into where and when the physics-based
+          model diverges from observed data, thereby supporting diagnostic analysis and model
+          refinement.
+
+    \item \textbf{Enhanced scalability:}  
+        The residual learning formulation supports scalable deployment across large well
+        populations by decoupling well-specific physics calibration from global data-driven
+        learning. Physics models are calibrated independently for each well, while a single
+        machine-learning residual model is shared across all wells. This design significantly
+        reduces training and inference overhead, enabling efficient application of virtual
+        flow metering in assets comprising thousands of wells.
+
+    \item \textbf{Improved robustness under sparse and irregular measurements:}  
+        The residual learning formulation leverages physics-based predictions as a stable
+        baseline, allowing reliable flow-rate estimation even when ground-truth measurements
+        are sparse, irregular, or intermittently unavailable. By learning residuals only
+        where reference measurements exist and pooling information across multiple wells,
+        the framework reduces sensitivity to data gaps and supports robust operation under
+        realistic field data constraints.
 \end{itemize}
 
-Let
-\(
-q_o^{P}(t), q_w^{P}(t), q_g^{P}(t)
-\)
-denote the physics-based predictions at time \(t\),
-and let the corresponding observed rates be
-\(
-q_o^{\mathrm{obs}}(t), q_w^{\mathrm{obs}}(t), q_g^{\mathrm{obs}}(t).
-\)
-The residual targets for ML training are defined as
+Overall, the machine-learning residual modelling component serves as a complementary layer that enhances physics-based predictions while respecting physical structure and industrial deployment requirements.
 
-\begin{align}
-    r_{q_o}(t) &= q_o^{\mathrm{obs}}(t) - q_o^{P}(t), \\
-    r_{q_g}(t) &= q_g^{\mathrm{obs}}(t) - q_g^{P}(t).
-\end{align}
+\subsection{Residual Learning Formulation}
 
-Since water cut is more stable and scale-free than the water rate,
-the water residual is computed in terms of water cut:
+Let $\hat{q}_o^{\text{phys}}(t)$, $\hat{q}_w^{\text{phys}}(t)$, and $\hat{q}_g^{\text{phys}}(t)$ denote the oil, water, and gas flow rates predicted by the calibrated physics model at time $t$. The corresponding measured flow rates obtained from multiphase flow meters are denoted by $q_o(t)$, $q_w(t)$, and $q_g(t)$.
 
+Residual learning is performed in logarithmic space to stabilize variance and ensure positivity of predicted flow rates. The residual targets are defined as
 \begin{equation}
-    r_{\mathrm{wc}}(t)
-    =
-    \mathrm{wc}^{\mathrm{obs}}(t) - \mathrm{wc}^{P}(t),
-    \qquad
-    \mathrm{wc}^{\mathrm{obs}}(t)
-    =
-    \frac{q_w^{\mathrm{obs}}(t)}
-         {q_w^{\mathrm{obs}}(t) + q_o^{\mathrm{obs}}(t) + \varepsilon},
+r_i(t) = \log\!\left(1 + q_i(t)\right) - \log\!\left(1 + \hat{q}_i^{\text{phys}}(t)\right),
+\quad i \in \{o, w, g\}.
 \end{equation}
 
-where \(\varepsilon = 10^{-8}\) is a numerical stabilisation constant.
+This formulation allows the residual model to learn multiplicative corrections in the original flow-rate domain while remaining numerically stable for low-rate conditions.
 
+\subsection{Feature Construction}
 
-\subsection{Feature Engineering (Polynomial Expansion and Lagging)}
-\label{subsec:feature_engineering}
-
-The ML models operate on features extracted from operational variables.
-Two forms of feature engineering are applied: (i) \emph{polynomial expansion} and
-(ii) \emph{lagged pressure features}.
-
-\vspace{0.5em}
-\paragraph{Polynomial expansion.}
-
-Let \(\mathbf{x}(t)\) denote the vector of independent variables used by the ML component,
-for example:
-
-\[
-\mathbf{x}(t)
-=
-\bigl[
-\mathrm{DHP}(t),\;
-\mathrm{WHP}(t),\;
-\mathrm{DHT}(t),\;
-\mathrm{WHT}(t),\;
-\mathrm{CH}(t),\;
-\mathrm{DCP}(t)
-\bigr].
-\]
-
-A polynomial feature transformer of degree 2 is fitted on the training data:
-
+The input feature vector for residual learning is constructed by concatenating measured operating variables with physics-based flow predictions. For each valid time index $t$, the feature vector is defined as
 \begin{equation}
-    \mathbf{z}(t)
-    =
-    \phi(\mathbf{x}(t)),
+\mathbf{x}(t) =
+\begin{bmatrix}
+\mathbf{u}(t) \\
+\hat{q}_o^{\text{phys}}(t) \\
+\hat{q}_w^{\text{phys}}(t) \\
+\hat{q}_g^{\text{phys}}(t)
+\end{bmatrix},
+\end{equation}
+where $\mathbf{u}(t)$ represents the set of independent well measurements, including pressures, temperatures, choke settings, and lagged variables where applicable.
+
+Including physics-based predictions as explicit features enables the residual model to condition its corrections on physically meaningful state estimates, thereby reducing extrapolation risk and improving generalization.
+
+\subsection{Data Normalization and Polynomial Expansion}
+
+Prior to training, the feature matrix is standardized using zero-mean and unit-variance scaling,
+\begin{equation}
+\tilde{\mathbf{x}} = \frac{\mathbf{x} - \boldsymbol{\mu}}{\boldsymbol{\sigma}},
+\end{equation}
+where $\boldsymbol{\mu}$ and $\boldsymbol{\sigma}$ are computed from the training dataset.
+
+To capture low-order nonlinear interactions between features, a polynomial feature expansion of degree $d$ is applied,
+\begin{equation}
+\mathbf{z} = \Phi_d(\tilde{\mathbf{x}}),
+\end{equation}
+where $\Phi_d(\cdot)$ denotes the polynomial feature mapping without bias terms. In the current implementation, a linear expansion ($d=1$) is used to maintain computational efficiency and avoid overfitting under sparse data conditions.
+
+\subsection{Residual Model Architecture}
+
+The residual mapping from feature space to residual corrections is learned using a multi-output regression framework,
+\begin{equation}
+\mathbf{r}(t) = f_{\text{ML}}(\mathbf{z}(t)),
+\end{equation}
+where $\mathbf{r}(t) = [r_o(t), r_w(t), r_g(t)]^\top$.
+
+The function $f_{\text{ML}}(\cdot)$ is implemented as a \textit{MultiOutputRegressor} with gradient-boosted decision trees as base learners. Specifically, a histogram-based gradient boosting regressor is employed due to its robustness, fast training, and suitability for tabular industrial data. Key hyperparameters are selected to balance accuracy and computational efficiency, including shallow tree depth, early stopping, and minimum leaf size constraints.
+
+A single global residual model is trained using data pooled from all wells, while physics models are calibrated independently for each well. This design enables cross-well learning of common residual patterns while preserving well-specific physical behavior.
+
+\subsection{Hybrid Prediction and Residual Application}
+
+During inference, physics-based predictions are first generated for each well. The trained residual model then produces residual estimates $\hat{r}_i(t)$, which are applied selectively depending on the flow phase and operating regime.
+
+For oil and gas, residual corrections are applied in logarithmic space as
+\begin{equation}
+\hat{q}_i(t) =
+\exp\!\left(
+\log\!\left(1 + \hat{q}_i^{\text{phys}}(t)\right) + \hat{r}_i(t)
+\right) - 1,
+\quad i \in \{o, g\}.
 \end{equation}
 
-where \(\phi(\cdot)\) includes all monomials up to second order (excluding the bias term),
-consistent with the Python \texttt{PolynomialFeatures(degree=2, include\_bias=False)}.
-
-This augmentation allows the ML models to capture smooth nonlinear trends.
-
-\vspace{0.5em}
-\paragraph{Lagged feature construction.}
-
-To capture short-term temporal dependencies, lagged versions of selected
-pressure variables are included:
-
-\[
-\mathrm{DHP}(t-1), \quad \mathrm{WHP}(t-1),
-\]
-
-for a configured lag order \(L=1\). Higher orders may be configured, but a single step
-lag is typically sufficient for capturing transient pressure effects in the wellbore.
-During training, rows containing lagged NaN values are removed to maintain clean
-supervision signals, consistent with the implementation:
-
+For water, residual corrections are applied only when the physics-based water rate exceeds a predefined threshold $q_w^{\text{min}}$, ensuring that spurious corrections are not introduced during dry or near-dry conditions,
 \begin{equation}
-    \text{If } \mathrm{lagged\_feature}(t) = \text{NaN}, \text{ then } t \text{ is dropped.}
+\hat{q}_w(t) =
+\begin{cases}
+\exp\!\left(
+\log\!\left(1 + \hat{q}_w^{\text{phys}}(t)\right) + \hat{r}_w(t)
+\right) - 1, & \hat{q}_w^{\text{phys}}(t) > q_w^{\text{min}}, \\
+0, & \text{otherwise}.
+\end{cases}
 \end{equation}
 
-During prediction, lagged rows are preserved (no drop), ensuring alignment with the
-input dataframe index.
+Additional gating rules based on water cut and residual magnitude are applied to oil predictions to prevent physically implausible corrections under extreme conditions.
 
+\subsection{Consistency Constraints}
 
-\subsection{Gradient Boosting Regressor Configuration}
-\label{subsec:gbr_config}
-
-Three independent Gradient Boosting Regressors (GBRs) are trained to model
-the residuals of oil rate, gas rate, and water cut.
-All regressors share the following configuration:
-
-\begin{itemize}
-    \item \textbf{Number of trees:} \(500\)
-    \item \textbf{Maximum depth:} \(6\)
-    \item \textbf{Learning rate:} \(0.05\)
-    \item \textbf{Loss function:} squared error
-\end{itemize}
-
-The regressors are:
-
-\[
-\text{ML}_o: \mathbf{z}(t) \mapsto r_{q_o}(t),
-\qquad
-\text{ML}_g: \mathbf{z}(t) \mapsto r_{q_g}(t),
-\qquad
-\text{ML}_{\mathrm{wc}}: \mathbf{z}(t) \mapsto r_{\mathrm{wc}}(t).
-\]
-
-These models are expressive enough to capture nonlinear deviations from
-the physics model, while shallow enough to avoid overfitting given the
-limited number of well-test points.
-
-
-\subsection{Training of Residual Models (Oil, Gas, Water Cut)}
-\label{subsec:training_residual_models}
-
-Training proceeds in the following steps:
-
-\begin{enumerate}
-    \item \textbf{Fit the physics model:}  
-          Only rows containing complete well-test measurements are used.
-          This yields physics predictions
-          \(
-          q_o^{P}(t), q_w^{P}(t), q_g^{P}(t)
-          \)
-          and \(\mathrm{wc}^{P}(t)\).
-
-    \item \textbf{Generate lagged and aligned training data:}  
-          Lagged features are created and rows with NaN entries (only from lagging)
-          are dropped to ensure valid supervision.
-
-    \item \textbf{Compute the physics residuals:}  
-          Residual signals
-          \(
-          r_{q_o}(t), r_{q_g}(t), r_{\mathrm{wc}}(t)
-          \)
-          are computed from the aligned rows.
-
-    \item \textbf{Fit the polynomial transformer:}  
-          The \(\phi(\cdot)\) transformer is fitted on the independent variables
-          of the lagged training dataset.
-
-    \item \textbf{Transform features:}  
-          The input matrix \(\mathbf{z}(t) = \phi(\mathbf{x}(t))\) is generated.
-
-    \item \textbf{Train the GBR models:}  
-          Each regressor
-          \(
-          \text{ML}_o, \text{ML}_g, \text{ML}_{\mathrm{wc}}
-          \)
-          is trained independently on its respective residual target.
-\end{enumerate}
-
-After training, these models predict residual corrections that are added
-to the corresponding physics-based outputs during hybrid rate synthesis.
-The corrected predictions maintain physical consistency through the
-liquid-split and water-cut reconstruction mechanism described in the
-subsequent section.
+To preserve physical consistency, predicted oil and water rates are constrained such that
+\begin{equation}
+\hat{q}_o(t) + \hat{q}_w(t) = \hat{q}_L(t),
+\end{equation}
+where $\hat{q}_L(t)$ denotes the total liquid rate. Water predictions are clipped to ensure non-negativity and boundedness, and oil rates are adjusted accordingly.
 
 
 \section{Hybrid Physics--ML Rate Synthesis}
-\label{sec:hybrid_synthesis}
+\label{sec:hybrid-rate-synthesis}
 
-The hybrid synthesis stage combines the strengths of the physics-based inflow model with
-data-driven residual learning to obtain high-fidelity estimates of oil, water, and gas
-production rates. Whereas the physics model provides physically structured baseline
-predictions, the machine-learning (ML) residual models capture nonlinear, data-dependent
-corrections that account for operational behaviours not represented in the analytical
-formulation. The combination yields a hybrid model that is both physically grounded and
-empirically accurate.
+The hybrid physics--machine learning (ML) rate synthesis component defines how
+physics-based predictions and machine-learning residual corrections are combined
+to produce the final estimates of oil, water, and gas flow rates. This stage
+constitutes the final inference step of the proposed architecture and is critical
+for ensuring physical consistency, robustness, and safe deployment under sparse
+and irregular measurement conditions.
 
-This stage operates at every timestamp in the resampled dataset, including those for which
-no measured production rates exist, enabling dense temporal reconstruction.
+\subsection{Sequential Inference Structure}
 
-
-\subsection{Combining Physics Predictions with Residual Corrections}
-\label{subsec:combine_predictions}
-
-Let
-\(
-q_o^{P}(t), q_w^{P}(t), q_g^{P}(t)
-\)
-denote the physics-based predictions at time \(t\), and let
-\(
-\widehat{r}_{q_o}(t), \widehat{r}_{q_g}(t), \widehat{r}_{\mathrm{wc}}(t)
-\)
-denote the outputs of the machine-learning residual models:
-
-\[
-\widehat{r}_{q_o}(t) = \text{ML}_o\bigl(\mathbf{z}(t)\bigr), \quad
-\widehat{r}_{q_g}(t) = \text{ML}_g\bigl(\mathbf{z}(t)\bigr), \quad
-\widehat{r}_{\mathrm{wc}}(t) = \text{ML}_{\mathrm{wc}}\bigl(\mathbf{z}(t)\bigr),
-\]
-
-where \(\mathbf{z}(t)\) is the polynomially enhanced and lag-augmented feature vector.
-
-The hybrid model forms corrected intermediate predictions:
-
-\begin{align}
-    \widetilde{q}_o(t) &= q_o^{P}(t) + \widehat{r}_{q_o}(t), \\
-    \widetilde{q}_g(t) &= q_g^{P}(t) + \widehat{r}_{q_g}(t), \\
-    \widetilde{\mathrm{wc}}(t)
-    &= \mathrm{wc}^{P}(t) + \widehat{r}_{\mathrm{wc}}(t),
-\end{align}
-
-where \(\mathrm{wc}^{P}(t)\) is the water cut predicted by the physics model.
-
-The corrected water cut is clipped into its physical range:
-
+The proposed framework follows a strictly sequential inference strategy. For each
+well and time index $t$, physics-based predictions are generated first, followed by
+selective application of machine-learning residual corrections. Let
 \begin{equation}
-    \mathrm{wc}^{H}(t)
-    =
-    \min\left(1,\,
-    \max\left(0,\, \widetilde{\mathrm{wc}}(t)\right)\right),
+\hat{q}_o^{P}(t), \; \hat{q}_w^{P}(t), \; \hat{q}_g^{P}(t)
+\end{equation}
+denote the oil, water, and gas flow rates predicted by the calibrated physics model,
+and let
+\begin{equation}
+\hat{r}_o(t), \; \hat{r}_w(t), \; \hat{r}_g(t)
+\end{equation}
+denote the corresponding residuals predicted by the machine-learning model.
+
+The physics model is always evaluated regardless of data availability, while the
+machine-learning component operates as a corrective layer whose influence is
+controlled through physically motivated gating mechanisms.
+
+\subsection{Log-Space Residual Application}
+
+Residuals are learned and applied in logarithmic space to ensure numerical stability
+and preserve non-negativity of flow rates. For a given phase $i \in \{o, w, g\}$,
+the corrected rate is computed as
+\begin{equation}
+\hat{q}_i(t)
+=
+\exp\!\left(
+\log\!\left(1 + \hat{q}_i^{P}(t)\right) + \hat{r}_i(t)
+\right) - 1.
 \end{equation}
 
-yielding a hybrid (superscript \(H\)) water-cut prediction.
+This formulation corresponds to a multiplicative correction in the original rate
+domain and reflects the assumption that modeling errors scale with the magnitude
+of the predicted flow rate.
 
-The resulting hybrid predictions retain the physical structure
-of the inflow model but benefit from the fine-scale corrections captured by the ML component.
+\subsection{Phase-Specific Synthesis Rules}
 
+The hybrid synthesis logic differs across fluid phases to reflect their distinct
+flow characteristics and data reliability.
 
-\subsection{Enforcing Liquid-Split and Water-Cut Consistency}
-\label{subsec:consistency_rules}
+\subsubsection{Oil Rate Synthesis}
 
-To maintain physical coherence between the corrected oil, water, and water-cut estimates,
-the hybrid model reconstructs the total liquid rate and recomputes the oil--water split
-based on the corrected water cut.
-
-Let
-\(
-q_L^{P}(t) = q_o^{P}(t) + q_w^{P}(t)
-\)
-denote the liquid rate from the physics model. After applying the ML correction to oil,
-an intermediate total liquid rate is constructed:
-
+Oil rate corrections are applied conditionally. The physics-based oil prediction
+$\hat{q}_o^{P}(t)$ is retained unless one or more gating conditions are satisfied.
+These conditions include elevated water cut or large predicted residual magnitude.
+When gating is active, the corrected oil rate is computed using log-space residual
+application:
 \begin{equation}
-    q_L^{H}(t) = \widetilde{q}_o(t) + q_w^{P}(t).
+\hat{q}_o(t)
+=
+\exp\!\left(
+\log\!\left(1 + \hat{q}_o^{P}(t)\right) + \hat{r}_o(t)
+\right) - 1.
+\end{equation}
+If gating conditions are not satisfied, the physics-based oil rate is preserved.
+
+\subsubsection{Gas Rate Synthesis}
+
+Gas rates are corrected unconditionally using the residual model, reflecting the
+strong dependence of gas flow on pressure drawdown and choke behavior:
+\begin{equation}
+\hat{q}_g(t)
+=
+\exp\!\left(
+\log\!\left(1 + \hat{q}_g^{P}(t)\right) + \hat{r}_g(t)
+\right) - 1.
+\end{equation}
+The corrected gas rate is subsequently clipped to ensure non-negativity.
+
+\subsubsection{Water Rate Synthesis}
+
+Water rate corrections are applied only when the physics-based water rate exceeds
+a predefined minimum threshold $q_w^{\min}$:
+\begin{equation}
+\hat{q}_w(t)
+=
+\begin{cases}
+\exp\!\left(
+\log\!\left(1 + \hat{q}_w^{P}(t)\right) + \hat{r}_w(t)
+\right) - 1,
+& \hat{q}_w^{P}(t) > q_w^{\min}, \\[6pt]
+0,
+& \text{otherwise}.
+\end{cases}
 \end{equation}
 
-To avoid numerical instability, a minimum threshold is imposed:
+This gating strategy prevents spurious corrections during dry or near-dry conditions
+where measurement noise and model uncertainty are high.
 
-\[
-q_L^{H}(t) \leftarrow \max\bigl(q_L^{H}(t),\, 10^{-8}\bigr).
-\]
+\subsection{Physical Consistency Enforcement}
 
-Given the corrected hybrid water cut \(\mathrm{wc}^{H}(t)\), the final hybrid oil and water
-rates are recomputed as:
-
-\begin{align}
-    q_w^{H}(t) &= \mathrm{wc}^{H}(t)\, q_L^{H}(t), \\
-    q_o^{H}(t) &= \left(1 - \mathrm{wc}^{H}(t)\right)\, q_L^{H}(t).
-\end{align}
-
-This reconstruction step ensures that:
-
-\begin{itemize}
-    \item oil and water rates remain non-negative,
-    \item the water cut is always the ratio \(q_w^{H}(t) / q_L^{H}(t)\),
-    \item total liquid rate remains consistent with the hybrid adjustments,
-    \item ML corrections never violate fluid balance.
-\end{itemize}
-
-The gas-rate correction is applied independently:
-
+Following residual application, additional consistency constraints are enforced to
+ensure physically meaningful predictions. The total liquid rate is defined as
 \begin{equation}
-    q_g^{H}(t) = \widetilde{q}_g(t),
+\hat{q}_L(t) = \hat{q}_o(t) + \hat{q}_w(t).
 \end{equation}
 
-completing the set of hybrid predictions
+Water rates are clipped to ensure
+\begin{equation}
+0 \le \hat{q}_w(t) \le \hat{q}_L(t),
+\end{equation}
+and the oil rate is adjusted accordingly to preserve liquid consistency. All phase
+rates are constrained to be non-negative.
 
-\[
-\bigl(q_o^{H}(t),\; q_w^{H}(t),\; q_g^{H}(t)\bigr).
-\]
+\subsection{Role of Gating and Safety Mechanisms}
 
+The synthesis stage incorporates multiple gating and clipping mechanisms to limit
+machine-learning influence in poorly observed regimes. These safeguards reduce
+extrapolation risk under sparse or irregular measurements and ensure that physics-
+based predictions dominate when data-driven corrections are unreliable.
 
-\subsection{Error Handling and Physical Constraints}
-\label{subsec:error_physical_constraints}
+By design, the hybrid synthesis logic prioritizes physical plausibility, robustness,
+and stable behavior over unconstrained accuracy improvements.
 
-The hybrid model incorporates several safeguards to prevent physically
-implausible behaviour and numerical errors. These safeguards mirror the
-robustness measures implemented in the Python code:
+\subsection{Summary of Hybrid Rate Assembly}
 
-\begin{itemize}
-
-    \item \textbf{Non-negativity enforcement:}  
-    Intermediate and final rates are clipped so that
-    \(
-    q_o^{H}(t) \ge 0,\;
-    q_w^{H}(t) \ge 0,\;
-    q_g^{H}(t) \ge 0.
-    \)
-
-    \item \textbf{Water-cut domain restriction:}  
-    Corrected water cut is constrained to \([0,1]\)
-    using hard clipping, consistent with physical interpretation.
-
-    \item \textbf{Minimum liquid-rate threshold:}  
-    To avoid division by zero when recomputing the oil–water split,
-    the liquid rate is bounded below by \(10^{-8}\).
-
-    \item \textbf{Preservation of physics structure:}  
-    ML residuals modify physics outputs additively, ensuring the hybrid model
-    does not violate the underlying physics of inflow or choke behaviour.
-
-    \item \textbf{Index alignment during prediction:}  
-    No rows are dropped when predicting, even if lagged variables contain NaNs.
-    This guarantees that hybrid predictions align perfectly with the timestamps
-    in the input dataset.
-
-    \item \textbf{Robustness to missing values:}  
-    In downstream reconstruction, hybrid predictions are used only to fill
-    missing dependent variables; observed well-test data always takes priority.
-
-\end{itemize}
-
-These constraints collectively ensure that the hybrid rate synthesis remains
-physically meaningful, numerically stable, and suitable for subsequent use in
-temporal forecasting using the Transformer-based model.
+The hybrid physics--ML rate synthesis combines deterministic physics-based predictions
+with selectively applied machine-learning residual corrections. This structured
+integration enables improved predictive accuracy while preserving interpretability,
+physical consistency, and scalability across large well populations.
 
 
 \section{Temporal Reconstruction of Historical Production Rates}
-\label{sec:temporal_reconstruction}
+\label{sec:temporal-reconstruction}
 
-The hybrid physics--ML model enables the reconstruction of a complete historical
-time series of oil, water, and gas production rates across the entire resampled
-time grid. Because well-test measurements are sparse and occur infrequently, the 
-dependent variables (oil, water, gas rates) contain numerous missing entries.
-The temporal reconstruction stage fills these gaps using hybrid model predictions
-while strictly preserving the original well-test values. The output is a dense,
-physically informed multivariate dataset suitable for production history analysis.
+In practical oil and gas operations, direct flow-rate measurements are often sparse,
+irregular, or intermittently unavailable due to limited test frequency, sensor outages,
+or operational constraints. As a result, historical production datasets frequently
+contain missing values for oil, water, and gas rates. Beyond forward prediction, an
+important capability of virtual flow metering systems is therefore the reconstruction
+of temporally dense and physically consistent historical production profiles.
 
-The reconstruction procedure ensures that:
-\begin{itemize}
-    \item missing rates are estimated using the hybrid physics-ML model,
-    \item original measurements remain untouched,
-    \item all predictions are aligned to the original dataframe index, and
-    \item numerical and physical consistency is retained.
-\end{itemize}
+This section describes the methodology used to reconstruct historical production rates
+using the proposed hybrid physics--machine learning framework.
 
+\subsection{Problem Definition}
 
-\subsection{Reconstruction Strategy}
-\label{subsec:reconstruction_strategy}
+Let $t \in \mathcal{T}$ denote discrete time indices corresponding to available sensor
+measurements. For each well, let
+\begin{equation}
+\mathbf{q}(t) = \bigl[q_o(t),\, q_w(t),\, q_g(t)\bigr]
+\end{equation}
+represent the true oil, water, and gas flow rates, which may be partially observed.
+Define the set of time indices with missing production measurements as
+\begin{equation}
+\mathcal{T}_{\mathrm{miss}} =
+\left\{
+t \in \mathcal{T} \;:\;
+\exists i \in \{o,w,g\} \;\text{such that}\; q_i(t) \;\text{is unobserved}
+\right\}.
+\end{equation}
 
-Let
+The objective of temporal reconstruction is to estimate
 \(
-\mathcal{T} = \{t_1, t_2, \dots, t_N\}
+\hat{\mathbf{q}}(t)
 \)
-denote the set of resampled timestamps over the historical period.
-For each timestamp \(t \in \mathcal{T}\), a complete set of independent variables
-(\(\mathrm{DHP}, \mathrm{WHP}, \mathrm{DHT}, \mathrm{WHT}, \mathrm{CH}, \mathrm{DCP}\))
-is available, but only a subset of times contain observed production rates.
-
-The reconstruction algorithm proceeds as follows:
-
-\begin{enumerate}
-    \item \textbf{Identify missing target values:}  
-    Define the dependent variable set
-    \(
-    \mathcal{Y} = \{q_o, q_w, q_g\}
-    \).
-    For each timestamp, a mask identifies whether at least one of the entries in
-    \(\mathcal{Y}\) is missing:
-    \[
-        \mathcal{M}(t) =
-        \begin{cases}
-            1, & \text{if } \exists y \in \mathcal{Y}: y(t)\ \text{is missing}, \\
-            0, & \text{otherwise}.
-        \end{cases}
-    \]
-
-    \item \textbf{Generate hybrid predictions for missing rows:}  
-    The hybrid model is applied to the subset of timestamps with 
-    \(\mathcal{M}(t) = 1\):
-    \[
-        \widehat{q}_o^{H}(t),\; \widehat{q}_w^{H}(t),\; \widehat{q}_g^{H}(t)
-        =
-        \text{HybridPredict}\bigl(t\bigr).
-    \]
-    During prediction, lagged features are created but no rows are dropped,
-    ensuring full index alignment with the original dataset.
-
-    \item \textbf{Construct a prediction dataframe aligned to missing rows:}
-    A prediction table is built with the hybrid estimates for each required variable.
-
-    \item \textbf{Fill missing values only:}  
-    For any variable \(y \in \mathcal{Y}\), the reconstruction updates:
-    \[
-        y(t)
-        \leftarrow
-        \begin{cases}
-            \widehat{y}^{H}(t), & \text{if } y(t)\ \text{is missing}, \\
-            y(t), & \text{otherwise}.
-        \end{cases}
-    \]
-    No original well-test measurement is overwritten.
-\end{enumerate}
-
-This process yields a dense sequence of reconstructed rates for all timestamps in
-\(\mathcal{T}\).
-
-
-\subsection{Integration of Observed Well-Test Values}
-\label{subsec:integration_welltests}
-
-Observed well-test measurements serve as the authoritative ground truth for the
-reconstruction process. The methodology is deliberately designed to
-\emph{preserve} these values without modification. This is essential for:
-
-\begin{itemize}
-    \item ensuring historical consistency,
-    \item preventing propagation of ML prediction error into ground-truth data,
-    \item enabling objective model validation using the original measurements, and
-    \item maintaining numerical stability during TFT training.
-\end{itemize}
-
-Let
+for all
 \(
-q_y^{\mathrm{obs}}(t)
+t \in \mathcal{T}_{\mathrm{miss}}
+\),
+using available sensor measurements and the trained hybrid model, while preserving
+physical consistency across time.
+
+\subsection{Distinction from Forecasting}
+
+It is important to distinguish temporal reconstruction from forecasting. In the
+proposed framework, reconstruction operates exclusively on historical timestamps for
+which all independent variables (pressures, temperatures, choke settings, and lagged
+features) are available. No extrapolation beyond the observed time horizon is performed.
+
+Formally, reconstruction estimates
+\(
+\hat{\mathbf{q}}(t)
 \)
-be the observed value (for \(y \in \{o,w,g\}\)).
-The reconstruction enforces:
+for
+\(
+t \le t_{\max}
+\),
+where $t_{\max}$ denotes the latest available measurement time, whereas forecasting
+would require predicting
+\(
+\mathbf{q}(t)
+\)
+for
+\(
+t > t_{\max}
+\).
+The present work focuses solely on the former.
 
-\[
-q_y(t)
+\subsection{Hybrid Inference for Missing Time Indices}
+
+For each time index $t \in \mathcal{T}_{\mathrm{miss}}$, the hybrid inference procedure
+described in Section~\ref{sec:hybrid-rate-synthesis} is applied. First, physics-based
+predictions are generated:
+\begin{equation}
+\hat{\mathbf{q}}^{P}(t)
 =
-q_y^{\mathrm{obs}}(t)
-\quad \text{whenever the observed value exists}.
-\]
+\bigl[
+\hat{q}_o^{P}(t),\,
+\hat{q}_w^{P}(t),\,
+\hat{q}_g^{P}(t)
+\bigr].
+\end{equation}
 
-Hybrid predictions are used \emph{only} when the corresponding measurement is missing.
-This guarantees that the reconstructed dataset is faithful to the real well-test record
-while benefiting from model-based estimation at all intermediate points.
-
-
-\subsection{Output Structure of the Dense Reconstructed Dataset}
-\label{subsec:reconstruction_output}
-
-The final output of the reconstruction step is a dense, chronologically ordered,
-multivariate dataset:
-
-\[
-\mathcal{D}_{\mathrm{dense}}
+Next, machine-learning residuals are inferred from the residual model using the same
+feature construction employed during training:
+\begin{equation}
+\hat{\mathbf{r}}(t)
 =
-\bigl\{
-    t,\;
-    q_o(t),\;
-    q_w(t),\;
-    q_g(t),\;
-    \text{independent variables}(t)
-\bigr\}_{t \in \mathcal{T}}.
-\]
+\bigl[
+\hat{r}_o(t),\,
+\hat{r}_w(t),\,
+\hat{r}_g(t)
+\bigr].
+\end{equation}
 
-More specifically, the dataset contains:
+The final reconstructed rates are obtained through phase-specific hybrid synthesis,
+as defined by the equations in Section~\ref{sec:hybrid-rate-synthesis}:
+\begin{equation}
+\hat{\mathbf{q}}(t)
+=
+\mathcal{S}\!\left(
+\hat{\mathbf{q}}^{P}(t),\,
+\hat{\mathbf{r}}(t)
+\right),
+\end{equation}
+where $\mathcal{S}(\cdot)$ denotes the hybrid physics--ML synthesis operator incorporating
+log-space residual application, gating, and physical consistency constraints.
 
-\begin{itemize}
-    \item fully reconstructed oil rate \(q_o(t)\),
-    \item fully reconstructed water rate \(q_w(t)\),
-    \item fully reconstructed gas rate \(q_g(t)\),
-    \item original resampled independent variables
-          (\(\mathrm{DHP}, \mathrm{WHP}, \mathrm{DHT}, \mathrm{WHT}, \mathrm{CH}, \mathrm{DCP}\)),
-    \item no missing values in any dependent variable.
-\end{itemize}
+\subsection{Selective Reconstruction Logic}
 
-This dense dataset has several desirable properties:
+In the implemented workflow, reconstruction is applied only to time indices for which
+one or more dependent variables are missing. Let $\mathbf{y}(t)$ denote the vector of
+measured rates when available. The reconstructed dataset $\tilde{\mathbf{q}}(t)$ is
+defined as
+\begin{equation}
+\tilde{\mathbf{q}}(t)
+=
+\begin{cases}
+\mathbf{y}(t), & \text{if all rate measurements are available}, \\[6pt]
+\hat{\mathbf{q}}(t), & \text{if any rate measurement is missing}.
+\end{cases}
+\end{equation}
 
-\begin{enumerate}
-    \item \textbf{Completeness:}  
-    All timestamps contain valid oil, water, and gas rate values.
+This selective replacement ensures that observed measurements are preserved exactly,
+while the hybrid model is used only to fill missing values.
 
-    \item \textbf{Physical consistency:}  
-    The reconstructed rates inherit consistency from the hybrid model,
-    including water-cut constraints and liquid-split rules.
+\subsection{Physical and Temporal Consistency}
 
-    \item \textbf{Preservation of truth:}  
-    All original well-test measurements remain unchanged.
-\end{enumerate}
+The reconstruction procedure preserves physical consistency at each time step by
+enforcing non-negativity of phase rates and liquid-rate consistency,
+\begin{equation}
+\hat{q}_L(t) = \hat{q}_o(t) + \hat{q}_w(t),
+\end{equation}
+with appropriate clipping applied as described previously. Temporal smoothness is
+implicitly supported through the use of lagged features in the residual model, which
+allow historical system states to influence reconstructed values without imposing
+explicit smoothing constraints.
 
-The resulting dataframe therefore represents a high-fidelity approximation of the
-true production history, combining the strengths of physics-based modelling,
-residual learning, and controlled temporal reconstruction.
+\subsection{Practical Implications}
+
+Temporal reconstruction of historical production rates enables the creation of dense,
+physically consistent time series suitable for production surveillance, performance
+analysis, and downstream data-driven applications. By leveraging physics-based inference
+as a stable baseline and applying machine-learning corrections selectively, the proposed
+approach provides robust reconstruction under sparse and irregular measurement regimes
+commonly encountered in field operations.
+
+Overall, this capability extends the role of the proposed hybrid framework beyond
+prediction, positioning it as a practical tool for historical data completion in
+industrial virtual flow metering workflows.
 
 
 \section{Model Integration}
@@ -1544,16 +1442,6 @@ Gating mechanisms used to combine physics predictions and residual corrections f
 At inference time, the hybrid model requires a single forward evaluation of the physics equations followed by a lightweight residual prediction. This results in low-latency predictions suitable for near–real-time applications. Compared to purely data-driven deep learning models, the proposed approach offers significantly reduced inference cost, making it amenable to deployment in production monitoring systems with limited computational resources.
 
 Overall, the computational design of the hybrid model achieves a favorable balance between accuracy, interpretability, and efficiency, enabling practical deployment in real-world well surveillance and production optimization workflows.
-
-
-\section{Limitations and Assumptions}
-\label{sec:limitations}
-
-\subsection{Physical Model Assumptions}
-\label{subsec:physical_assumptions}
-
-\subsection{Machine-Learning Model Assumptions}
-\label{subsec:ml_assumptions}
 
 
 \chapter{Experimentation}

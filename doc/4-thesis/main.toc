@@ -3,8 +3,8 @@
 \contentsline {chapter}{Acknowledgement}{iii}{chapter*.3}%
 \contentsline {chapter}{Abstract}{iv}{chapter*.4}%
 \contentsline {chapter}{Table of Contents}{v}{chapter*.5}%
-\contentsline {chapter}{List of Figures}{ix}{chapter*.6}%
-\contentsline {chapter}{List of Tables}{x}{chapter*.7}%
+\contentsline {chapter}{List of Figures}{x}{chapter*.6}%
+\contentsline {chapter}{List of Tables}{xi}{chapter*.7}%
 \contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
 \contentsline {section}{\numberline {1.1}Asset Hierarchy}{2}{section.1.1}%
 \contentsline {section}{\numberline {1.2}Well Types}{3}{section.1.2}%
@@ -77,31 +77,38 @@
 \contentsline {subsubsection}{\numberline {3.3.6.6}Calibration Quality Assessment}{41}{subsubsection.3.3.6.6}%
 \contentsline {subsubsection}{\numberline {3.3.6.7}Role in the Hybrid Modeling Framework}{41}{subsubsection.3.3.6.7}%
 \contentsline {section}{\numberline {3.4}Machine-Learning Residual Modelling}{41}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}Motivation for Residual Learning}{42}{subsection.3.4.1}%
-\contentsline {subsection}{\numberline {3.4.2}Feature Engineering (Polynomial Expansion and Lagging)}{42}{subsection.3.4.2}%
-\contentsline {paragraph}{\numberline {3.4.2.0.1}Polynomial expansion.}{43}{paragraph.3.4.2.0.1}%
-\contentsline {paragraph}{\numberline {3.4.2.0.2}Lagged feature construction.}{43}{paragraph.3.4.2.0.2}%
-\contentsline {subsection}{\numberline {3.4.3}Gradient Boosting Regressor Configuration}{43}{subsection.3.4.3}%
-\contentsline {subsection}{\numberline {3.4.4}Training of Residual Models (Oil, Gas, Water Cut)}{44}{subsection.3.4.4}%
-\contentsline {section}{\numberline {3.5}Hybrid Physics--ML Rate Synthesis}{44}{section.3.5}%
-\contentsline {subsection}{\numberline {3.5.1}Combining Physics Predictions with Residual Corrections}{45}{subsection.3.5.1}%
-\contentsline {subsection}{\numberline {3.5.2}Enforcing Liquid-Split and Water-Cut Consistency}{45}{subsection.3.5.2}%
-\contentsline {subsection}{\numberline {3.5.3}Error Handling and Physical Constraints}{46}{subsection.3.5.3}%
+\contentsline {subsection}{\numberline {3.4.1}Residual Learning Model Philosophy}{42}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Residual Learning Formulation}{43}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}Feature Construction}{43}{subsection.3.4.3}%
+\contentsline {subsection}{\numberline {3.4.4}Data Normalization and Polynomial Expansion}{43}{subsection.3.4.4}%
+\contentsline {subsection}{\numberline {3.4.5}Residual Model Architecture}{44}{subsection.3.4.5}%
+\contentsline {subsection}{\numberline {3.4.6}Hybrid Prediction and Residual Application}{44}{subsection.3.4.6}%
+\contentsline {subsection}{\numberline {3.4.7}Consistency Constraints}{45}{subsection.3.4.7}%
+\contentsline {section}{\numberline {3.5}Hybrid Physics--ML Rate Synthesis}{45}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Sequential Inference Structure}{45}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Log-Space Residual Application}{45}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.3}Phase-Specific Synthesis Rules}{46}{subsection.3.5.3}%
+\contentsline {subsubsection}{\numberline {3.5.3.1}Oil Rate Synthesis}{46}{subsubsection.3.5.3.1}%
+\contentsline {subsubsection}{\numberline {3.5.3.2}Gas Rate Synthesis}{46}{subsubsection.3.5.3.2}%
+\contentsline {subsubsection}{\numberline {3.5.3.3}Water Rate Synthesis}{46}{subsubsection.3.5.3.3}%
+\contentsline {subsection}{\numberline {3.5.4}Physical Consistency Enforcement}{47}{subsection.3.5.4}%
+\contentsline {subsection}{\numberline {3.5.5}Role of Gating and Safety Mechanisms}{47}{subsection.3.5.5}%
+\contentsline {subsection}{\numberline {3.5.6}Summary of Hybrid Rate Assembly}{47}{subsection.3.5.6}%
 \contentsline {section}{\numberline {3.6}Temporal Reconstruction of Historical Production Rates}{47}{section.3.6}%
-\contentsline {subsection}{\numberline {3.6.1}Reconstruction Strategy}{47}{subsection.3.6.1}%
-\contentsline {subsection}{\numberline {3.6.2}Integration of Observed Well-Test Values}{48}{subsection.3.6.2}%
-\contentsline {subsection}{\numberline {3.6.3}Output Structure of the Dense Reconstructed Dataset}{49}{subsection.3.6.3}%
-\contentsline {section}{\numberline {3.7}Model Integration}{49}{section.3.7}%
-\contentsline {subsection}{\numberline {3.7.1}Step-by-Step Pipeline Summary}{49}{subsection.3.7.1}%
-\contentsline {subsection}{\numberline {3.7.2}Computational Considerations}{49}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {3.6.1}Problem Definition}{48}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Distinction from Forecasting}{48}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}Hybrid Inference for Missing Time Indices}{48}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.6.4}Selective Reconstruction Logic}{49}{subsection.3.6.4}%
+\contentsline {subsection}{\numberline {3.6.5}Physical and Temporal Consistency}{49}{subsection.3.6.5}%
+\contentsline {subsection}{\numberline {3.6.6}Practical Implications}{49}{subsection.3.6.6}%
+\contentsline {section}{\numberline {3.7}Model Integration}{50}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Step-by-Step Pipeline Summary}{50}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {3.7.2}Computational Considerations}{50}{subsection.3.7.2}%
 \contentsline {subsubsection}{\numberline {3.7.2.1}Model Decomposition and Computational Load}{50}{subsubsection.3.7.2.1}%
 \contentsline {subsubsection}{\numberline {3.7.2.2}Parameter Calibration and Training Efficiency}{50}{subsubsection.3.7.2.2}%
-\contentsline {subsubsection}{\numberline {3.7.2.3}Scalability Across Multiple Wells}{50}{subsubsection.3.7.2.3}%
+\contentsline {subsubsection}{\numberline {3.7.2.3}Scalability Across Multiple Wells}{51}{subsubsection.3.7.2.3}%
 \contentsline {subsubsection}{\numberline {3.7.2.4}Numerical Stability and Robustness}{51}{subsubsection.3.7.2.4}%
 \contentsline {subsubsection}{\numberline {3.7.2.5}Inference Time and Deployment Considerations}{51}{subsubsection.3.7.2.5}%
-\contentsline {section}{\numberline {3.8}Limitations and Assumptions}{51}{section.3.8}%
-\contentsline {subsection}{\numberline {3.8.1}Physical Model Assumptions}{51}{subsection.3.8.1}%
-\contentsline {subsection}{\numberline {3.8.2}Machine-Learning Model Assumptions}{51}{subsection.3.8.2}%
 \contentsline {chapter}{\numberline {4}Experimentation}{52}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Experimental Objectives}{52}{section.4.1}%
 \contentsline {section}{\numberline {4.2}Experimental Data Partitioning}{52}{section.4.2}%
