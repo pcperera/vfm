@@ -166,62 +166,6 @@ parent={},%
 %
 }%
 
-\glsdefs@newdocentry{WH}%
-{%
-name={\acronymfont {\glsentryshort {WH}}},%
-sort={WH},%
-type={acronym},%
-first={WH},%
-firstplural={WHs},%
-text={WH},%
-plural={WHs},%
-description={Well Head},%
-descriptionplural={Well Head},%
-symbol={\relax },%
-symbolplural={\relax },%
-user1={},%
-user2={},%
-user3={},%
-user4={},%
-user5={},%
-user6={},%
-long={Well Head},%
-longplural={Well Heads},%
-short={WH},%
-shortplural={WHs},%
-counter={page},%
-parent={},%
-%
-}%
-
-\glsdefs@newdocentry{DC}%
-{%
-name={\acronymfont {\glsentryshort {DC}}},%
-sort={DC},%
-type={acronym},%
-first={DC},%
-firstplural={DCs},%
-text={DC},%
-plural={DCs},%
-description={Downstream Choke},%
-descriptionplural={Downstream Choke},%
-symbol={\relax },%
-symbolplural={\relax },%
-user1={},%
-user2={},%
-user3={},%
-user4={},%
-user5={},%
-user6={},%
-long={Downstream Choke},%
-longplural={Downstream Chokes},%
-short={DC},%
-shortplural={DCs},%
-counter={page},%
-parent={},%
-%
-}%
-
 \glsdefs@newdocentry{DHP}%
 {%
 name={\acronymfont {\glsentryshort {DHP}}},%
@@ -273,6 +217,34 @@ long={Down Hole Temperature},%
 longplural={Down Hole Temperatures},%
 short={DHT},%
 shortplural={DHTs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{WH}%
+{%
+name={\acronymfont {\glsentryshort {WH}}},%
+sort={WH},%
+type={acronym},%
+first={WH},%
+firstplural={WHs},%
+text={WH},%
+plural={WHs},%
+description={Well Head},%
+descriptionplural={Well Head},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Well Head},%
+longplural={Well Heads},%
+short={WH},%
+shortplural={WHs},%
 counter={page},%
 parent={},%
 %
