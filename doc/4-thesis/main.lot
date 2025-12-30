@@ -1,11 +1,11 @@
 \contentsline {table}{\numberline {1.1}{\ignorespaces Well downhole and surface instrumentation}}{6}{table.caption.9}%
-\contentsline {table}{\numberline {2.1}{\ignorespaces Comparative evaluation of flow metering and virtual flow metering approaches}}{23}{table.2.1}%
-\contentsline {table}{\numberline {2.2}{\ignorespaces Literature summary}}{26}{table.2.2}%
-\contentsline {table}{\numberline {3.1}{\ignorespaces Indepdent operational variables}}{32}{table.caption.11}%
-\contentsline {table}{\numberline {3.2}{\ignorespaces Geometrical static data}}{32}{table.caption.12}%
-\contentsline {table}{\numberline {3.3}{\ignorespaces Reference ground truth variables}}{33}{table.caption.13}%
-\contentsline {table}{\numberline {3.4}{\ignorespaces MPFM estimated rates}}{33}{table.caption.14}%
-\contentsline {table}{\numberline {3.5}{\ignorespaces Summary of available historical measurements for each production well}}{34}{table.caption.15}%
-\contentsline {table}{\numberline {4.1}{\ignorespaces Performance metrics used for model evaluation}}{59}{table.caption.19}%
-\contentsline {table}{\numberline {5.1}{\ignorespaces Prediction performance comparison for oil ($q_o$), water ($q_w$), and gas ($q_g$) rates across all wells.}}{60}{table.caption.20}%
-\contentsline {table}{\numberline {5.2}{\ignorespaces Performance comparison of physics-only and hybrid models for Well W10 under the Leave-One-Well-Out (LOWO) evaluation strategy. Absolute error metrics are emphasized for robustness under low-rate regimes.}}{65}{table.caption.28}%
+\contentsline {table}{\numberline {2.1}{\ignorespaces Comparative evaluation of flow metering and virtual flow metering approaches}}{25}{table.2.1}%
+\contentsline {table}{\numberline {2.2}{\ignorespaces Literature summary}}{27}{table.2.2}%
+\contentsline {table}{\numberline {3.1}{\ignorespaces Indepdent operational variables}}{34}{table.caption.11}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Geometrical static data}}{34}{table.caption.12}%
+\contentsline {table}{\numberline {3.3}{\ignorespaces Reference ground truth variables}}{35}{table.caption.13}%
+\contentsline {table}{\numberline {3.4}{\ignorespaces MPFM estimated rates}}{35}{table.caption.14}%
+\contentsline {table}{\numberline {3.5}{\ignorespaces Summary of available historical measurements for each production well}}{36}{table.caption.15}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Performance metrics used for model evaluation}}{61}{table.caption.19}%
+\contentsline {table}{\numberline {5.1}{\ignorespaces Prediction performance comparison for oil ($q_o$), water ($q_w$), and gas ($q_g$) rates across all wells.}}{62}{table.caption.20}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Performance comparison of physics-only and hybrid models for Well W10 under the Leave-One-Well-Out (LOWO) evaluation strategy. Absolute error metrics are emphasized for robustness under low-rate regimes.}}{67}{table.caption.28}%

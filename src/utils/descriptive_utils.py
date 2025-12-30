@@ -19,50 +19,6 @@ def get_train_test_split(df: pd.DataFrame):
         shuffle=False
     )
 
-# def get_train_test_split_per_well(
-#     df: pd.DataFrame,
-#     well_id_col: str = "well_id",
-#     test_size: float = 0.2,
-#     min_train_points: int = 30,
-# ):
-#     """
-#     Per-well temporal train/test split WITHOUT lagged features.
-
-#     Assumes df is already sorted by time_idx.
-#     """
-
-#     if not 0.0 < test_size < 1.0:
-#         raise ValueError("test_size must be between 0 and 1")
-
-#     train_parts = []
-#     test_parts = []
-
-#     for well_id, df_well in df.groupby(well_id_col, sort=False):
-#         n = len(df_well)
-
-#         # Not enough data → skip well
-#         if n < min_train_points + 1:
-#             continue
-
-#         split_idx = int((1 - test_size) * n)
-
-#         # Enforce minimum train size
-#         if split_idx < min_train_points:
-#             split_idx = min_train_points
-
-#         df_train = df_well.iloc[:split_idx]
-#         df_test = df_well.iloc[split_idx:]
-
-#         if len(df_test) == 0:
-#             continue
-
-#         train_parts.append(df_train)
-#         test_parts.append(df_test)
-
-#     df_train = pd.concat(train_parts)
-#     df_test = pd.concat(test_parts)
-
-#     return df_train, df_test
 
 def get_random_train_test_split_per_well_with_order_preserved(
     df,
@@ -107,11 +63,141 @@ def get_random_train_test_split_per_well_with_order_preserved(
 
     raise RuntimeError("Could not satisfy split constraints")
 
+
+import numpy as np
+import pandas as pd
+
+
+def get_blocked_temporal_train_val_test_split(
+    df: pd.DataFrame,
+    well_id_col: str = "well_id",
+    time_col: str | None = None,
+    n_blocks: int = 5,
+    val_fraction_per_block: float = 0.1,
+    test_fraction_per_block: float = 0.2,
+    min_block_size: int = 5,
+):
+    """
+    Blocked temporal train-validation-test split with preserved temporal order.
+
+    For each well:
+    - data are sorted by time
+    - split into contiguous temporal blocks
+    - within each block:
+        early   → train
+        middle → validation (optional)
+        late    → test (optional)
+
+    Fractions may be zero; corresponding sets will be empty.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input dataframe.
+    well_id_col : str
+        Well identifier column.
+    time_col : str | None
+        Time column name. If None, index is assumed temporal.
+    n_blocks : int
+        Number of temporal blocks per well.
+    val_fraction_per_block : float
+        Fraction of each block reserved for validation.
+    test_fraction_per_block : float
+        Fraction of each block reserved for testing.
+    min_block_size : int
+        Minimum samples required per block.
+
+    Returns
+    -------
+    df_train : pd.DataFrame
+    df_val : pd.DataFrame
+    df_test : pd.DataFrame
+    """
+
+    if not (0.0 <= val_fraction_per_block < 1.0):
+        raise ValueError("val_fraction_per_block must be in [0, 1)")
+    if not (0.0 <= test_fraction_per_block < 1.0):
+        raise ValueError("test_fraction_per_block must be in [0, 1)")
+    if val_fraction_per_block + test_fraction_per_block >= 1.0:
+        raise ValueError("val_fraction + test_fraction must be < 1")
+
+    train_parts = []
+    val_parts = []
+    test_parts = []
+
+    for well_id, df_well in df.groupby(well_id_col):
+
+        # --------------------------------------------------
+        # Sort temporally
+        # --------------------------------------------------
+        if time_col:
+            df_well = df_well.sort_values(time_col)
+        else:
+            df_well = df_well.sort_index()
+
+        n = len(df_well)
+
+        # --------------------------------------------------
+        # Fallback: insufficient data for blocks
+        # --------------------------------------------------
+        if n < n_blocks * min_block_size:
+            n_test = int(test_fraction_per_block * n)
+            n_val = int(val_fraction_per_block * n)
+
+            n_train = n - n_val - n_test
+            if n_train < 0:
+                n_train = 0
+
+            train_parts.append(df_well.iloc[:n_train])
+
+            if n_val > 0:
+                val_parts.append(df_well.iloc[n_train:n_train + n_val])
+
+            if n_test > 0:
+                test_parts.append(df_well.iloc[n_train + n_val:])
+
+            continue
+
+        # --------------------------------------------------
+        # Create temporal blocks
+        # --------------------------------------------------
+        block_edges = np.linspace(0, n, n_blocks + 1, dtype=int)
+
+        for i in range(n_blocks):
+            start = block_edges[i]
+            end = block_edges[i + 1]
+            block = df_well.iloc[start:end]
+
+            if len(block) < min_block_size:
+                continue
+
+            nb = len(block)
+            n_test = int(test_fraction_per_block * nb)
+            n_val = int(val_fraction_per_block * nb)
+            n_train = nb - n_val - n_test
+
+            if n_train < 0:
+                continue
+
+            train_parts.append(block.iloc[:n_train])
+
+            if n_val > 0:
+                val_parts.append(block.iloc[n_train:n_train + n_val])
+
+            if n_test > 0:
+                test_parts.append(block.iloc[n_train + n_val:])
+
+    df_train = pd.concat(train_parts).sort_index() if train_parts else pd.DataFrame(columns=df.columns)
+    df_val = pd.concat(val_parts).sort_index() if val_parts else pd.DataFrame(columns=df.columns)
+    df_test = pd.concat(test_parts).sort_index() if test_parts else pd.DataFrame(columns=df.columns)
+
+    return df_train, df_val, df_test
+
+
 def get_lowo_train_val_test_split(
     df: pd.DataFrame,
     test_well_id: str,
     well_id_col: str = "well_id",
-    random_state: int | None = None,
 ):
     """
     Leave-One-Well-Out split with RANDOMIZED block-wise validation.
@@ -120,102 +206,14 @@ def get_lowo_train_val_test_split(
     # --------------------------------------------------
     # 1. LOWO split (cross-well generalization)
     # --------------------------------------------------
-    df_test = df[df[well_id_col] == test_well_id].sort_index()
+    df_test_all = df[df[well_id_col] == test_well_id].sort_index()
     df_train_val = df[df[well_id_col] != test_well_id].sort_index()
 
     df_train, df_val, _ = get_random_train_test_split_per_well_with_order_preserved(df=df_train_val, val_size=0.2, test_size=0)
-    return df_train, df_val, df_test
+    df_calibration, _, df_test = get_blocked_temporal_train_val_test_split(df=df_test_all, test_fraction_per_block=0.9, val_fraction_per_block=0)
 
+    return df_train, df_val, df_calibration, df_test
 
-# def get_train_val_test_split_per_well(
-#     df: pd.DataFrame,
-#     well_id_col: str = "well_id",
-#     train_frac: float = 0.7,
-#     val_frac: float = 0.1,
-#     test_frac: float = 0.2,
-#     block_size: int = 10,
-#     min_train: int = 20,
-#     min_val: int = 5,
-#     min_test: int = 4,
-#     random_state: int | None = None,
-# ):
-#     """
-#     Block-wise train/validation/test split per well with
-#     approximate fraction control and future-like test set.
-#     """
-
-#     assert abs(train_frac + val_frac + test_frac - 1.0) < 1e-6
-
-#     rng = np.random.default_rng(random_state)
-
-#     train_all, val_all, test_all = [], [], []
-
-#     for well_id, d in df.groupby(well_id_col):
-#         d = d.sort_index()
-#         n = len(d)
-
-#         if n < (min_train + min_val + min_test):
-#             raise ValueError("Not enough data points for requested split")
-
-#         # --------------------------------------------------
-#         # Split into contiguous blocks
-#         # --------------------------------------------------
-#         blocks = [
-#             d.iloc[i:i + block_size]
-#             for i in range(0, n, block_size)
-#         ]
-
-#         n_blocks = len(blocks)
-#         if n_blocks < 5:
-#             raise ValueError("Too few blocks for stable splitting")
-
-#         # --------------------------------------------------
-#         # Number of blocks per split
-#         # --------------------------------------------------
-#         n_test_blocks = max(1, int(test_frac * n_blocks))
-#         n_val_blocks = max(1, int(val_frac * n_blocks))
-#         n_train_blocks = n_blocks - n_test_blocks - n_val_blocks
-
-#         if n_train_blocks < 1:
-#             raise ValueError("Invalid block allocation")
-
-#         # --------------------------------------------------
-#         # Assign TEST as last contiguous blocks (future-like)
-#         # --------------------------------------------------
-#         test_blocks = blocks[-n_test_blocks:]
-#         remaining_blocks = blocks[:-n_test_blocks]
-
-#         # --------------------------------------------------
-#         # Randomize TRAIN / VAL blocks
-#         # --------------------------------------------------
-#         rng.shuffle(remaining_blocks)
-
-#         train_blocks = remaining_blocks[:n_train_blocks]
-#         val_blocks = remaining_blocks[n_train_blocks:]
-
-#         # --------------------------------------------------
-#         # Concatenate and validate sizes
-#         # --------------------------------------------------
-#         train_df = pd.concat(train_blocks)
-#         val_df = pd.concat(val_blocks)
-#         test_df = pd.concat(test_blocks)
-
-#         if (
-#             len(train_df) < min_train or
-#             len(val_df) < min_val or
-#             len(test_df) < min_test
-#         ):
-#             raise ValueError("Split violates minimum size constraints")
-
-#         train_all.append(train_df)
-#         val_all.append(val_df)
-#         test_all.append(test_df)
-
-#     return (
-#         pd.concat(train_all).sort_index(),
-#         pd.concat(val_all).sort_index(),
-#         pd.concat(test_all).sort_index(),
-#     )
 
 
 # def get_all_wells() -> list[str]:

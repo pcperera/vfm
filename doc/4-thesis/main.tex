@@ -241,7 +241,7 @@ Physics based VFM are also known as first principles VFM systems. Physics-based 
     \item \textbf{System Matching (IPR-VLP Intersection)}:
     Once the IPR and VLP curves are generated, the model determines the stable operating point of the well by finding the intersection between the two. This intersection represents the flow rate and bottomhole pressure at which reservoir inflow and wellbore outflow are in equilibrium. System matching ensures that the well model is physically consistent and reflects actual production behavior. Engineers often calibrate this stage using well test data, pressure surveys, or downhole gauges to align the theoretical model with observed performance. Accurate matching is essential for reliable predictions in virtual metering, production optimization, and artificial lift design.
     \item \textbf{Surface Network and Choke Modeling}:
-    In many wells, surface constraints significantly influence flow performance. This stage incorporates choke models, manifold pressures, flowline hydraulics, separators, and facility back-pressure effects. Choke modeling uses vendor-specific or mechanistic equations to capture the nonlinear relationship between choke opening, upstream pressure, downstream pressure, and multiphase flow rate. Incorporating the surface network allows the model to reflect operational realities, including changing separator pressures, pipeline slugging tendencies, and facility limits, thereby improving forecast accuracy and steady-state or transient flow predictions.
+    In many wells, surface constraints significantly influence flow performance. This stage incorporates choke models, manifold pressures, flowline hydraulics, separators, and facility back-pressure effects. Choke modeling uses vendor-specific or mechanistic equations to capture the nonlinear relationship between choke opening, upstream pressure, downstream pressure, and multiphase flow rate. Incorporating the surface network allows the model to reflect operational realities, including changing separator pressures, pipeline slugging tendencies, and facility limits, thereby improving steady-state or transient flow predictions.
     \item \textbf{Calibration, Validation, and Sensitivity Analysis}:
     Physics-based well models must be calibrated against historical production data, well tests, and downhole or surface gauge measurements. Calibration typically involves adjusting uncertain parameters such as PI, skin, GOR, water cut, or tubing roughness until the model matches real observed behavior. Once calibrated, the model is validated by comparing predictions against unseen measurements to ensure predictive reliability. Sensitivity analysis is then performed to quantify how uncertainties in PVT, reservoir pressure, or equipment performance affect model outputs. This step ensures that the model remains robust, stable, and trustworthy for operational use.
 \end{itemize} 
@@ -440,16 +440,47 @@ An alternative to strict physics enforcement is the use of soft physical constra
 
 \section{Rationale for a Physics-Informed Hybrid Residual Architecture}
 
-The reviewed literature reveals a clear gap between interpretable but brittle physics-based VFMs and accurate but opaque data-driven models. This motivates a physics-informed hybrid residual architecture in which:
+The adoption of a physics-informed hybrid residual architecture in this work is motivated by several well-established considerations in the virtual flow metering and data-driven modeling literature:
 
 \begin{itemize}
-    \item Dominant production behavior is modeled using simplified, physically interpretable inflow and choke flow relationships \citep{dake1978developments,agwu2022modelling}.
-    \item Phase consistency is enforced through bounded closure laws \citep{ishak2022virtual}.
-    \item Machine learning models correct systematic residual errors rather than replacing physics entirely \citep{bikmukhametov2020combining}.
-    \item Temporal learning can be incorporated independently when forecasting capability is required \citep{lim2021temporal}.
+    \item \textbf{Limited availability and sparsity of well test data:}  
+    In practical production environments, well test measurements are acquired infrequently due to operational constraints, cost, and production priorities. 
+    Purely data-driven models typically require large, dense, and regularly sampled datasets to generalize reliably, which is rarely achievable in field conditions. 
+    Physics-based models, by contrast, can operate under sparse data regimes by embedding prior physical knowledge, making them a natural foundation for hybrid approaches.
+
+    \item \textbf{Strong prior knowledge of multiphase flow behavior:}  
+    The governing relationships between pressure, temperature, fluid properties, and phase flow rates in production systems are well understood and extensively documented in the petroleum engineering literature. 
+    Ignoring this prior knowledge and learning flow behavior purely from data is inefficient and may lead to physically implausible predictions. 
+    A physics-informed architecture ensures that baseline predictions remain consistent with known flow physics.
+
+    \item \textbf{Systematic bias and model mismatch in physics-based models:}  
+    While physics-based virtual flow metering models capture dominant flow mechanisms, they often rely on simplifying assumptions, empirical correlations, and uncertain parameters. 
+    As a result, systematic residual errors arise due to unmodeled effects such as changing flow regimes, sensor drift, fluid property variations, and facility interactions. 
+    Learning residual corrections allows these structured biases to be addressed without discarding the physical model.
+
+    \item \textbf{Improved generalization across wells and operating conditions:}  
+    Residual learning focuses the machine learning component on modeling deviations from physics rather than the full input--output mapping. 
+    This reduces model complexity and improves generalization, particularly when transferring predictive capability across wells with heterogeneous characteristics. 
+    Such decomposition has been shown to enhance robustness under spatial and temporal distribution shifts.
+
+    \item \textbf{Reduced risk of overfitting and improved data efficiency:}  
+    By constraining the learning task to residual errors, the hybrid architecture significantly reduces the hypothesis space explored by the machine learning model. 
+    This improves data efficiency and mitigates overfitting, which is critical when training on small multi-well datasets typical of well test applications.
+
+    \item \textbf{Interpretability and diagnostic value:}  
+    Separating physics-based predictions from learned residual corrections enhances model interpretability. 
+    The physics component provides transparent baseline behavior, while the residual component highlights conditions under which the physical assumptions break down. 
+    This separation supports diagnostic analysis and builds trust for deployment in production engineering workflows.
+
+    \item \textbf{Alignment with operational calibration practices:}  
+    In field operations, physics-based models are routinely calibrated using limited well-specific data, while global correlations and assumptions are reused across assets. 
+    The proposed hybrid architecture mirrors this practice by allowing limited per-well calibration of physical parameters while maintaining a globally trained residual model, thereby aligning model design with real-world engineering workflows.
+
+    \item \textbf{Robustness under non-stationary operating conditions:}  
+    Production systems evolve over time due to changes in reservoir conditions, choke settings, artificial lift performance, and facility constraints. 
+    Hybrid residual models can adapt to such non-stationarities by updating residual behavior while retaining physically consistent baseline predictions, offering greater long-term stability than purely data-driven approaches.
 \end{itemize}
 
-Such an architecture aligns with contemporary best practices in hybrid modeling and satisfies industrial requirements for robustness, interpretability, scalability, and data efficiency.
 
 \newcolumntype{Z}{>{\raggedright\arraybackslash}p{2.5cm}}
 \begin{longtable}{p{2cm} Z Z Z Z}
@@ -1451,10 +1482,8 @@ physical consistency across time.
 
 \subsection{Distinction from Forecasting}
 
-It is important to distinguish temporal reconstruction from forecasting. In the
-proposed framework, reconstruction operates exclusively on historical timestamps for
-which all independent variables (pressures, temperatures, choke settings, and lagged
-features) are available. No extrapolation beyond the observed time horizon is performed.
+It is important to distinguish temporal reconstruction from forecasting. In the proposed framework, reconstruction operates exclusively on historical timestamps for which all independent variables (pressures, temperatures, choke settings, and lagged features) are available. 
+No extrapolation beyond the observed time horizon is performed.
 
 Formally, reconstruction estimates
 \(
@@ -1738,7 +1767,7 @@ These ratios are computed from both measured and predicted flow rates, and the s
 \section{Cross-Well Temporal Generalization Evaluation Setup}
 \label{sec:temporal_setup}
 
-The cross-well temporal generalization evaluation is designed to assess the ability of the proposed modeling framework to produce accurate flow-rate predictions on unseen time periods while remaining within the same set of wells. This evaluation reflects a common production monitoring scenario in which historical data are available for a well, and the objective is to forecast or infer flow rates under future operating conditions without retraining the model.
+The cross-well temporal generalization evaluation is designed to assess the ability of the proposed modeling framework to produce accurate flow-rate predictions on unseen time periods while remaining within the same set of wells. This evaluation reflects a common production monitoring scenario in which historical data are available for a well, and the objective is to predict flow rates under future operating conditions without retraining the model.
 
 For each well, the available time-series data are partitioned into training and testing subsets using a temporally ordered split. Earlier observations are used for physics-model calibration and, where applicable, training of the global machine-learning residual model, while later observations are held out exclusively for evaluation. This strategy preserves the natural temporal ordering of the data and prevents information leakage from future operating conditions into the training process.
 
@@ -1750,12 +1779,15 @@ Reporting results on a per-well basis enables systematic assessment of temporal 
 \section{Spatial Generalization Evaluation Setup}
 \label{sec:lowo_setup}
 
-The spatial generalization evaluation assesses the ability of the proposed modeling framework to transfer predictive capability to previously unseen wells. 
-This evaluation is conducted using a LOWO validation strategy, which emulates realistic deployment conditions in which a trained model is applied to a new well with limited historical data.
-In each LOWO experiment, one well is excluded from model development and used solely for evaluation, while the remaining wells constitute the training set. The machine-learning residual model is trained globally using data from the training wells and is kept fixed during evaluation on the unseen well. For the held-out well, limited calibration of well-specific physics parameters is performed using a small subset of available data to ensure physical consistency, while retraining of the residual model is intentionally avoided.
+The spatial generalization evaluation assesses the ability of the proposed modeling framework to transfer predictive capability to a previously unseen well. 
+This evaluation is conducted using a targeted Leave-One-Well-Out (LOWO) strategy, designed to emulate a realistic deployment scenario in which a trained model is applied to a new well with limited or no prior exposure during training.
 
-This setup enables isolation of the spatial transferability of the learned residual corrections across wells, while maintaining a realistic calibration procedure consistent with field operations. Both physics-only and hybrid model configurations are evaluated on the unseen well, and their performance is compared against MPFM estimates using well-test measurements as the reference standard.
-Model performance is quantified using well-test measurements as the reference standard and evaluated using the evaluation metrics defined in Section~\ref{sec:evaluation_metrics} for oil, water, and gas flow rates. 
+In this setup, the well with the largest number of historical observations (W10) is excluded entirely from model development and used exclusively for evaluation, while the remaining wells constitute the training set. The machine-learning residual model is trained globally using data from the training wells and is kept fixed during evaluation on the unseen well. For the held-out well, limited calibration of well-specific physics parameters is performed using a small subset of available data to ensure physical consistency, while retraining of the residual model is intentionally avoided.
+
+This experimental design serves as a conservative stress test of spatial generalization. By excluding the most data-rich well from training, the evaluation prevents dominance of a single well during residual learning and ensures that model performance on W10 reflects genuine cross-well transferability rather than implicit memorization driven by data availability. The setup therefore provides a stringent assessment of whether the proposed hybrid framework can generalize to a well with complex and well-sampled production behavior based solely on information learned from other wells.
+
+Both physics-only and hybrid model configurations are evaluated on the held-out well, and their performance is compared against MPFM estimates using well-test measurements as the reference standard. Model performance is quantified using the evaluation metrics defined in Section~\ref{sec:evaluation_metrics} for oil, water, and gas flow rates.
+
 
 \section{Summary of Experimental Design}
 
