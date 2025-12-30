@@ -8,3 +8,4 @@
 \contentsline {table}{\numberline {3.5}{\ignorespaces Summary of available historical measurements for each production well}}{34}{table.caption.15}%
 \contentsline {table}{\numberline {4.1}{\ignorespaces Performance metrics used for model evaluation}}{59}{table.caption.19}%
 \contentsline {table}{\numberline {5.1}{\ignorespaces Model performance comparison for selected wells. Absolute error metrics are emphasized for water rate due to low-flow regimes.}}{60}{table.caption.20}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Performance comparison of physics-only and hybrid models for Well W10 under the Leave-One-Well-Out (LOWO) evaluation strategy. Absolute error metrics are emphasized for robustness under low-rate regimes.}}{63}{table.caption.24}%

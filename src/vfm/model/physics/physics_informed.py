@@ -343,16 +343,32 @@ class PhysicsModel:
 class PhysicsInformedHybridModel:
 
     def __init__(self, 
-                 dependant_vars, 
-                 independent_vars,
-                 well_id_col="well_id", 
-                 degree=1, 
-                 lags=1,
-                 well_geometry: dict | None = None):
+                    dependant_vars, 
+                    independent_vars,
+                    well_id_col:str = "well_id", 
+                    y_qo_col:str = "qo_well_test",
+                    y_qg_col:str ="qg_well_test",
+                    y_qw_col:str ="qw_well_test",
+                    mpfm_qo_col: str = "qo_mpfm",
+                    mpfm_qg_col: str = "qg_mpfm",
+                    mpfm_qw_col: str = "qw_mpfm",
+                    mpfm_gor_col: str = "gor_mpfm",
+                    mpfm_wgr_col: str = "wgr_mpfm",
+                    degree=1, 
+                    lags=1,
+                    well_geometry: dict | None = None):
 
         self.dependant_vars = dependant_vars
         self.independent_vars = independent_vars
         self.well_id_col = well_id_col
+        self.y_qo_col = y_qo_col
+        self.y_qg_col = y_qg_col
+        self.y_qw_col = y_qw_col
+        self.mpfm_qo_col = mpfm_qo_col
+        self.mpfm_qg_col = mpfm_qg_col
+        self.mpfm_qw_col = mpfm_qw_col
+        self.mpfm_gor_col = mpfm_gor_col
+        self.mpfm_wgr_col = mpfm_wgr_col
         self.degree = degree
         self.lags = lags
         self.well_geometry = well_geometry or {}
@@ -398,10 +414,7 @@ class PhysicsInformedHybridModel:
     def fit(
         self,
         df: pd.DataFrame,
-        df_val: pd.DataFrame | None = None,
-        y_qo_col: str = "qo_well_test",
-        y_qg_col: str = "qg_well_test",
-        y_qw_col: str = "qw_well_test",
+        df_val: pd.DataFrame | None = None
     ):
         """
         Fit physics models per well and a global ML residual model.
@@ -427,7 +440,7 @@ class PhysicsInformedHybridModel:
         for wid, d in df.groupby(self.well_id_col):
             try:
                 temp_phys_models[wid] = PhysicsModel().fit(
-                    d, y_qo_col, y_qg_col, y_qw_col
+                    d, self.y_qo_col, self.y_qg_col, self.y_qw_col
                 )
             except Exception as e:
                 # Fail-safe: skip wells that cannot be calibrated
@@ -473,12 +486,12 @@ class PhysicsInformedHybridModel:
                 self.phys_models[wid] = PhysicsModel(
                     geometry=geom,
                     global_params=global_physics_params,
-                ).fit(d, y_qo_col, y_qg_col, y_qw_col)
+                ).fit(d, self.y_qo_col, self.y_qg_col, self.y_qw_col)
             except Exception as e:
                 # Fallback: original unconstrained physics model
                 print(f"[WARN] Geometry-aware fit failed for well {wid}, falling back: {e}")
                 self.phys_models[wid] = PhysicsModel().fit(
-                    d, y_qo_col, y_qg_col, y_qw_col
+                    d, self.y_qo_col, self.y_qg_col, self.y_qw_col
                 )
 
         # ==================================================
@@ -502,7 +515,7 @@ class PhysicsInformedHybridModel:
 
             model_input_cols = (
                 self.independent_vars +
-                [y_qo_col, y_qw_col, y_qg_col]
+                [self.y_qo_col, self.y_qw_col, self.y_qg_col]
             )
 
             min_rows = max(5, self.lags + 3)
@@ -527,7 +540,7 @@ class PhysicsInformedHybridModel:
                 ])
 
                 y_true = np.maximum(
-                    d[[y_qo_col, y_qw_col, y_qg_col]].values, EPS
+                    d[[self.y_qo_col, self.y_qw_col, self.y_qg_col]].values, EPS
                 )
                 y_phys = np.maximum(phys.values, EPS)
 
@@ -711,10 +724,7 @@ class PhysicsInformedHybridModel:
     # --------------------------------------------------
     def score_physics(
         self,
-        df,
-        y_qo_col="qo_well_test",
-        y_qg_col="qg_well_test",
-        y_qw_col="qw_well_test",
+        df
     ):
         results = {}
 
@@ -725,8 +735,8 @@ class PhysicsInformedHybridModel:
             # WGR
             # -----------------------------
             y_wgr = compute_wgr(
-                d[y_qw_col].values,
-                d[y_qg_col].values
+                d[self.y_qw_col].values,
+                d[self.y_qg_col].values
             )
             p_wgr = compute_wgr(
                 p["qw_pred"].values,
@@ -739,8 +749,8 @@ class PhysicsInformedHybridModel:
             # GOR
             # -----------------------------
             y_gor = compute_gor(
-                d[y_qg_col].values,
-                d[y_qo_col].values
+                d[self.y_qg_col].values,
+                d[self.y_qo_col].values
             )
             p_gor = compute_gor(
                 p["qg_pred"].values,
@@ -752,15 +762,15 @@ class PhysicsInformedHybridModel:
             results[wid] = {
                 "qo": dict(zip(
                     METRICS,
-                    regression_metrics(d[y_qo_col], p["qo_pred"])
+                    regression_metrics(d[self.y_qo_col], p["qo_pred"])
                 )),
                 "qw": dict(zip(
                     METRICS,
-                    regression_metrics(d[y_qw_col], p["qw_pred"])
+                    regression_metrics(d[self.y_qw_col], p["qw_pred"])
                 )),
                 "qg": dict(zip(
                     METRICS,
-                    regression_metrics(d[y_qg_col], p["qg_pred"])
+                    regression_metrics(d[self.y_qg_col], p["qg_pred"])
                 )),
                 "wgr": (
                     dict(zip(
@@ -788,10 +798,7 @@ class PhysicsInformedHybridModel:
     # --------------------------------------------------
     def score_hybrid(
         self,
-        df,
-        y_qo_col="qo_well_test",
-        y_qg_col="qg_well_test",
-        y_qw_col="qw_well_test",
+        df
     ):
         results = {}
 
@@ -812,8 +819,8 @@ class PhysicsInformedHybridModel:
             # WGR
             # -----------------------------
             y_wgr = compute_wgr(
-                d[y_qw_col].values,
-                d[y_qg_col].values
+                d[self.y_qw_col].values,
+                d[self.y_qg_col].values
             )
             p_wgr = compute_wgr(
                 d["qw_pred"].values,
@@ -826,8 +833,8 @@ class PhysicsInformedHybridModel:
             # GOR
             # -----------------------------
             y_gor = compute_gor(
-                d[y_qg_col].values,
-                d[y_qo_col].values
+                d[self.y_qg_col].values,
+                d[self.y_qo_col].values
             )
             p_gor = compute_gor(
                 d["qg_pred"].values,
@@ -839,15 +846,15 @@ class PhysicsInformedHybridModel:
             results[wid] = {
                 "qo": dict(zip(
                     METRICS,
-                    regression_metrics(d[y_qo_col], d["qo_pred"])
+                    regression_metrics(d[self.y_qo_col], d["qo_pred"])
                 )),
                 "qw": dict(zip(
                     METRICS,
-                    regression_metrics(d[y_qw_col], d["qw_pred"])
+                    regression_metrics(d[self.y_qw_col], d["qw_pred"])
                 )),
                 "qg": dict(zip(
                     METRICS,
-                    regression_metrics(d[y_qg_col], d["qg_pred"])
+                    regression_metrics(d[self.y_qg_col], d["qg_pred"])
                 )),
                 "wgr": (
                     dict(zip(
@@ -871,13 +878,7 @@ class PhysicsInformedHybridModel:
     
     def score_mpfm(
         self,
-        df,
-        y_qo_col="qo_well_test",
-        y_qg_col="qg_well_test",
-        y_qw_col="qw_well_test",
-        mpfm_qo_col="qo_mpfm",
-        mpfm_qg_col="qg_mpfm",
-        mpfm_qw_col="qw_mpfm",
+        df
     ):
         """
         Compute MPFM performance metrics with respect to well test (reference),
@@ -895,12 +896,12 @@ class PhysicsInformedHybridModel:
             # WGR
             # -----------------------------
             y_wgr = compute_wgr(
-                d[y_qw_col].values,
-                d[y_qg_col].values
+                d[self.y_qw_col].values,
+                d[self.y_qg_col].values
             )
             p_wgr = compute_wgr(
-                d[mpfm_qw_col].values,
-                d[mpfm_qg_col].values
+                d[self.mpfm_qw_col].values,
+                d[self.mpfm_qg_col].values
             )
 
             mask_wgr = np.isfinite(y_wgr) & np.isfinite(p_wgr)
@@ -909,12 +910,12 @@ class PhysicsInformedHybridModel:
             # GOR
             # -----------------------------
             y_gor = compute_gor(
-                d[y_qg_col].values,
-                d[y_qo_col].values
+                d[self.y_qg_col].values,
+                d[self.y_qo_col].values
             )
             p_gor = compute_gor(
-                d[mpfm_qg_col].values,
-                d[mpfm_qo_col].values
+                d[self.mpfm_qg_col].values,
+                d[self.mpfm_qo_col].values
             )
 
             mask_gor = np.isfinite(y_gor) & np.isfinite(p_gor)
@@ -922,15 +923,15 @@ class PhysicsInformedHybridModel:
             results[wid] = {
                 "qo": dict(zip(
                     METRICS,
-                    regression_metrics(d[y_qo_col], d[mpfm_qo_col])
+                    regression_metrics(d[self.y_qo_col], d[self.mpfm_qo_col])
                 )),
                 "qw": dict(zip(
                     METRICS,
-                    regression_metrics(d[y_qw_col], d[mpfm_qw_col])
+                    regression_metrics(d[self.y_qw_col], d[self.mpfm_qw_col])
                 )),
                 "qg": dict(zip(
                     METRICS,
-                    regression_metrics(d[y_qg_col], d[mpfm_qg_col])
+                    regression_metrics(d[self.y_qg_col], d[self.mpfm_qg_col])
                 )),
                 "wgr": (
                     dict(zip(
@@ -998,14 +999,8 @@ class PhysicsInformedHybridModel:
     def plot_predictions(
         self,
         df: pd.DataFrame,
-        y_qo_col: str = "qo_well_test",
-        y_qg_col: str = "qg_well_test",
-        y_qw_col: str = "qw_well_test",
-        mpfm_qo_col: str = "qo_mpfm",
-        mpfm_qg_col: str = "qg_mpfm",
-        mpfm_qw_col: str = "qw_mpfm",
         is_hybrid_model: bool = True,
-        model_tag_prefix: str = None
+        model_tag_prefix: str = None,
     ):
         """
         Plot predictions using DatetimeIndex as X-axis and save plots.
@@ -1032,6 +1027,18 @@ class PhysicsInformedHybridModel:
         if model_tag_prefix:
             model_tag = f"{model_tag_prefix}_{model_tag}"
 
+        # --------------------------------------------------
+        # Plot styling (publication-quality, color-blind safe)
+        # --------------------------------------------------
+        COLORS = {
+            "reference": "#000000",  # Well Test
+            "mpfm": "#1f77b4",       # MPFM
+            "hybrid": "#d62728",     # Hybrid prediction
+            "physics": "#7f7f7f",    # Physics-only
+        }
+
+        pred_color = COLORS["hybrid"] if is_hybrid_model else COLORS["physics"]
+
         for wid in df[self.well_id_col].unique():
             d = df[df[self.well_id_col] == wid].sort_index()
 
@@ -1057,9 +1064,24 @@ class PhysicsInformedHybridModel:
             # Rate plots: qo, qw, qg
             # --------------------------------------------------
             rate_cfg = {
-                "qo": {"truth": y_qo_col, "mpfm": mpfm_qo_col, "pred": "qo_pred", "label": "Oil rate"},
-                "qw": {"truth": y_qw_col, "mpfm": mpfm_qw_col, "pred": "qw_pred", "label": "Water rate"},
-                "qg": {"truth": y_qg_col, "mpfm": mpfm_qg_col, "pred": "qg_pred", "label": "Gas rate"},
+                "qo": {
+                    "truth": self.y_qo_col,
+                    "mpfm": self.mpfm_qo_col,
+                    "pred": "qo_pred",
+                    "label": "Oil rate",
+                },
+                "qw": {
+                    "truth": self.y_qw_col,
+                    "mpfm": self.mpfm_qw_col,
+                    "pred": "qw_pred",
+                    "label": "Water rate",
+                },
+                "qg": {
+                    "truth": self.y_qg_col,
+                    "mpfm": self.mpfm_qg_col,
+                    "pred": "qg_pred",
+                    "label": "Gas rate",
+                },
             }
 
             for rate, cfg in rate_cfg.items():
@@ -1072,7 +1094,7 @@ class PhysicsInformedHybridModel:
                     linewidth=2.5,
                     marker="o",
                     markersize=4,
-                    color="black",
+                    color=COLORS["reference"],
                 )
 
                 if cfg["mpfm"] in d_lag.columns:
@@ -1084,15 +1106,19 @@ class PhysicsInformedHybridModel:
                         linestyle="--",
                         marker="x",
                         markersize=4,
+                        color=COLORS["mpfm"],
                     )
 
                 ax.plot(
                     x,
                     p[cfg["pred"]].values,
-                    label="Hybrid Prediction" if is_hybrid_model else "Physics Prediction",
+                    label="Hybrid (Predicted)"
+                    if is_hybrid_model
+                    else "Physics Prediction",
                     linewidth=2,
                     marker="o",
                     markersize=4,
+                    color=pred_color,
                 )
 
                 ax.set_xlabel("Time")
@@ -1106,7 +1132,6 @@ class PhysicsInformedHybridModel:
                 fig.autofmt_xdate()
                 plt.tight_layout()
 
-                # -------- SAVE --------
                 fname = f"{wid}_{rate}_{model_tag}.png"
                 fig.savefig(os.path.join(out_dir, fname), dpi=300)
 
@@ -1114,17 +1139,59 @@ class PhysicsInformedHybridModel:
                 plt.close(fig)
 
             # --------------------------------------------------
-            # WGR plot
+            # WGR plot (Well Test + MPFM + Predicted)
             # --------------------------------------------------
-            y_wgr = compute_wgr(d_lag[y_qw_col].values, d_lag[y_qg_col].values)
-            p_wgr = compute_wgr(p["qw_pred"].values, p["qg_pred"].values)
+            y_wgr = compute_wgr(
+                d_lag[self.y_qw_col].values,
+                d_lag[self.y_qg_col].values,
+            )
+
+            p_wgr = compute_wgr(
+                p["qw_pred"].values,
+                p["qg_pred"].values,
+            )
+
+            mpfm_wgr = (
+                d_lag[self.mpfm_wgr_col].values
+                if self.mpfm_wgr_col in d_lag.columns
+                else None
+            )
 
             mask = np.isfinite(y_wgr) & np.isfinite(p_wgr)
+            if mpfm_wgr is not None:
+                mask &= np.isfinite(mpfm_wgr)
+
             if mask.sum() >= 2:
                 fig, ax = plt.subplots(figsize=(10, 4))
 
-                ax.plot(x[mask], y_wgr[mask], label="WGR (Well Test)", linewidth=2.5, marker="o", color="black")
-                ax.plot(x[mask], p_wgr[mask], label="WGR (Predicted)", linewidth=2, marker="o")
+                ax.plot(
+                    x[mask],
+                    y_wgr[mask],
+                    label="WGR (Well Test)",
+                    linewidth=2.5,
+                    marker="o",
+                    color=COLORS["reference"],
+                )
+
+                if mpfm_wgr is not None:
+                    ax.plot(
+                        x[mask],
+                        mpfm_wgr[mask],
+                        label="WGR (MPFM)",
+                        linewidth=2,
+                        linestyle="--",
+                        marker="x",
+                        color=COLORS["mpfm"],
+                    )
+
+                ax.plot(
+                    x[mask],
+                    p_wgr[mask],
+                    label="WGR (Predicted)",
+                    linewidth=2,
+                    marker="o",
+                    color=pred_color,
+                )
 
                 ax.set_xlabel("Time")
                 ax.set_ylabel("WGR (qw / qg)")
@@ -1142,17 +1209,59 @@ class PhysicsInformedHybridModel:
                 plt.close(fig)
 
             # --------------------------------------------------
-            # GOR plot
+            # GOR plot (Well Test + MPFM + Predicted)
             # --------------------------------------------------
-            y_gor = compute_gor(d_lag[y_qg_col].values, d_lag[y_qo_col].values)
-            p_gor = compute_gor(p["qg_pred"].values, p["qo_pred"].values)
+            y_gor = compute_gor(
+                d_lag[self.y_qg_col].values,
+                d_lag[self.y_qo_col].values,
+            )
+
+            p_gor = compute_gor(
+                p["qg_pred"].values,
+                p["qo_pred"].values,
+            )
+
+            mpfm_gor = (
+                d_lag[self.mpfm_gor_col].values
+                if self.mpfm_gor_col in d_lag.columns
+                else None
+            )
 
             mask = np.isfinite(y_gor) & np.isfinite(p_gor)
+            if mpfm_gor is not None:
+                mask &= np.isfinite(mpfm_gor)
+
             if mask.sum() >= 2:
                 fig, ax = plt.subplots(figsize=(10, 4))
 
-                ax.plot(x[mask], y_gor[mask], label="GOR (Well Test)", linewidth=2.5, marker="o", color="black")
-                ax.plot(x[mask], p_gor[mask], label="GOR (Predicted)", linewidth=2, marker="o")
+                ax.plot(
+                    x[mask],
+                    y_gor[mask],
+                    label="GOR (Well Test)",
+                    linewidth=2.5,
+                    marker="o",
+                    color=COLORS["reference"],
+                )
+
+                if mpfm_gor is not None:
+                    ax.plot(
+                        x[mask],
+                        mpfm_gor[mask],
+                        label="GOR (MPFM)",
+                        linewidth=2,
+                        linestyle="--",
+                        marker="x",
+                        color=COLORS["mpfm"],
+                    )
+
+                ax.plot(
+                    x[mask],
+                    p_gor[mask],
+                    label="GOR (Predicted)",
+                    linewidth=2,
+                    marker="o",
+                    color=pred_color,
+                )
 
                 ax.set_xlabel("Time")
                 ax.set_ylabel("GOR (qg / qo)")
@@ -1169,13 +1278,9 @@ class PhysicsInformedHybridModel:
                 plt.show()
                 plt.close(fig)
 
-
     def calibrate_physics_only(
         self,
-        df: pd.DataFrame,
-        y_qo_col="qo_well_test",
-        y_qg_col="qg_well_test",
-        y_qw_col="qw_well_test",
+        df: pd.DataFrame
     ):
         """
         Calibrate physics model for a new (unseen) well
@@ -1188,4 +1293,4 @@ class PhysicsInformedHybridModel:
             self.phys_models[wid] = PhysicsModel(
                 geometry=geom,
                 global_params=None,  # IMPORTANT: do not update global priors
-            ).fit(d, y_qo_col, y_qg_col, y_qw_col)
+            ).fit(d, self.y_qo_col, self.y_qg_col, self.y_qw_col)

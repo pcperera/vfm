@@ -30,21 +30,44 @@ class Preprocessor:
         # Convert choke to fraction
         df["choke"] /= 100
 
-        # Calculate MPFM flow rates from GOR and WC
-        df["gor_mpfm"] = df["qg_mpfm"] / df["qo_mpfm"]
+        df["gor_mpfm"] = np.where(
+            df["qo_mpfm"] > 0,
+            df["qg_mpfm"] / df["qo_mpfm"],
+            np.nan
+        )
+
         df["wc_mpfm_ratio"] = df["wc_mpfm"] / 100
         df["qw_mpfm"] = (df["wc_mpfm_ratio"] * df["qo_mpfm"]) / (1 - df["wc_mpfm_ratio"])
+
+        df["wgr_mpfm"] = np.where(
+            df["qg_mpfm"] > 0,
+            df["qw_mpfm"] / df["qg_mpfm"],
+            np.nan
+        )
 
         df.dropna(subset=get_depdendent_vars(), inplace=True)
         df.dropna(subset=get_independent_vars_with_no_well_code(), inplace=True)
 
-        df = df[get_all_vars()]
         # df = df[(df["qo_mpfm"] >= 0) & (df["qg_mpfm"] >= 0) & (df["qw_mpfm"] >= 0)]
         df = df[(df["qo_well_test"] >= 0) & (df["qg_well_test"] >= 0) & (df["qw_well_test"] >= 0)]
 
         # Drop rows where oil and gas rates are both zero.
         # df = df[~((df["qo_mpfm"] == 0) & (df["qg_mpfm"] == 0))]
         df = df[~((df["qo_well_test"] == 0) & (df["qg_well_test"] == 0))]
+
+        df["gor_well_test"] = np.where(
+            df["qo_well_test"] > 0,
+            df["qg_well_test"] / df["qo_well_test"],
+            np.nan
+        )
+
+        df["wgr_well_test"] = np.where(
+            df["qg_well_test"] > 0,
+            df["qw_well_test"] / df["qg_well_test"],
+            np.nan
+        )
+
+        df = df[get_all_vars()]
 
         return df    
 

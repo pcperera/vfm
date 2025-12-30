@@ -227,9 +227,6 @@ def get_all_wells() -> list[str]:
 def get_depdendent_vars():
     return ["qo_well_test", "qg_well_test", "qw_well_test"]
 
-# def get_depdendent_vars():
-#     return ["qo_mpfm", "qg_mpfm", "qw_mpfm"]
-
 def get_mpfm_vars():
     return ["qo_mpfm", "qg_mpfm", "qw_mpfm", "wc_mpfm"]
 
@@ -242,13 +239,21 @@ def get_independent_tp_vars():
 def get_independent_vars_with_no_well_code():
     vars = get_independent_vars()
     vars.remove("well_code")
-    return vars   
+    return vars
+
+def get_mpfm_ratios():
+    return ["gor_mpfm", "wgr_mpfm"]
+
+def get_well_test_ratios():
+    return ["gor_well_test", "wgr_well_test"]
 
 def get_all_vars():
     all_vars = []
     all_vars.extend(get_depdendent_vars())
     all_vars.extend(get_independent_vars())
     all_vars.extend(get_mpfm_vars())
+    all_vars.extend(get_mpfm_ratios())
+    all_vars.extend(get_well_test_ratios())
     all_vars.append("well_id")
 
     return all_vars

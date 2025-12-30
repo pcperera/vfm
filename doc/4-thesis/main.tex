@@ -1616,6 +1616,8 @@ The primary objectives of the experimental evaluation are to:
     \item Compare the predictive performance of the proposed modeling approaches against MPFM estimates in order to assess the added value of the data-driven framework relative to field-measured metering solutions.
 
     \item Assess the spatial generalization capability of the proposed framework under realistic deployment conditions by evaluating model performance on previously unseen wells using a \abbr{Leave-One-Well-Out}{LOWO} strategy. For unseen wells, limited physics-model calibration is permitted, while the global machine-learning residual model is applied without retraining.
+
+    \item Benchmark the predictive performance of the proposed hybrid framework against the results reported by \citep{nemoto2023cloud}, leveraging the fact that both studies are based on the same dataset. This comparison aims to contextualize the performance of the proposed approach relative to existing cloud-based virtual flow metering methodologies under similar data.
 \end{enumerate}
 
 
@@ -1822,7 +1824,7 @@ W18
 & Physics-only & -0.59 & 21.61 & 24.95 & 12.61 & 16.92 & 0.37 & 3034.30 & 4512.62 \\
 & Hybrid       & 0.67  & 9.02  & 11.33 & 7.25  & 11.30 & 0.70 & 2303.57 & 3098.49 \\
 & MPFM         & -0.37 & 12.58 & 23.15 & 6.04  & 11.01 & -0.10 & 3215.30 & 5949.11 \\
-\midrule
+% \midrule
 % W19
 % & Physics-only & -0.03 & 14.13 & 16.21 & 3.52 & 5.49 & 0.15 & 1441.38 & 1984.60 \\
 % & Hybrid       & 0.54  & 8.46  & 10.83 & 2.45 & 4.82 & 0.35 & 1331.85 & 1736.11 \\
@@ -1929,6 +1931,38 @@ W18
 
 This section reports model performance on previously unseen wells, based on the LOWO evaluation protocol defined in Section~\ref{sec:lowo_setup}.
 
+\begin{table}[htbp]
+\centering
+\caption{Performance comparison of physics-only and hybrid models for Well W10
+under the Leave-One-Well-Out (LOWO) evaluation strategy.
+Absolute error metrics are emphasized for robustness under low-rate regimes.}
+\label{tab:lowo_w10_performance_clean}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llccc}
+\toprule
+\textbf{Rate} & \textbf{Model} & $R^2$ & MAE & RMSE \\
+\midrule
+\multirow{2}{*}{Oil rate ($q_o$)}
+& Physics-only & 0.476 & 17.67 & 23.27 \\
+& Hybrid       & \textbf{0.654} & \textbf{15.48} & \textbf{18.91} \\
+\midrule
+\multirow{2}{*}{Water rate ($q_w$)}
+& Physics-only & 0.640 & 3.27 & 6.18 \\
+& Hybrid       & \textbf{0.717} & \textbf{3.10} & \textbf{5.48} \\
+\midrule
+\multirow{2}{*}{Gas rate ($q_g$)}
+& Physics-only & \textbf{0.691} & \textbf{1649.56} & \textbf{2271.27} \\
+& Hybrid       & 0.133 & 3120.42 & 3806.95 \\
+\midrule
+\multirow{2}{*}{WGR}
+& Physics-only & 0.456 & $2.88\times10^{-4}$ & $6.64\times10^{-4}$ \\
+& Hybrid       & \textbf{0.555} & \textbf{$2.61\times10^{-4}$} & \textbf{$6.01\times10^{-4}$} \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+
 \section{Code Availability and Reproducibility}
 \label{sec:reproducibility}
 
@@ -1936,7 +1970,6 @@ All code implementations, experimental results, supporting documentation, and su
 This repository is maintained by the author and serves as the primary reference for the computational aspects of this thesis.
 
 The repository includes the complete implementation of the proposed physics-informed residual learning framework for virtual flow metering, along with data preprocessing routines, model training and evaluation scripts, and visualization utilities used to generate the results presented in this thesis. Where applicable, documentation is provided to facilitate reproducibility and to enable further extension of the proposed methods.
-
 
 \chapter{Discussion}
 
