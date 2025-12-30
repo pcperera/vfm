@@ -782,53 +782,101 @@ W19 & 152 & 2017-09-02 & 2023-07-27 \\
 \end{tabularx}}{}
 \end{table}
 
+Downhole pressure and temperature measurements, shown in Figures~\ref{fig:W10_dhp} and~\ref{fig:W10_dht}, respectively, represent the thermodynamic conditions at the producing interval. These variables are critical for characterizing reservoir drawdown, inflow behavior, and fluid properties, and they directly influence the physics-based inflow and vertical lift formulations employed in the model.
+Figures~\ref{fig:W10_whp} and~\ref{fig:W10_wht} illustrate the wellhead pressure and temperature measurements. These measurements capture surface operating conditions and reflect the combined effects of reservoir inflow, multiphase flow in the wellbore, and surface choke control. Wellhead measurements are typically more frequently available and are therefore particularly valuable for continuous production monitoring and data-driven model calibration.
+The downstream choke pressure and choke regulation signals are shown in Figures~\ref{fig:W10_dcp} and~\ref{fig:W10_choke}. These variables describe the imposed flow restriction and surface control strategy applied to the well. Variations in choke opening and downstream pressure directly affect the pressure drawdown across the choke and, consequently, the produced flow rates. As such, these measurements play an important role in capturing operational transients and control-induced production variability.
+
+Collectively, the measurements presented in Figures~\ref{fig:W10_dhp}--\ref{fig:W10_choke} constitute the primary operational dataset used for model training, calibration, and validation. Their combined use enables the hybrid modeling framework to exploit both physics-based consistency and data-driven adaptability under varying operating conditions.
+
+%------------------------------------------------
+% W10 – Downhole measurements
+%------------------------------------------------
 \begin{figure}[!htb]
-\uomFig{W10 - downhole pressure}{fig:dhp}{\includegraphics[width=0.5\textwidth]{images/W10_dhp.png}}{}
+\centering
+\begin{minipage}{0.48\textwidth}
+    \uomFig{W10 -- Downhole pressure}{fig:W10_dhp}
+    {\includegraphics[width=\linewidth]{images/W10_dhp.png}}{}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+    \uomFig{W10 -- Downhole temperature}{fig:W10_dht}
+    {\includegraphics[width=\linewidth]{images/W10_dht.png}}{}
+\end{minipage}
 \end{figure}
 
+%------------------------------------------------
+% W10 – Wellhead measurements
+%------------------------------------------------
 \begin{figure}[!htb]
-\uomFig{W10 - downhole temperature}{fig:dht}{\includegraphics[width=0.5\textwidth]{images/W10_dht.png}}{}
+\centering
+\begin{minipage}{0.48\textwidth}
+    \uomFig{W10 -- Wellhead pressure}{fig:W10_whp}
+    {\includegraphics[width=\linewidth]{images/W10_whp.png}}{}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+    \uomFig{W10 -- Wellhead temperature}{fig:W10_wht}
+    {\includegraphics[width=\linewidth]{images/W10_wht.png}}{}
+\end{minipage}
 \end{figure}
 
+%------------------------------------------------
+% W10 – Downstream choke measurements
+%------------------------------------------------
 \begin{figure}[!htb]
-\uomFig{W10 - wellhead pressure}{fig:whp}{\includegraphics[width=0.5\textwidth]{images/W10_whp.png}}{}
+\centering
+\begin{minipage}{0.48\textwidth}
+    \uomFig{W10 -- Downstream choke pressure}{fig:W10_dcp}
+    {\includegraphics[width=\linewidth]{images/W10_dcp.png}}{}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+    \uomFig{W10 -- Downstream choke regulation}{fig:W10_choke}
+    {\includegraphics[width=\linewidth]{images/W10_choke.png}}{}
+\end{minipage}
 \end{figure}
 
-\begin{figure}[!htb]
-\uomFig{W10 - wellhead temperature}{fig:wht}{\includegraphics[width=0.5\textwidth]{images/W10_wht.png}}{}
-\end{figure}
-
-\begin{figure}[!htb]
-\uomFig{W10 - Downstream choke pressure}{fig:dcp}{\includegraphics[width=0.5\textwidth]{images/W10_dcp.png}}{}
-\end{figure}
-
-\begin{figure}[!htb]
-\uomFig{W10 - Downstream choke regulation}{fig:dcr}{\includegraphics[width=0.5\textwidth]{images/W10_choke.png}}{}
-\end{figure}
 
 \subsection{Well-Level Preprocessing}
 
-For each well, the preprocessing begins by isolating data corresponding to a single well identifier and sorting the observations chronologically to preserve the original time order. This step is critical for subsequent temporal modeling and lagged feature construction.
+\begin{itemize}
+    \item \textbf{Well-wise data isolation and temporal ordering:}  
+    The preprocessing is performed independently for each well by isolating records associated with a single well identifier. Observations are sorted in chronological order to preserve the original temporal structure of the data.
 
-To ensure physical validity and numerical stability, rows containing zero-valued measurements in key sensor variables are removed. Specifically, observations with zero values in downhole pressure (DHP), wellhead pressure (WHP), downstream choke pressure (DCP), downhole temperature (DHT), wellhead temperature (WHT), or choke position are excluded. These values typically indicate sensor dropouts, invalid readings, or non-operational states that are not representative of steady production behavior.
+    \item \textbf{Removal of physically invalid sensor readings:}  
+    To ensure physical consistency and numerical stability, observations containing zero-valued measurements in key operational variables are removed. These include downhole pressure, wellhead pressure, downstream choke pressure, downhole temperature, wellhead temperature, and choke opening. Zero values are interpreted as sensor dropouts, invalid measurements, or non-operational conditions.
 
-The choke opening is subsequently converted from a percentage representation to a normalized fraction by dividing by 100. This transformation ensures numerical consistency and facilitates learning in downstream machine-learning components.
+    \item \textbf{Consistent well identification and encoding:}  
+    The well identifier is explicitly reassigned to each processed subset to ensure consistency. In addition, a numerical well code is generated from the categorical well identifier to enable machine-learning models to condition on well identity in a numerically stable manner.
+
+    \item \textbf{Normalization of choke opening:}  
+    The choke opening is converted from a percentage representation to a normalized fraction by dividing by 100. This transformation ensures numerical consistency and improves convergence behavior in downstream machine-learning components.
+
+    \item \textbf{Removal of incomplete observations:}  
+    Observations containing missing values in either dependent variables or independent input variables are removed. This step ensures that all retained samples are fully defined for model training, calibration, and validation.
+
+    \item \textbf{Variable selection and schema enforcement:}  
+    After preprocessing, the dataset is restricted to a predefined set of required variables. This enforces a consistent data schema across all wells and prevents unintended variables from entering the modeling pipeline.
+
+    \item \textbf{Enforcement of physically admissible flow rates:}  
+    Observations with negative well-test oil, gas, or water rates are excluded to maintain physical realism and prevent numerical instability during model fitting.
+
+    \item \textbf{Exclusion of non-producing operating states:}  
+    Rows corresponding to non-producing conditions, identified by simultaneous zero oil and gas well-test rates, are removed. These conditions are not representative of active production behavior and are therefore excluded from the modeling dataset.
+\end{itemize}
+
 
 \subsection{Derivation of Multiphase Flow Variables}
 
-Additional flow-related variables are derived from the available MPFM measurements to support both physics-based modeling and residual learning. The gas--oil ratio (GOR) is computed as
+Additional flow-related variables are derived from the available MPFM measurements solely for the purpose of evaluating MPFM estimates against well-test data, and are not used for physics-model calibration or hybrid model training.
+The gas--oil ratio (GOR) is computed as:
 \begin{equation}
-\text{GOR} = \frac{q_g}{q_o},
+\text{gor\_mpfm} = \frac{qg\_mpfm}{qo\_mpfm},
 \end{equation}
-where $q_g$ and $q_o$ denote the measured gas and oil flow rates, respectively.
+where $gor\_mpfm$ and $qg\_mpfm$ denote the MPFM measured gas and oil flow rates, respectively.
 
 The water flow rate is reconstructed from the measured water cut using the relationship
 \begin{equation}
-q_w = \frac{\text{wc} \cdot q_o}{1 - \text{wc}},
+qw\_mpfm = \frac{\text{wc\_mpfm} \cdot qo\_mpfm}{1 - \text{wc\_mpfm}},
 \end{equation}
 where $\text{wc}$ is the water cut expressed as a fraction. This formulation ensures consistency between oil, water, and water cut measurements and avoids reliance on potentially noisy direct water rate measurements.
-
-Rows containing missing values in either dependent variables (flow rates) or independent input variables are removed to prevent propagation of invalid data into the modeling stages. Additionally, observations with negative oil or water flow rates are excluded to enforce basic physical constraints.
 
 \subsection{Temporal Index Construction}
 
@@ -1558,13 +1606,19 @@ This chapter describes the experimental design, data partitioning strategy, and 
 
 \section{Experimental Objectives}
 
-The primary objectives of the experimentation are to:
+The primary objectives of the experimental evaluation are to:
 \begin{itemize}
-    \item Evaluate the accuracy of oil, water, and gas flow rate predictions produced by the proposed model.
-    \item Quantify the improvement achieved by machine-learning residual correction over physics-only predictions.
-    \item Assess model generalization using unseen temporal data from multiple wells.
-    \item Validate model behavior under a production-mimicking workflow without retraining.
+    \item Quantitatively evaluate the accuracy of oil, water, and gas flow rate predictions produced by the proposed hybrid physics--machine learning model using well-test measurements as reference data.
+
+    \item Compare the predictive performance of the proposed modeling approaches against multiphase flow meter (MPFM) estimates in order to assess the added value of the data-driven framework relative to field-measured metering solutions.
+
+    \item Quantify the performance gains achieved through machine-learning-based residual correction relative to physics-only model predictions across multiple wells.
+
+    \item Assess temporal generalization by evaluating model performance on unseen time periods within wells without retraining.
+
+    \item Assess the spatial generalization capability of the proposed framework under realistic deployment conditions by evaluating model performance on unseen temporal data and on previously unseen wells using a leave-one-well-out (LOWO) strategy. For unseen wells, limited physics-model calibration is permitted, while the global machine-learning residual model is applied without retraining.
 \end{itemize}
+
 
 \section{Experimental Data Partitioning}
 
@@ -1602,8 +1656,11 @@ Let $t$ denote the prediction time index. At each time step $t$, only measuremen
 Two experimental model configurations are considered:
 
 \begin{enumerate}
-    \item \textbf{Physics-only configuration}: Flow rates are estimated using the calibrated physics-based model without any residual correction.
-    \item \textbf{Physics-informed hybrid configuration}: Physics-based predictions are corrected using the trained machine-learning residual model in log-space, with regime-aware gating and physical constraints enforced.
+    \item \textbf{Physics-only configuration}:  
+    Flow rates are estimated using a physics-based model calibrated on a per-well basis. For unseen wells, limited calibration of well-specific physics parameters is performed, while no data-driven correction is applied.
+
+    \item \textbf{Physics-informed hybrid configuration}:  
+    Physics-based predictions are corrected using a globally trained machine-learning residual model operating in log-space, with regime-aware gating and physical constraints enforced. For unseen wells, only the physics-model parameters are calibrated, and the residual model is applied without retraining.
 \end{enumerate}
 
 Comparing these configurations allows the incremental contribution of residual learning to be quantified.
@@ -1662,9 +1719,9 @@ MPE is a dimensionless metric reported as a percentage (\%). It captures systema
 
 In addition to individual phase flow rates, the experiments evaluate derived production ratios, including the water--gas ratio (WGR) and gas--oil ratio (GOR), defined as:
 \begin{equation}
-\text{WGR} = \frac{q_w}{q_g},
+\text{wgr} = \frac{q_w}{q_g},
 \qquad
-\text{GOR} = \frac{q_g}{q_o},
+\text{gor} = \frac{q_g}{q_o},
 \end{equation}
 where $q_o$, $q_w$, and $q_g$ denote oil, water, and gas flow rates, respectively.
 
