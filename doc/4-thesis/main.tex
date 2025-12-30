@@ -763,8 +763,12 @@ qw\_mpfm & MPFM measured water rate & Sm$^3$/h & MPFM \\
 \end{tabularx}}{}
 \end{table}
 
-Table~\ref{tab:dataset_row_counts} summarises the number of available records and the temporal
-range for each well:
+Table~\ref{tab:dataset_row_counts} summarizes the availability and temporal coverage of historical well test measurements used in this study. 
+A total of 834 well test records are available across seven production wells, spanning a period from March 2017 to August 2023. 
+The number of records per well varies substantially, reflecting differences in operational practices, testing frequency, and data availability over the field lifecycle. 
+Such sparsity and irregularity are characteristic of well test data, as production tests are typically conducted intermittently due to operational constraints, cost considerations, and production priorities, rather than being continuously acquired like sensor-based measurements. 
+Consequently, the resulting dataset exhibits limited sample sizes and non-uniform temporal spacing, which poses challenges for data-driven modeling approaches. 
+This motivates the adoption of physics-based and hybrid modeling strategies in this work, which are better suited to learning from sparse, irregular, and heterogeneous well test observations.
 
 \begin{table}[h!]
 \uomTable{Summary of available historical measurements for each production well}{tab:dataset_row_counts}{\begin{tabularx}{0.9\textwidth}{lYYYY} 

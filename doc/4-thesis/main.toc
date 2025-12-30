@@ -59,7 +59,7 @@
 \contentsline {subsection}{\numberline {3.2.1}Independent and Reference Variables}{32}{subsection.3.2.1}%
 \contentsline {subsection}{\numberline {3.2.2}Well-Level Preprocessing}{35}{subsection.3.2.2}%
 \contentsline {subsection}{\numberline {3.2.3}Derivation of Multiphase Flow Variables}{36}{subsection.3.2.3}%
-\contentsline {subsection}{\numberline {3.2.4}Temporal Index Construction}{36}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.4}Temporal Index Construction}{37}{subsection.3.2.4}%
 \contentsline {subsection}{\numberline {3.2.5}Cross-Well Consolidation and Encoding}{37}{subsection.3.2.5}%
 \contentsline {section}{\numberline {3.3}Physics-Based Inflow Modelling}{37}{section.3.3}%
 \contentsline {subsection}{\numberline {3.3.1}Modeling Philosophy}{38}{subsection.3.3.1}%
@@ -67,12 +67,12 @@
 \contentsline {subsection}{\numberline {3.3.3}Liquid-Rate Inflow Equation}{39}{subsection.3.3.3}%
 \contentsline {subsection}{\numberline {3.3.4}Logistic Water-Cut Closure Model}{39}{subsection.3.3.4}%
 \contentsline {subsection}{\numberline {3.3.5}Gas Flow Modelling}{40}{subsection.3.3.5}%
-\contentsline {subsection}{\numberline {3.3.6}Parameter Calibration via Nonlinear Least Squares}{40}{subsection.3.3.6}%
+\contentsline {subsection}{\numberline {3.3.6}Parameter Calibration via Nonlinear Least Squares}{41}{subsection.3.3.6}%
 \contentsline {subsubsection}{\numberline {3.3.6.1}Problem Formulation}{41}{subsubsection.3.3.6.1}%
 \contentsline {subsubsection}{\numberline {3.3.6.2}Weighted Least Squares Objective Function}{41}{subsubsection.3.3.6.2}%
 \contentsline {subsubsection}{\numberline {3.3.6.3}Nonlinear Least Squares Optimization}{42}{subsubsection.3.3.6.3}%
 \contentsline {subsubsection}{\numberline {3.3.6.4}Initialization and Regularization}{42}{subsubsection.3.3.6.4}%
-\contentsline {subsubsection}{\numberline {3.3.6.5}Handling Sparse and Irregular Measurements}{42}{subsubsection.3.3.6.5}%
+\contentsline {subsubsection}{\numberline {3.3.6.5}Handling Sparse and Irregular Measurements}{43}{subsubsection.3.3.6.5}%
 \contentsline {subsubsection}{\numberline {3.3.6.6}Calibration Quality Assessment}{43}{subsubsection.3.3.6.6}%
 \contentsline {subsubsection}{\numberline {3.3.6.7}Role in the Hybrid Modeling Architecture}{43}{subsubsection.3.3.6.7}%
 \contentsline {section}{\numberline {3.4}Machine-Learning Residual Modelling}{43}{section.3.4}%
