@@ -188,12 +188,12 @@ All or a subset of the aforementioned sensors are used as independent variables 
 \hline
 Sensor & Description & Unit \\
 \hline
-DHP & downhole pressure & bara \\
-DHT & downhole temperature & \textdegree C \\
-WHP & wellhead pressure & bara \\
-WHT & wellhead temperature & \textdegree C \\
-DCP & Downstream choke pressure & bara \\
-DCR & Downstream choke regulation & \% \\
+dhp & downhole pressure & bara \\
+dht & downhole temperature & \textdegree C \\
+whp & wellhead pressure & bara \\
+wht & wellhead temperature & \textdegree C \\
+dcp & Downstream choke pressure & bara \\
+choke & Downstream choke regulation & \% \\
 \hline
 \end{tabularx}}{}
 \end{table}
@@ -296,7 +296,7 @@ The primary objective of this research is to develop and evaluate a physics-info
 
     \item \textbf{To develop a computationally efficient prediction framework} that enables scalable virtual flow metering across large well populations, recognizing that industrial oil and gas assets may consist of thousands of wells distributed across multiple fields and production systems.
 
-    \item \textbf{To implement the proposed hybrid modeling framework} using real-world multi-well production data and to ensure that the training, validation, and testing procedures avoid data leakage and reflect realistic operational constraints.
+    \item \textbf{To implement the proposed hybrid modeling architecture} using real-world multi-well production data and to ensure that the training, validation, and testing procedures avoid data leakage and reflect realistic operational constraints.
 
     \item \textbf{To evaluate the performance of the proposed physics-informed residual learning approach} using appropriate regression metrics, and to compare its predictive accuracy against physics-only and purely data-driven baseline models.
 
@@ -673,62 +673,59 @@ Together, these characteristics make the proposed framework a practical and scie
 
 \section{Dataset Description and Preprocessing}
 \label{sec:data_preprocessing}
-The dataset consists of operational measurements and periodic well-test rates collected
-from seven production wells in an offshore oil and gas field. These wells span multi-year
-operational histories with irregular sampling frequencies, requiring careful preprocessing
-to enable consistent temporal modelling.
-This research will use the same data-set used by \citep{nemoto2023cloud}. This data-set contains 
-real operational data from sensors and provide a wealth of historical information from January, 2017 to January, 2023 encompassing well sensor data and oil, gas, and water flow rates. In production systems, real-time operational variables such as downhole pressure and temperature, wellhead pressure and temperature, choke position, and downstream choke pressure are recorded at high frequency, often at sub-minute to hourly intervals. In contrast, high-fidelity flow rate measurements are typically available only during periodic well tests or dedicated calibration cycles. As a result, the dataset exhibits extremely high feature density on the input side, but severely sparse and irregular sampling of the target variables (oil, gas, and water rates). This asymmetry introduces a significant challenge for conventional supervised learning models, which normally assume that target values are available at the same temporal resolution as the inputs.
+The dataset used in this research consists of multi-source production and operational measurements collected from a set of producing oil wells. The data integrate well test measurements, MPFM data, and permanently installed surface and downhole sensor readings. 
+This study employs the \textbf{same dataset previously utilized by \citep{nemoto2023cloud}}, thereby ensuring consistency with established literature while extending the analysis through a hybrid physics--machine learning modeling architecture.
+A defining characteristic of the dataset is that \textbf{well test data are sparse and irregular in time}. Well tests are conducted at non-uniform intervals determined by operational, logistical, and economic considerations rather than by systematic sampling schemes. 
+Consequently, the temporal spacing between successive well tests may range from days to several weeks or months, resulting in an unevenly sampled supervisory signal for flow rate estimation.
+In contrast, auxiliary measurements such as wellhead pressure (WHP), downhole pressure (DHP), temperatures, choke settings, and downstream pressures are available at higher temporal resolution. 
+Nevertheless, these signals may still exhibit missing values, sensor dropouts, or extended periods of constant readings associated with shut-ins or instrumentation limitations.
 
-Prior to model training and evaluation, the raw well time-series data are subjected to a structured preprocessing pipeline to ensure data quality, physical consistency, and suitability for physics-based and machine-learning modeling. The preprocessing workflow operates on a per-well basis and is designed to preserve temporal ordering while removing invalid measurements and deriving additional physically meaningful variables.
+The dependent variables considered in this study are the phase flow rates—oil rate ($q_o$), water rate ($q_w$), and gas rate ($q_g$)—primarily obtained from well test and MPFM measurements. 
+The independent variables comprise pressure, temperature, and operational parameters that are physically linked to well inflow and surface flow behavior.
 
-The main entry point of the preprocessing pipeline is the \texttt{preprocess\_wells} procedure, which applies a sequence of well-level transformations and consolidates the processed data across all wells.
-
-\subsection{Data Sources and Available Measurements}
-\label{subsec:data_sources}
+\subsection{Independent and Reference Variables}
+\label{subsec:dataset_variables}
 
 The raw dataset for each well contains a combination of wellhead measurements, downhole
-measurements, choke parameters, and multiphase rate estimates. The following variables are
-available:
+measurements, choke parameters, well test rate estimations and MPFM rate estimations. 
+Table~\ref{tab:independent_vars} summarizes the independent operational variables of the dataset, while Table~\ref{tab:geometrical_const} lists the geometrical parameters associated with each well.
+Although geometrical parameters such as tubing diameter, measured depth, and completion geometry play a fundamental role in governing multiphase flow behavior, they are \textbf{not used as independent input variables} in the proposed modeling architecture. This is because the operational measurements—such as pressures, temperatures, and choke settings—are themselves physical responses of the well system that inherently embed the effects of the underlying geometry. Consequently, explicitly including geometrical parameters as model inputs would introduce redundancy and may lead to identifiability issues or spurious correlations, particularly under sparse and irregular well test supervision.
+Instead, geometrical data are used exclusively to provide \textbf{initial estimates and constraints during the physics-based model calibration stage}. These parameters inform the initialization of flow equations and serve as fixed structural inputs to the physics model, while the operational variables act as the primary explanatory signals for dynamic rate prediction. This separation ensures physical consistency, reduces model complexity, and improves robustness of the hybrid framework when applied across wells with limited historical data.
+ 
 
-\begin{itemize}
-    \item \textbf{Wellhead pressure and temperature:}
-          $\mathrm{WHP}$ (wellhead pressure) and $\mathrm{WHT}$ (wellhead temperature)
-    \item \textbf{Downhole pressure and temperature:}
-          $\mathrm{DHP}$ (downhole pressure) and $\mathrm{DHT}$ (downhole temperature)
-    \item \textbf{Choke and pressure-drop measurements:}
-          $\mathrm{CHOKE}$ (choke opening) and $\mathrm{DCP}$ (pressure drop across choke)
-    \item \textbf{MPFM readings:}
-          $q_o^{\mathrm{mpfm}}$, $q_g^{\mathrm{mpfm}}$, and $\mathrm{wc}^{\mathrm{mpfm}}$
-    \item \textbf{Metadata:}
-          well identifier ($\texttt{well\_id}$)
-\end{itemize}
-
-Table~\ref{tab:well_summary} summarises the number of available records and the temporal
-range for each well:
-
-\begin{table}[h!]
-\centering
-\begin{tabular}{lccc}
+\begin{table}[!htb]
+\uomTable{Indepdent operational variables}{tab:independent_vars}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
 \hline
-\textbf{Well} & \textbf{Number of Records} & \textbf{Start Timestamp} & \textbf{End Timestamp} \\
+Variable & Description & Unit \\
 \hline
-W06 & 377 & 2017-03-06 & 2023-05-07 \\
-W08 & 149 & 2018-07-30 & 2023-06-03 \\
-W10 & 571 & 2017-03-13 & 2023-07-31 \\
-W11 & 359 & 2017-03-01 & 2023-08-04 \\
-W15 & 164 & 2017-03-11 & 2023-05-13 \\
-W18 & 192 & 2018-05-03 & 2023-08-09 \\
-W19 & 152 & 2017-09-02 & 2023-07-27 \\
+dhp & Downhole pressure & bara \\
+dht & Downhole temperature & \textdegree C \\
+whp & Wellhead pressure & bara \\
+wht & Wellhead temperature & \textdegree C \\
+dcp & Downstream choke pressure & bara \\
+choke & Downstream choke regulation & \% \\
+well\_id & Well unique id & unitless (string) \\
 \hline
-\end{tabular}
-\caption{Summary of available historical measurements for each production well.}
-\label{tab:well_summary}
+\end{tabularx}}{}
 \end{table}
 
-A key modelling decision is the use of \textbf{well-test measurements} ($q_o^{\mathrm{WT}}$,
+\begin{table}[!htb]
+\uomTable{Geometrical static data}{tab:geometrical_const}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
+\hline
+Variable & Description & Unit \\
+\hline
+dh\_md & Downhole measured depth & m \\
+dh\_tvd & Downhole true vertical depth & m \\
+wh\_md & Wellhead measured depth & m \\
+wh\_tvd & Wellhead true vertical depth & m \\
+\hline
+\end{tabularx}}{}
+\end{table}
+
+Table~\ref{tab:reference_vars} summarizes the reference ground truth variables of the dataset. 
+A key modelling decision is the use of \textbf{well test measurements} ($q_o^{\mathrm{WT}}$,
 $q_g^{\mathrm{WT}}$, $q_w^{\mathrm{WT}}$) as the primary ground-truth supervisory targets,
-rather than MPFM-derived flow rates. This choice is justified as follows:
+rather than MPFM flow rates. This choice is justified as follows:
 
 \begin{itemize}
     \item Well tests provide \textbf{officially calibrated} and \textbf{field-accepted} flow-rate
@@ -739,8 +736,51 @@ rather than MPFM-derived flow rates. This choice is justified as follows:
           well-test values serve as a more reliable \textbf{ground-truth reference}.
 \end{itemize}
 
-As a consequence, MPFM measurements are excluded from model training and evaluation,
-while all available wellhead operational variables are retained as independent features.
+As a consequence, MPFM measurements are excluded from model training while all available operational variables are retained as independent features.
+
+
+\begin{table}[!htb]
+\uomTable{Reference ground truth variables}{tab:reference_vars}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
+\hline
+Variable & Description & Unit & Source \\
+\hline
+qo\_well\_test & Well test measured oil rate & Sm$^3$/h & Well test \\
+qg\_well\_test & Well test measured gas rate & Sm$^3$/h & Well test \\
+qw\_well\_test & Well test measured water rate & Sm$^3$/h & Well test \\
+\hline
+\end{tabularx}}{}
+\end{table}
+
+\begin{table}[!htb]
+\uomTable{MPFM estimated rates}{tab:mpfm_vars}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
+\hline
+Variable & Description & Unit & Source \\
+\hline
+qo\_mpfm & MPFM measured oil rate & Sm$^3$/h & MPFM \\
+qg\_mpfm & MPFM measured gas rate & Sm$^3$/h & MPFM \\
+qw\_mpfm & MPFM measured water rate & Sm$^3$/h & MPFM \\
+\hline
+\end{tabularx}}{}
+\end{table}
+
+Table~\ref{tab:dataset_row_counts} summarises the number of available records and the temporal
+range for each well:
+
+\begin{table}[h!]
+\uomTable{Summary of available historical measurements for each production well}{tab:dataset_row_counts}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
+\hline
+Well ID & Number of Records & Start Timestamp & End Timestamp \\
+\hline
+W06 & 377 & 2017-03-06 & 2023-05-07 \\
+W08 & 149 & 2018-07-30 & 2023-06-03 \\
+W10 & 571 & 2017-03-13 & 2023-07-31 \\
+W11 & 359 & 2017-03-01 & 2023-08-04 \\
+W15 & 164 & 2017-03-11 & 2023-05-13 \\
+W18 & 192 & 2018-05-03 & 2023-08-09 \\
+W19 & 152 & 2017-09-02 & 2023-07-27 \\
+\hline
+\end{tabularx}}{}
+\end{table}
 
 \begin{figure}[!htb]
 \uomFig{W10 - downhole pressure}{fig:dhp}{\includegraphics[width=0.5\textwidth]{images/W10_dhp.png}}{}
@@ -806,35 +846,6 @@ where $t$ is the observation timestamp, $t_{\text{ref}}$ is the reference time, 
 After preprocessing individual wells, the processed datasets are concatenated into a single multi-well dataframe. To support machine-learning models that require numerical inputs, categorical well identifiers are encoded into continuous numerical codes using category-based indexing. This encoding preserves well identity information while remaining compatible with standard regression models.
 
 The final output of the preprocessing stage is a cleaned, physically consistent, and temporally ordered dataset containing all required input variables, derived flow quantities, and auxiliary identifiers required for subsequent physics-based modeling and machine-learning residual learning.
-
-
-\subsection{Temporal Alignment and Resampling}
-\label{subsec:alignment_resampling}
-
-The raw dataset is irregularly sampled: measurement intervals vary from minutes to hours,
-and well-test rates appear only intermittently (typically 100--500 samples over 5--6~years).
-To enable temporal modelling using sequential neural architectures, all wells are resampled
-onto a uniform time grid.
-
-A fixed resampling interval $\Delta t$ (e.g., 5--30 minutes depending on operational context)
-is used to generate a continuous timeline  
-\[
-\mathcal{T} = \{t_1, t_2, \ldots, t_N\},
-\qquad
-t_{i+1} - t_i = \Delta t.
-\]
-
-For each timestamp $t_i$:
-
-\begin{itemize}
-    \item all independent variables ($\mathrm{WHP}, \mathrm{WHT}, \mathrm{DHP}, \mathrm{DHT},
-          \mathrm{CHOKE}, \mathrm{DCP}$) are aligned to the nearest or most recent observation,
-    \item dependent variables ($q_o^{\mathrm{WT}}, q_w^{\mathrm{WT}}, q_g^{\mathrm{WT}}$)
-          are \textbf{not interpolated} to avoid introducing artificial production signals.
-\end{itemize}
-
-This resampling produces a temporally consistent dataset, while preserving the sparse nature
-of the ground-truth production measurements.
 
 
 \section{Physics-Based Inflow Modelling}
@@ -1056,7 +1067,7 @@ Following optimization, calibration quality is assessed using residual diagnosti
 
 Importantly, the calibrated physics-based model is not expected to achieve perfect agreement with measured data. Instead, it is intended to capture dominant flow behavior while leaving systematic discrepancies to be addressed by the subsequent residual learning component.
 
-\subsubsection{Role in the Hybrid Modeling Framework}
+\subsubsection{Role in the Hybrid Modeling Architecture}
 
 The independently calibrated physics-based model serves as a physically grounded baseline within the hybrid architecture. By constraining the solution space through first-principles relationships and calibrated parameters, the nonlinear least squares estimation stage enables the residual learning model to focus on compensating for unmodeled dynamics, thereby improving overall prediction accuracy, robustness, and data efficiency.
 
@@ -1503,7 +1514,7 @@ industrial virtual flow metering workflows.
 \subsection{Computational Considerations}
 \label{sec:computational_considerations}
 
-The proposed hybrid modeling framework combines a physics-based flow model with a data-driven residual learning component. While this integration improves predictive accuracy and generalization under sparse data conditions, it introduces several computational considerations related to efficiency, scalability, numerical stability, and deployment feasibility. These aspects are discussed below.
+The proposed hybrid modeling architecture combines a physics-based flow model with a data-driven residual learning component. While this integration improves predictive accuracy and generalization under sparse data conditions, it introduces several computational considerations related to efficiency, scalability, numerical stability, and deployment feasibility. These aspects are discussed below.
 
 \subsubsection{Model Decomposition and Computational Load}
 
