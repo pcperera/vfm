@@ -769,15 +769,17 @@ range for each well:
 \begin{table}[h!]
 \uomTable{Summary of available historical measurements for each production well}{tab:dataset_row_counts}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
 \hline
-Well ID & Number of Records & Start Timestamp & End Timestamp \\
+Well ID & Number of Records & Start Date & End Date \\
 \hline
-W06 & 377 & 2017-03-06 & 2023-05-07 \\
-W08 & 149 & 2018-07-30 & 2023-06-03 \\
-W10 & 571 & 2017-03-13 & 2023-07-31 \\
-W11 & 359 & 2017-03-01 & 2023-08-04 \\
-W15 & 164 & 2017-03-11 & 2023-05-13 \\
-W18 & 192 & 2018-05-03 & 2023-08-09 \\
-W19 & 152 & 2017-09-02 & 2023-07-27 \\
+W06 & 137 & 2017-03-06 & 2023-05-07 \\
+W08 & 69 & 2018-07-30 & 2023-06-03 \\
+W10 & 222 & 2017-03-13 & 2023-07-31 \\
+W11 & 154 & 2017-03-01 & 2023-08-04 \\
+W15 & 86 & 2017-03-11 & 2023-05-13 \\
+W18 & 89 & 2018-05-03 & 2023-08-09 \\
+W19 & 77 & 2017-09-02 & 2023-07-27 \\
+\hline
+\textbf{All} & \textbf{834} & 2017-03-01 & 2023-08-09 \\
 \hline
 \end{tabularx}}{}
 \end{table}
@@ -1795,44 +1797,142 @@ This chapter presents the experimental results and analysis of the proposed hybr
 
 This section presents per-well prediction accuracy on unseen time periods, based on the temporal generalization evaluation setup described in Section~\ref{sec:temporal_setup}.
 
-\begin{table}[htbp]
+\begin{table}[!htbp]
 \centering
-\caption{Model performance comparison for selected wells.
-Absolute error metrics are emphasized for water rate due to low-flow regimes.}
-\label{tab:best_wells_performance_all_phases}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{llccccccccc}
+\caption{Prediction performance comparison for oil ($q_o$), water ($q_w$), and gas ($q_g$) rates across all wells.}
+\label{tab:rate_scores_by_phase}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{ll|ccc|ccc|ccc}
 \toprule
-\textbf{Well} & \textbf{Model} &
-\multicolumn{3}{c}{\textbf{Oil Rate ($q_o$)}} &
-\multicolumn{2}{c}{\textbf{Water Rate ($q_w$)}} &
-\multicolumn{3}{c}{\textbf{Gas Rate ($q_g$)}} \\
-\cmidrule(lr){3-5} \cmidrule(lr){6-7} \cmidrule(lr){8-10}
- &  & $R^2$ & MAE & RMSE & MAE & RMSE & $R^2$ & MAE & RMSE \\
+ &  & \multicolumn{9}{c}{Phase} \\
+\cmidrule(lr){3-11}
+Well & Model
+& \multicolumn{3}{c}{Oil ($q_o$)}
+& \multicolumn{3}{c}{Water ($q_w$)}
+& \multicolumn{3}{c}{Gas ($q_g$)} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-8} \cmidrule(lr){9-11}
+ & 
+ & $R^2$ & MAE & RMSE
+ & $R^2$ & MAE & RMSE
+ & $R^2$ & MAE & RMSE \\
 \midrule
-W06
-& Physics-only & 0.74 & 11.85 & 16.42 & 1.03 & 1.18 & 0.50 & 2411.60 & 2892.26 \\
-& Hybrid       & 0.84 & 9.44  & 12.68 & 1.41 & 1.82 & 0.93 & 905.44  & 1101.56 \\
-& MPFM         & 0.94 & 6.07  & 7.56  & 1.33 & 1.71 & 0.96 & 547.78  & 776.86 \\
+
+% ===================== W06 =====================
+\multirow{3}{*}{W06}
+& Physics & 0.70 & 13.30 & 17.49 & 0.05 & 1.04 & 1.28 & 0.52 & 2311.07 & 2828.52 \\
+& Hybrid  & 0.82 & 9.81  & 13.74 & -1.27 & 1.48 & 1.98 & 0.85 & 1233.78 & 1563.34 \\
+& MPFM    & 0.95 & 5.93  & 7.26  & -0.93 & 1.38 & 1.82 & 0.96 & 570.81  & 801.07  \\
 \midrule
-W10
-& Physics-only & 0.48 & 17.53 & 23.87 & 2.57 & 5.98 & 0.79 & 1506.82 & 2060.22 \\
-& Hybrid       & 0.76 & 10.90 & 16.06 & 2.56 & 6.42 & 0.95 & 845.74  & 1041.45 \\
-& MPFM         & 0.98 & 2.95  & 4.31  & 2.49 & 3.03 & 0.94 & 552.33  & 1137.35 \\
+
+% ===================== W08 =====================
+\multirow{3}{*}{W08}
+& Physics & 0.15 & 8.98 & 10.83 & 0.75 & 6.28 & 7.23 & 0.36 & 1155.35 & 1548.24 \\
+& Hybrid  & 0.12 & 7.63 & 10.96 & 0.71 & 6.08 & 7.78 & 0.35 & 1162.30 & 1563.73 \\
+& MPFM    & 0.83 & 3.99 & 4.88  & 0.95 & 2.73 & 3.35 & 0.67 & 751.99  & 1117.27 \\
 \midrule
-W18
-& Physics-only & -0.59 & 21.61 & 24.95 & 12.61 & 16.92 & 0.37 & 3034.30 & 4512.62 \\
-& Hybrid       & 0.67  & 9.02  & 11.33 & 7.25  & 11.30 & 0.70 & 2303.57 & 3098.49 \\
-& MPFM         & -0.37 & 12.58 & 23.15 & 6.04  & 11.01 & -0.10 & 3215.30 & 5949.11 \\
-% \midrule
-% W19
-% & Physics-only & -0.03 & 14.13 & 16.21 & 3.52 & 5.49 & 0.15 & 1441.38 & 1984.60 \\
-% & Hybrid       & 0.54  & 8.46  & 10.83 & 2.45 & 4.82 & 0.35 & 1331.85 & 1736.11 \\
-% & MPFM         & 0.95  & 2.44  & 3.62  & 2.53 & 4.47 & 0.99 & 150.17  & 215.62 \\
+
+% ===================== W10 =====================
+\multirow{3}{*}{W10}
+& Physics & 0.45 & 19.38 & 24.82 & -3.85 & 1.96 & 3.05 & 0.89 & 1197.22 & 1570.05 \\
+& Hybrid  & 0.86 & 9.91  & 12.59 & -1.15 & 1.67 & 2.03 & 0.92 & 1060.62 & 1338.47 \\
+& MPFM    & 0.98 & 3.11  & 4.53  & -2.99 & 2.31 & 2.80 & 0.92 & 530.72  & 1365.75 \\
+\midrule
+
+% ===================== W11 =====================
+\multirow{3}{*}{W11}
+& Physics & 0.03 & 36.80 & 47.13 & 0.01 & 5.05 & 6.07 & 0.55 & 2623.74 & 3290.68 \\
+& Hybrid  & 0.03 & 34.26 & 46.98 & 0.49 & 3.17 & 4.38 & 0.72 & 2235.44 & 2602.49 \\
+& MPFM    & 0.78 & 8.63  & 22.06 & 0.54 & 2.94 & 4.57 & 0.94 & 715.94  & 1228.54 \\
+\midrule
+
+% ===================== W15 =====================
+\multirow{3}{*}{W15}
+& Physics & 0.32 & 9.75 & 12.15 & 0.21 & 1.31 & 1.69 & 0.80 & 1013.10 & 1337.01 \\
+& Hybrid  & 0.84 & 4.88 & 5.87  & -0.12 & 1.23 & 2.02 & 0.74 & 1132.46 & 1516.85 \\
+& MPFM    & 0.92 & 2.42 & 4.04  & 0.02 & 1.21 & 1.89 & 0.73 & 704.36  & 1562.90 \\
+\midrule
+
+% ===================== W18 =====================
+\multirow{3}{*}{W18}
+& Physics & 0.08 & 22.54 & 27.79 & 0.55 & 13.82 & 24.96 & 0.34 & 2632.44 & 3712.13 \\
+& Hybrid  & 0.72 & 11.70 & 15.43 & 0.66 & 10.31 & 21.69 & 0.52 & 2402.84 & 3174.49 \\
+& MPFM    & 0.68 & 8.60  & 16.54 & 0.50 & 9.18  & 26.27 & 0.40 & 1312.41 & 3518.69 \\
+\midrule
+
+% ===================== W19 =====================
+\multirow{3}{*}{W19}
+& Physics & -0.32 & 19.09 & 24.68 & 0.64 & 3.63 & 4.86 & 0.44 & 2694.17 & 3023.05 \\
+& Hybrid  & 0.65  & 10.06 & 12.65 & 0.78 & 2.52 & 3.78 & 0.60 & 2018.05 & 2553.24 \\
+& MPFM    & 0.96  & 2.67  & 4.31  & 0.89 & 1.49 & 2.81 & 0.95 & 594.66  & 971.11  \\
 \bottomrule
 \end{tabular}
-}
 \end{table}
+
+
+\begin{figure}[!htb]
+    \centering
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W06 gas rate temporal generalization performance}
+        {fig:w06_qg_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W06_qg_hybrid.png}}{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W06 oil rate temporal generalization performance}
+        {fig:w06_qo_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W06_qo_hybrid.png}}{}
+    \end{subfigure}
+
+    \vspace{0.5em}
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W06 water rate temporal generalization performance}
+        {fig:w06_qw_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W06_qw_hybrid.png}}{}
+    \end{subfigure}
+
+    \caption{Temporal generalization performance of the hybrid model for W06.
+    The plots show predicted and measured gas, oil, and water rates over time.}
+    \label{fig:w06_temporal_generalization}
+\end{figure}
+
+
+\begin{figure}[!htb]
+    \centering
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W08 gas rate temporal generalization performance}
+        {fig:W08_qg_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W08_qg_hybrid.png}}{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W08 oil rate temporal generalization performance}
+        {fig:W08_qo_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W08_qo_hybrid.png}}{}
+    \end{subfigure}
+
+    \vspace{0.5em}
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W08 water rate temporal generalization performance}
+        {fig:W08_qw_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W08_qw_hybrid.png}}{}
+    \end{subfigure}
+
+    \caption{Temporal generalization performance of the hybrid model for W08.
+    The plots show predicted and measured gas, oil, and water rates over time.}
+    \label{fig:W08_temporal_generalization}
+\end{figure}
+
 
 \begin{figure}[!htb]
     \centering
@@ -1870,31 +1970,64 @@ W18
 
     \begin{subfigure}[t]{0.48\textwidth}
         \uomFig
-        {W06 gas rate temporal generalization performance}
-        {fig:w06_qg_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W06_qg_hybrid.png}}{}
+        {W11 gas rate temporal generalization performance}
+        {fig:W11_qg_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W11_qg_hybrid.png}}{}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \uomFig
-        {W06 oil rate temporal generalization performance}
-        {fig:w06_qo_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W06_qo_hybrid.png}}{}
+        {W11 oil rate temporal generalization performance}
+        {fig:W11_qo_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W11_qo_hybrid.png}}{}
     \end{subfigure}
 
     \vspace{0.5em}
 
     \begin{subfigure}[t]{0.48\textwidth}
         \uomFig
-        {W06 water rate temporal generalization performance}
-        {fig:w06_qw_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W06_qw_hybrid.png}}{}
+        {W11 water rate temporal generalization performance}
+        {fig:W11_qw_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W11_qw_hybrid.png}}{}
     \end{subfigure}
 
-    \caption{Temporal generalization performance of the hybrid model for W06.
+    \caption{Temporal generalization performance of the hybrid model for W11.
     The plots show predicted and measured gas, oil, and water rates over time.}
-    \label{fig:w06_temporal_generalization}
+    \label{fig:W11_temporal_generalization}
 \end{figure}
+
+
+\begin{figure}[!htb]
+    \centering
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W15 gas rate temporal generalization performance}
+        {fig:W15_qg_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W15_qg_hybrid.png}}{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W15 oil rate temporal generalization performance}
+        {fig:W15_qo_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W15_qo_hybrid.png}}{}
+    \end{subfigure}
+
+    \vspace{0.5em}
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W15 water rate temporal generalization performance}
+        {fig:W15_qw_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W15_qw_hybrid.png}}{}
+    \end{subfigure}
+
+    \caption{Temporal generalization performance of the hybrid model for W15.
+    The plots show predicted and measured gas, oil, and water rates over time.}
+    \label{fig:W15_temporal_generalization}
+\end{figure}
+
 
 \begin{figure}[!htb]
     \centering
@@ -1926,6 +2059,39 @@ W18
     The plots show predicted and measured gas, oil, and water rates over time.}
     \label{fig:w18_temporal_generalization}
 \end{figure}
+
+
+\begin{figure}[!htb]
+    \centering
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W19 gas rate temporal generalization performance}
+        {fig:W19_qg_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W19_qg_hybrid.png}}{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W19 oil rate temporal generalization performance}
+        {fig:W19_qo_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W19_qo_hybrid.png}}{}
+    \end{subfigure}
+
+    \vspace{0.5em}
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W19 water rate temporal generalization performance}
+        {fig:W19_qw_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W19_qw_hybrid.png}}{}
+    \end{subfigure}
+
+    \caption{Temporal generalization performance of the hybrid model for W19.
+    The plots show predicted and measured gas, oil, and water rates over time.}
+    \label{fig:W19_temporal_generalization}
+\end{figure}
+
 
 \section{Spatial Generalization Performance}
 

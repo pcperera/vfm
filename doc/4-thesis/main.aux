@@ -170,7 +170,6 @@
 \newlabel{fig:W10_dhp}{{3.2}{34}{W10 -- Downhole pressure}{figure.caption.16}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces W10 -- Downhole temperature}}{34}{figure.caption.16}\protected@file@percent }
 \newlabel{fig:W10_dht}{{3.3}{34}{W10 -- Downhole temperature}{figure.caption.16}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Well-Level Preprocessing}{34}{subsection.3.2.2}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces W10 -- Wellhead pressure}}{35}{figure.caption.17}\protected@file@percent }
 \newlabel{fig:W10_whp}{{3.4}{35}{W10 -- Wellhead pressure}{figure.caption.17}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces W10 -- Wellhead temperature}}{35}{figure.caption.17}\protected@file@percent }
@@ -179,6 +178,7 @@
 \newlabel{fig:W10_dcp}{{3.6}{35}{W10 -- Downstream choke pressure}{figure.caption.18}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3.7}{\ignorespaces W10 -- Downstream choke regulation}}{35}{figure.caption.18}\protected@file@percent }
 \newlabel{fig:W10_choke}{{3.7}{35}{W10 -- Downstream choke regulation}{figure.caption.18}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Well-Level Preprocessing}{35}{subsection.3.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}Derivation of Multiphase Flow Variables}{36}{subsection.3.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2.4}Temporal Index Construction}{36}{subsection.3.2.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2.5}Cross-Well Consolidation and Encoding}{37}{subsection.3.2.5}\protected@file@percent }
@@ -269,47 +269,79 @@
 \@writefile{toc}{\contentsline {chapter}{\numberline {5}Results and Analysis}{60}{chapter.5}\protected@file@percent }
 \@writefile{loa}{\addvspace {10\p@ }}
 \@writefile{toc}{\contentsline {section}{\numberline {5.1}Temporal Generalization Performance}{60}{section.5.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Model performance comparison for selected wells. Absolute error metrics are emphasized for water rate due to low-flow regimes.}}{60}{table.caption.20}\protected@file@percent }
-\newlabel{tab:best_wells_performance_all_phases}{{5.1}{60}{Model performance comparison for selected wells. Absolute error metrics are emphasized for water rate due to low-flow regimes}{table.caption.20}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{60}{section.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5.3}Code Availability and Reproducibility}{60}{section.5.3}\protected@file@percent }
-\newlabel{sec:reproducibility}{{5.3}{60}{Code Availability and Reproducibility}{section.5.3}{}}
-\newlabel{fig:w10_qg_model_performance}{{5.1a}{61}{W10 gas rate temporal generalization performance}{figure.caption.21}{}}
-\newlabel{sub@fig:w10_qg_model_performance}{{a}{61}{W10 gas rate temporal generalization performance}{figure.caption.21}{}}
-\newlabel{fig:w10_qo_model_performance}{{5.1b}{61}{W10 oil rate temporal generalization performance}{figure.caption.21}{}}
-\newlabel{sub@fig:w10_qo_model_performance}{{b}{61}{W10 oil rate temporal generalization performance}{figure.caption.21}{}}
-\newlabel{fig:w10_qw_model_performance}{{5.1c}{61}{W10 water rate temporal generalization performance}{figure.caption.21}{}}
-\newlabel{sub@fig:w10_qw_model_performance}{{c}{61}{W10 water rate temporal generalization performance}{figure.caption.21}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces Temporal generalization performance of the hybrid model for W10. The plots show predicted and measured gas, oil, and water rates over time.}}{61}{figure.caption.21}\protected@file@percent }
-\newlabel{fig:w10_temporal_generalization}{{5.1}{61}{Temporal generalization performance of the hybrid model for W10. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.21}{}}
-\newlabel{fig:w06_qg_model_performance}{{5.2a}{61}{W06 gas rate temporal generalization performance}{figure.caption.22}{}}
-\newlabel{sub@fig:w06_qg_model_performance}{{a}{61}{W06 gas rate temporal generalization performance}{figure.caption.22}{}}
-\newlabel{fig:w06_qo_model_performance}{{5.2b}{61}{W06 oil rate temporal generalization performance}{figure.caption.22}{}}
-\newlabel{sub@fig:w06_qo_model_performance}{{b}{61}{W06 oil rate temporal generalization performance}{figure.caption.22}{}}
-\newlabel{fig:w06_qw_model_performance}{{5.2c}{61}{W06 water rate temporal generalization performance}{figure.caption.22}{}}
-\newlabel{sub@fig:w06_qw_model_performance}{{c}{61}{W06 water rate temporal generalization performance}{figure.caption.22}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces Temporal generalization performance of the hybrid model for W06. The plots show predicted and measured gas, oil, and water rates over time.}}{61}{figure.caption.22}\protected@file@percent }
-\newlabel{fig:w06_temporal_generalization}{{5.2}{61}{Temporal generalization performance of the hybrid model for W06. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.22}{}}
-\newlabel{fig:w18_qg_model_performance}{{5.3a}{62}{W18 gas rate temporal generalization performance}{figure.caption.23}{}}
-\newlabel{sub@fig:w18_qg_model_performance}{{a}{62}{W18 gas rate temporal generalization performance}{figure.caption.23}{}}
-\newlabel{fig:w18_qo_model_performance}{{5.3b}{62}{W18 oil rate temporal generalization performance}{figure.caption.23}{}}
-\newlabel{sub@fig:w18_qo_model_performance}{{b}{62}{W18 oil rate temporal generalization performance}{figure.caption.23}{}}
-\newlabel{fig:w18_qw_model_performance}{{5.3c}{62}{W18 water rate temporal generalization performance}{figure.caption.23}{}}
-\newlabel{sub@fig:w18_qw_model_performance}{{c}{62}{W18 water rate temporal generalization performance}{figure.caption.23}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.3}{\ignorespaces Temporal generalization performance of the hybrid model for W18. The plots show predicted and measured gas, oil, and water rates over time.}}{62}{figure.caption.23}\protected@file@percent }
-\newlabel{fig:w18_temporal_generalization}{{5.3}{62}{Temporal generalization performance of the hybrid model for W18. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.23}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Performance comparison of physics-only and hybrid models for Well W10 under the Leave-One-Well-Out (LOWO) evaluation strategy. Absolute error metrics are emphasized for robustness under low-rate regimes.}}{63}{table.caption.24}\protected@file@percent }
-\newlabel{tab:lowo_w10_performance_clean}{{5.2}{63}{Performance comparison of physics-only and hybrid models for Well W10 under the Leave-One-Well-Out (LOWO) evaluation strategy. Absolute error metrics are emphasized for robustness under low-rate regimes}{table.caption.24}{}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {6}Discussion}{64}{chapter.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Prediction performance comparison for oil ($q_o$), water ($q_w$), and gas ($q_g$) rates across all wells.}}{60}{table.caption.20}\protected@file@percent }
+\newlabel{tab:rate_scores_by_phase}{{5.1}{60}{Prediction performance comparison for oil ($q_o$), water ($q_w$), and gas ($q_g$) rates across all wells}{table.caption.20}{}}
+\newlabel{fig:w06_qg_model_performance}{{5.1a}{61}{W06 gas rate temporal generalization performance}{figure.caption.21}{}}
+\newlabel{sub@fig:w06_qg_model_performance}{{a}{61}{W06 gas rate temporal generalization performance}{figure.caption.21}{}}
+\newlabel{fig:w06_qo_model_performance}{{5.1b}{61}{W06 oil rate temporal generalization performance}{figure.caption.21}{}}
+\newlabel{sub@fig:w06_qo_model_performance}{{b}{61}{W06 oil rate temporal generalization performance}{figure.caption.21}{}}
+\newlabel{fig:w06_qw_model_performance}{{5.1c}{61}{W06 water rate temporal generalization performance}{figure.caption.21}{}}
+\newlabel{sub@fig:w06_qw_model_performance}{{c}{61}{W06 water rate temporal generalization performance}{figure.caption.21}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces Temporal generalization performance of the hybrid model for W06. The plots show predicted and measured gas, oil, and water rates over time.}}{61}{figure.caption.21}\protected@file@percent }
+\newlabel{fig:w06_temporal_generalization}{{5.1}{61}{Temporal generalization performance of the hybrid model for W06. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.21}{}}
+\newlabel{fig:W08_qg_model_performance}{{5.2a}{61}{W08 gas rate temporal generalization performance}{figure.caption.22}{}}
+\newlabel{sub@fig:W08_qg_model_performance}{{a}{61}{W08 gas rate temporal generalization performance}{figure.caption.22}{}}
+\newlabel{fig:W08_qo_model_performance}{{5.2b}{61}{W08 oil rate temporal generalization performance}{figure.caption.22}{}}
+\newlabel{sub@fig:W08_qo_model_performance}{{b}{61}{W08 oil rate temporal generalization performance}{figure.caption.22}{}}
+\newlabel{fig:W08_qw_model_performance}{{5.2c}{61}{W08 water rate temporal generalization performance}{figure.caption.22}{}}
+\newlabel{sub@fig:W08_qw_model_performance}{{c}{61}{W08 water rate temporal generalization performance}{figure.caption.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces Temporal generalization performance of the hybrid model for W08. The plots show predicted and measured gas, oil, and water rates over time.}}{61}{figure.caption.22}\protected@file@percent }
+\newlabel{fig:W08_temporal_generalization}{{5.2}{61}{Temporal generalization performance of the hybrid model for W08. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.22}{}}
+\newlabel{fig:w10_qg_model_performance}{{5.3a}{62}{W10 gas rate temporal generalization performance}{figure.caption.23}{}}
+\newlabel{sub@fig:w10_qg_model_performance}{{a}{62}{W10 gas rate temporal generalization performance}{figure.caption.23}{}}
+\newlabel{fig:w10_qo_model_performance}{{5.3b}{62}{W10 oil rate temporal generalization performance}{figure.caption.23}{}}
+\newlabel{sub@fig:w10_qo_model_performance}{{b}{62}{W10 oil rate temporal generalization performance}{figure.caption.23}{}}
+\newlabel{fig:w10_qw_model_performance}{{5.3c}{62}{W10 water rate temporal generalization performance}{figure.caption.23}{}}
+\newlabel{sub@fig:w10_qw_model_performance}{{c}{62}{W10 water rate temporal generalization performance}{figure.caption.23}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.3}{\ignorespaces Temporal generalization performance of the hybrid model for W10. The plots show predicted and measured gas, oil, and water rates over time.}}{62}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:w10_temporal_generalization}{{5.3}{62}{Temporal generalization performance of the hybrid model for W10. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.23}{}}
+\newlabel{fig:W11_qg_model_performance}{{5.4a}{62}{W11 gas rate temporal generalization performance}{figure.caption.24}{}}
+\newlabel{sub@fig:W11_qg_model_performance}{{a}{62}{W11 gas rate temporal generalization performance}{figure.caption.24}{}}
+\newlabel{fig:W11_qo_model_performance}{{5.4b}{62}{W11 oil rate temporal generalization performance}{figure.caption.24}{}}
+\newlabel{sub@fig:W11_qo_model_performance}{{b}{62}{W11 oil rate temporal generalization performance}{figure.caption.24}{}}
+\newlabel{fig:W11_qw_model_performance}{{5.4c}{62}{W11 water rate temporal generalization performance}{figure.caption.24}{}}
+\newlabel{sub@fig:W11_qw_model_performance}{{c}{62}{W11 water rate temporal generalization performance}{figure.caption.24}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.4}{\ignorespaces Temporal generalization performance of the hybrid model for W11. The plots show predicted and measured gas, oil, and water rates over time.}}{62}{figure.caption.24}\protected@file@percent }
+\newlabel{fig:W11_temporal_generalization}{{5.4}{62}{Temporal generalization performance of the hybrid model for W11. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.24}{}}
+\newlabel{fig:W15_qg_model_performance}{{5.5a}{63}{W15 gas rate temporal generalization performance}{figure.caption.25}{}}
+\newlabel{sub@fig:W15_qg_model_performance}{{a}{63}{W15 gas rate temporal generalization performance}{figure.caption.25}{}}
+\newlabel{fig:W15_qo_model_performance}{{5.5b}{63}{W15 oil rate temporal generalization performance}{figure.caption.25}{}}
+\newlabel{sub@fig:W15_qo_model_performance}{{b}{63}{W15 oil rate temporal generalization performance}{figure.caption.25}{}}
+\newlabel{fig:W15_qw_model_performance}{{5.5c}{63}{W15 water rate temporal generalization performance}{figure.caption.25}{}}
+\newlabel{sub@fig:W15_qw_model_performance}{{c}{63}{W15 water rate temporal generalization performance}{figure.caption.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.5}{\ignorespaces Temporal generalization performance of the hybrid model for W15. The plots show predicted and measured gas, oil, and water rates over time.}}{63}{figure.caption.25}\protected@file@percent }
+\newlabel{fig:W15_temporal_generalization}{{5.5}{63}{Temporal generalization performance of the hybrid model for W15. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.25}{}}
+\newlabel{fig:w18_qg_model_performance}{{5.6a}{63}{W18 gas rate temporal generalization performance}{figure.caption.26}{}}
+\newlabel{sub@fig:w18_qg_model_performance}{{a}{63}{W18 gas rate temporal generalization performance}{figure.caption.26}{}}
+\newlabel{fig:w18_qo_model_performance}{{5.6b}{63}{W18 oil rate temporal generalization performance}{figure.caption.26}{}}
+\newlabel{sub@fig:w18_qo_model_performance}{{b}{63}{W18 oil rate temporal generalization performance}{figure.caption.26}{}}
+\newlabel{fig:w18_qw_model_performance}{{5.6c}{63}{W18 water rate temporal generalization performance}{figure.caption.26}{}}
+\newlabel{sub@fig:w18_qw_model_performance}{{c}{63}{W18 water rate temporal generalization performance}{figure.caption.26}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.6}{\ignorespaces Temporal generalization performance of the hybrid model for W18. The plots show predicted and measured gas, oil, and water rates over time.}}{63}{figure.caption.26}\protected@file@percent }
+\newlabel{fig:w18_temporal_generalization}{{5.6}{63}{Temporal generalization performance of the hybrid model for W18. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.26}{}}
+\newlabel{fig:W19_qg_model_performance}{{5.7a}{64}{W19 gas rate temporal generalization performance}{figure.caption.27}{}}
+\newlabel{sub@fig:W19_qg_model_performance}{{a}{64}{W19 gas rate temporal generalization performance}{figure.caption.27}{}}
+\newlabel{fig:W19_qo_model_performance}{{5.7b}{64}{W19 oil rate temporal generalization performance}{figure.caption.27}{}}
+\newlabel{sub@fig:W19_qo_model_performance}{{b}{64}{W19 oil rate temporal generalization performance}{figure.caption.27}{}}
+\newlabel{fig:W19_qw_model_performance}{{5.7c}{64}{W19 water rate temporal generalization performance}{figure.caption.27}{}}
+\newlabel{sub@fig:W19_qw_model_performance}{{c}{64}{W19 water rate temporal generalization performance}{figure.caption.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.7}{\ignorespaces Temporal generalization performance of the hybrid model for W19. The plots show predicted and measured gas, oil, and water rates over time.}}{64}{figure.caption.27}\protected@file@percent }
+\newlabel{fig:W19_temporal_generalization}{{5.7}{64}{Temporal generalization performance of the hybrid model for W19. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.27}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{64}{section.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.3}Code Availability and Reproducibility}{64}{section.5.3}\protected@file@percent }
+\newlabel{sec:reproducibility}{{5.3}{64}{Code Availability and Reproducibility}{section.5.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Performance comparison of physics-only and hybrid models for Well W10 under the Leave-One-Well-Out (LOWO) evaluation strategy. Absolute error metrics are emphasized for robustness under low-rate regimes.}}{65}{table.caption.28}\protected@file@percent }
+\newlabel{tab:lowo_w10_performance_clean}{{5.2}{65}{Performance comparison of physics-only and hybrid models for Well W10 under the Leave-One-Well-Out (LOWO) evaluation strategy. Absolute error metrics are emphasized for robustness under low-rate regimes}{table.caption.28}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {6}Discussion}{66}{chapter.6}\protected@file@percent }
 \@writefile{loa}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {chapter}{\numberline {7}Future Work}{65}{chapter.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {7}Future Work}{67}{chapter.7}\protected@file@percent }
 \@writefile{loa}{\addvspace {10\p@ }}
-\newlabel{chap:future-work}{{7}{65}{Future Work}{chapter.7}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{65}{section.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{65}{section.7.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{66}{section.7.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{66}{section.7.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{66}{section.7.5}\protected@file@percent }
+\newlabel{chap:future-work}{{7}{67}{Future Work}{chapter.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{67}{section.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{67}{section.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{68}{section.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{68}{section.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{68}{section.7.5}\protected@file@percent }
 \bibstyle{apalike}
 \bibdata{references}
 \bibcite{agwu2022modelling}{{1}{2022}{{Agwu et~al.}}{{}}}
@@ -324,7 +356,7 @@
 \bibcite{dake1978developments}{{10}{1978}{{Dake and Dake}}{{}}}
 \bibcite{dutta2018modeling}{{11}{2018}{{Dutta and Kumar}}{{}}}
 \bibcite{franklin2022physics}{{12}{2022}{{Franklin et~al.}}{{}}}
-\@writefile{toc}{\contentsline {chapter}{References}{67}{chapter*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{References}{69}{chapter*.29}\protected@file@percent }
 \bibcite{grimstad2021bayesian}{{13}{2021}{{Grimstad et~al.}}{{}}}
 \bibcite{gryzlov2023combining}{{14}{2023}{{Gryzlov et~al.}}{{}}}
 \bibcite{hansen2019multi}{{15}{2019}{{Hansen et~al.}}{{}}}
@@ -341,4 +373,4 @@
 \global \tablestrue
 \global \abbrstrue
 \global \appensfalse
-\gdef \@abspage@last{82}
+\gdef \@abspage@last{84}

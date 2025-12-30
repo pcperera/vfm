@@ -57,7 +57,7 @@
 \contentsline {subsection}{\numberline {3.1.5}Key Advantages of the Proposed Architecture}{31}{subsection.3.1.5}%
 \contentsline {section}{\numberline {3.2}Dataset Description and Preprocessing}{31}{section.3.2}%
 \contentsline {subsection}{\numberline {3.2.1}Independent and Reference Variables}{32}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}Well-Level Preprocessing}{34}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.2}Well-Level Preprocessing}{35}{subsection.3.2.2}%
 \contentsline {subsection}{\numberline {3.2.3}Derivation of Multiphase Flow Variables}{36}{subsection.3.2.3}%
 \contentsline {subsection}{\numberline {3.2.4}Temporal Index Construction}{36}{subsection.3.2.4}%
 \contentsline {subsection}{\numberline {3.2.5}Cross-Well Consolidation and Encoding}{37}{subsection.3.2.5}%
@@ -125,13 +125,13 @@
 \contentsline {section}{\numberline {4.9}Summary of Experimental Design}{59}{section.4.9}%
 \contentsline {chapter}{\numberline {5}Results and Analysis}{60}{chapter.5}%
 \contentsline {section}{\numberline {5.1}Temporal Generalization Performance}{60}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{60}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Code Availability and Reproducibility}{60}{section.5.3}%
-\contentsline {chapter}{\numberline {6}Discussion}{64}{chapter.6}%
-\contentsline {chapter}{\numberline {7}Future Work}{65}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{65}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{65}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{66}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{66}{section.7.4}%
-\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{66}{section.7.5}%
-\contentsline {chapter}{References}{67}{chapter*.25}%
+\contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{64}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Code Availability and Reproducibility}{64}{section.5.3}%
+\contentsline {chapter}{\numberline {6}Discussion}{66}{chapter.6}%
+\contentsline {chapter}{\numberline {7}Future Work}{67}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{67}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{67}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{68}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{68}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{68}{section.7.5}%
+\contentsline {chapter}{References}{69}{chapter*.29}%
