@@ -8,6 +8,28 @@ class Preprocessor:
         # self._time_idx_resolution_min = 1
         self._independent_tp_vars = get_independent_tp_vars()
         self._independent_vars = get_independent_vars_with_no_well_code()
+        self._well_col = "well_id"
+
+    def _process_zero_water_rates(self, df):
+        well_ids = df[self._well_col].unique()
+        assert len(well_ids) == 1, "DataFrame contains multiple well IDs."
+        well_id = well_ids[0]
+        qw_col="qw_well_test"
+
+        pos = df[df[qw_col] > 0]
+        if pos.empty:
+            return df
+
+        qw_min = pos[qw_col].min()
+        t_wb = pos.index.min()
+
+        mask = (df[self._well_col] == well_id) & (df.index >= t_wb) & (df[qw_col] == 0)
+        df.loc[mask, qw_col] = qw_min
+        assert (df["qw_well_test"] != 0).all(), \
+            "Zero values found in qw_well_test after preprocessing"
+
+        return df
+
 
     def _preprocess_well(self, df: pd.DataFrame) -> pd.DataFrame:
         well_ids = df["well_id"].unique()
@@ -51,11 +73,11 @@ class Preprocessor:
 
         print(f"{well_id} Record count before target preprocessing: {len(df)}")
 
-        # df = df[(df["qo_mpfm"] >= 0) & (df["qg_mpfm"] >= 0) & (df["qw_mpfm"] >= 0)]
         df = df[(df["qo_well_test"] >= 0) & (df["qg_well_test"] >= 0) & (df["qw_well_test"] >= 0)]
 
-        # Drop rows where oil and gas rates are both zero.
-        # df = df[~((df["qo_mpfm"] == 0) & (df["qg_mpfm"] == 0))]
+        df = self._process_zero_water_rates(df=df)
+
+        # Drop rows where oil and gas rates are both zero. 0))]
         df = df[~((df["qo_well_test"] == 0) & (df["qg_well_test"] == 0))]
 
         print(f"{well_id} Record count after target preprocessing: {len(df)}")
@@ -73,6 +95,7 @@ class Preprocessor:
         )
 
         df = df[get_all_vars()]
+        df.sort_index(inplace=True) 
         print(f"{well_id} Record count after preprocessing: {len(df)}")
         return df    
 

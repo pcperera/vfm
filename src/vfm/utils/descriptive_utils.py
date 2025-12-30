@@ -75,7 +75,7 @@ def get_blocked_temporal_train_val_test_split(
     n_blocks: int = 5,
     val_fraction_per_block: float = 0.1,
     test_fraction_per_block: float = 0.2,
-    min_block_size: int = 5,
+    min_block_size: int = 3,
 ):
     """
     Blocked temporal train-validation-test split with preserved temporal order.
@@ -254,3 +254,22 @@ def get_all_vars():
     all_vars.append("well_id")
 
     return all_vars
+
+
+import pandas as pd
+
+def scores_to_df(scores: dict, model_name: str) -> pd.DataFrame:
+    rows = []
+
+    for well, vars_ in scores.items():
+        for var, metrics in vars_.items():
+            for metric, value in metrics.items():
+                rows.append({
+                    "well_id": well,
+                    "variable": var,
+                    "metric": metric,
+                    "model": model_name,
+                    "value": value,
+                })
+
+    return pd.DataFrame(rows)

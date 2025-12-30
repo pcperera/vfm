@@ -895,6 +895,9 @@ Collectively, the measurements presented in Figures~\ref{fig:W10_dhp}--\ref{fig:
     \item \textbf{Enforcement of physically admissible flow rates:}  
     Observations with negative well-test oil, gas, or water rates are excluded to maintain physical realism and prevent numerical instability during model fitting.
 
+    \item \textbf{Treatment of zero well-test water rates:}  
+    Reported zero water rates in well-test data may correspond either to genuinely water-free production or to measurements below the detection resolution of the test separator. To mitigate numerical instability and distortion of error metrics, zero water-rate values occurring after the onset of water production for a given well are treated as left-censored observations and replaced with the minimum non-zero water rate reported for that well. Zero water-rate values prior to the first observed water production are retained unchanged.
+
     \item \textbf{Exclusion of non-producing operating states:}  
     Rows corresponding to non-producing conditions, identified by simultaneous zero oil and gas well-test rates, are removed. These conditions are not representative of active production behavior and are therefore excluded from the modeling dataset.
 \end{itemize}
@@ -991,7 +994,6 @@ The following assumptions are embedded in the formulation:
 All relationships act instantaneously and do not assume temporal memory,
 which enables the model to make predictions at any arbitrary timestamp
 given the set of independent well measurements.
-
 
 \subsection{Liquid-Rate Inflow Equation}
 \label{subsec:liquid_rate}
@@ -1125,9 +1127,58 @@ subject to physically motivated bounds:
 \boldsymbol{\theta}_{\min} \le \boldsymbol{\theta} \le \boldsymbol{\theta}_{\max}.
 \end{equation}
 
+All parameters are estimated via nonlinear least-squares calibration against well-test data and represent effective coefficients that compensate for unmodeled multiphase flow, surface interactions, and operational variability.
 These bounds enforce physical plausibility, such as non-negative productivity indices, reasonable reservoir pressures, and monotonic choke response, and significantly improve numerical stability and convergence behavior.
 
 The optimization is solved using a trust-region-based nonlinear least squares algorithm, which iteratively linearizes the residual function around the current parameter estimate and updates the parameters by solving a sequence of local quadratic subproblems. This approach is well-suited for moderately nonlinear models and provides robust convergence under noisy and sparse data conditions.
+The set of model parameters calibrated during physics-model fitting, together with their physical interpretation and units, is summarized in Table~\ref{tab:physics_calibrated_parameters}.
+
+\begin{table}[!htb]
+\centering
+\caption{Calibrated parameters of the physics-based production model}
+\label{tab:physics_calibrated_parameters}
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Scientific purpose} & \textbf{Unit} \\
+\hline
+$P_{\mathrm{res}}$ 
+& Effective reservoir pressure governing inflow and drawdown behavior 
+& bara \\
+
+$q_{L,\max}$ 
+& Maximum achievable liquid production rate at negligible bottomhole pressure 
+& Sm$^{3}$/h \\
+
+$a$ 
+& Linear inflow coefficient controlling first-order pressure–rate sensitivity 
+& -- \\
+
+$b$ 
+& Quadratic inflow coefficient accounting for nonlinear inflow effects 
+& -- \\
+
+$\boldsymbol{A}_{\mathrm{wc}}$ 
+& Logistic water-cut model coefficients governing oil–water phase partitioning 
+& -- \\
+
+$C_{g}$ 
+& Reservoir gas productivity coefficient relating pressure drawdown to gas rate 
+& Sm$^{3}$/h/$\sqrt{\text{bar}}$ \\
+
+$k_{\mathrm{ch}}$ 
+& Choke-response steepness parameter controlling sensitivity to choke opening 
+& -- \\
+
+$\mathrm{ch}_{0}$ 
+& Reference choke opening at which flow transitions from restricted to open 
+& fraction \\
+
+$C_{\mathrm{gl}}$ 
+& Gas-lift utilization coefficient mapping injected lift gas to produced gas contribution 
+& -- \\
+\hline
+\end{tabular}
+\end{table}
 
 \subsubsection{Initialization and Regularization}
 
@@ -1155,7 +1206,6 @@ Importantly, the calibrated physics-based model is not expected to achieve perfe
 \subsubsection{Role in the Hybrid Modeling Architecture}
 
 The independently calibrated physics-based model serves as a physically grounded baseline within the hybrid architecture. By constraining the solution space through first-principles relationships and calibrated parameters, the nonlinear least squares estimation stage enables the residual learning model to focus on compensating for unmodeled dynamics, thereby improving overall prediction accuracy, robustness, and data efficiency.
-
 
 \section{Machine-Learning Residual Modelling}
 \label{sec:residual_ml}

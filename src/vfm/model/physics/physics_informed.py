@@ -12,8 +12,9 @@ from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import HistGradientBoostingRegressor
 from src.vfm.constants import *
 
+
 # =====================================================
-# Constants & helpers
+# Helpers
 # =====================================================
 
 def compute_wgr(qw, qg, min_qg=50.0):
@@ -157,37 +158,104 @@ class PhysicsModel:
         P_res = x[i] if self.fit_pres else None; i += self.fit_pres
         qL_max, a, b = x[i:i+3]; i += 3
         Cg, k_ch, ch0 = x[i:i+3]; i += 3
+        C_gl = x[i]; i += 1   # Gas lift efficiency
         A_wc = x[i:i+n_wc]
-        return P_res, qL_max, a, b, Cg, k_ch, ch0, A_wc
+        return P_res, qL_max, a, b, Cg, k_ch, ch0, C_gl, A_wc
+
 
     # --------------------------------------------------
     # Residual function for least squares
     # --------------------------------------------------
     def residuals(self, x, df, y_qo, y_qg, y_qw):
-        n_wc = 8
-        P_res, qL_max, a, b, Cg, k_ch, ch0, A = self._unpack(x, n_wc)
+        """
+        Residual function for nonlinear least squares calibration.
 
+        Includes:
+        - Liquid inflow relationship
+        - Logistic water-cut closure
+        - Pressure-driven reservoir gas rate
+        - Additive gas-lift contribution (when available)
+
+        For non–gas-lifted wells or missing signals, the formulation
+        automatically reduces to the original physics model.
+        """
+
+        n_wc = 8
+        (
+            P_res,
+            qL_max,
+            a,
+            b,
+            Cg,
+            k_ch,
+            ch0,
+            C_gl,
+            A,
+        ) = self._unpack(x, n_wc)
+
+        # --------------------------------------------------
+        # Reservoir pressure fallback
+        # --------------------------------------------------
         if P_res is None:
             P_res = df["dhp"].max() + self.estimate_pres_offset
 
+        # --------------------------------------------------
+        # Liquid rate (IPR-like formulation)
+        # --------------------------------------------------
         Pwf = df["dhp"].values
-        pr = np.clip(Pwf / P_res, 0, 1.5)
+        pr = np.clip(Pwf / P_res, 0.0, 1.5)
 
-        qL = np.maximum(0.0, qL_max * (1 - a * pr - b * pr**2))
+        qL = np.maximum(
+            0.0,
+            qL_max * (1.0 - a * pr - b * pr**2),
+        )
+
+        # --------------------------------------------------
+        # Water-cut closure
+        # --------------------------------------------------
         wc = logistic(self._feature_matrix_for_wc(df) @ A)
 
         qw = wc * qL
-        qo = (1 - wc) * qL
+        qo = (1.0 - wc) * qL
 
+        # --------------------------------------------------
+        # Reservoir gas rate (pressure-driven)
+        # --------------------------------------------------
         dp = np.sqrt(np.maximum(0.0, P_res - Pwf)) / self.P_SCALE
         choke_eff = logistic(k_ch * (df["choke"].values - ch0))
-        qg = Cg * dp * choke_eff
 
+        qg_res = Cg * dp * choke_eff
+
+        # --------------------------------------------------
+        # Gas lift contribution (additive, optional)
+        # --------------------------------------------------
+        if "gl_mass_rate" in df.columns:
+            gl_mass = np.maximum(df["gl_mass_rate"].values, 0.0)
+
+            if "gl_open_ratio" in df.columns:
+                gl_or = np.clip(df["gl_open_ratio"].values, 0.0, 1.0)
+            else:
+                gl_or = 1.0
+
+            qg_lift = (
+                C_gl
+                * (gl_mass / GL_MASS_TO_STD_VOL)
+                * gl_or
+            )
+        else:
+            qg_lift = 0.0
+
+        qg = qg_res + qg_lift
+
+        # --------------------------------------------------
+        # Normalized residual vector
+        # --------------------------------------------------
         return np.concatenate([
             (qo - y_qo) / max(np.std(y_qo), EPS),
             (qw - y_qw) / max(np.std(y_qw), EPS),
             (qg - y_qg) / max(np.std(y_qg), EPS),
         ])
+
 
     # --------------------------------------------------
     # Fit physics model
@@ -256,17 +324,17 @@ class PhysicsModel:
         n_wc = 8
 
         x0 = (
-            [P_res0, qL_mean, 0.2, 0.5, 50.0, 5.0, 0.3]
+            [P_res0, qL_mean, 0.2, 0.5, 50.0, 5.0, 0.3, 0.01]
             + [0.0] * n_wc
         )
 
         lb = (
-            [P_res_lb, 0.0, 0.0, 0.0, 0.0, 0.01, 0.0]
+            [P_res_lb, 0.0, 0.0, 0.0, 0.0, 0.01, 0.0, 0.0]
             + [-5.0] * n_wc
         )
 
         ub = (
-            [P_res_ub, 1e5, 1.0, 2.0, 1e5, 50.0, 1.0]
+            [P_res_ub, 1e5, 1.0, 2.0, 1e5, 50.0, 1.0, 1.0]
             + [5.0] * n_wc
         )
 
@@ -284,7 +352,7 @@ class PhysicsModel:
             gtol=1e-8,
         )
 
-        P_res, qL_max, a, b, Cg, k_ch, ch0, A = self._unpack(res.x, n_wc)
+        P_res, qL_max, a, b, Cg, k_ch, ch0, C_gl, A = self._unpack(res.x, n_wc)
 
         # --------------------------------------------------
         # 6. Partial pooling of physics parameters
@@ -310,6 +378,7 @@ class PhysicsModel:
             a=a,
             b=b,
             Cg=Cg,
+            C_gl=C_gl,   # Gas lift
             k_choke=k_ch,
             choke0=ch0,
             A_wc=A,
@@ -318,23 +387,79 @@ class PhysicsModel:
         return self
 
     def predict(self, df):
-        p = self.params_
-        Pwf = df["dhp"].values
-        pr = np.clip(Pwf / p["P_res"], 0, 1.5)
+        """
+        Physics-only prediction.
 
-        qL = np.maximum(0.0, p["qL_max"] * (1 - p["a"]*pr - p["b"]*pr**2))
+        Includes:
+        - Liquid inflow relationship
+        - Logistic water-cut closure
+        - Pressure-driven reservoir gas rate
+        - Additive gas-lift contribution (when available)
+
+        For non-gas-lifted wells or missing gas-lift signals,
+        the formulation automatically reduces to the original
+        physics model.
+        """
+
+        p = self.params_
+
+        # --------------------------------------------------
+        # Liquid rates
+        # --------------------------------------------------
+        Pwf = df["dhp"].values
+        pr = np.clip(Pwf / p["P_res"], 0.0, 1.5)
+
+        qL = np.maximum(
+            0.0,
+            p["qL_max"] * (1.0 - p["a"] * pr - p["b"] * pr**2),
+        )
+
         wc = logistic(self._feature_matrix_for_wc(df) @ p["A_wc"])
 
         qw = wc * qL
-        qo = (1 - wc) * qL
+        qo = (1.0 - wc) * qL
 
+        # --------------------------------------------------
+        # Reservoir gas (pressure-driven)
+        # --------------------------------------------------
         dp = np.sqrt(np.maximum(0.0, p["P_res"] - Pwf)) / self.P_SCALE
-        choke_eff = logistic(p["k_choke"] * (df["choke"].values - p["choke0"]))
-        qg = p["Cg"] * dp * choke_eff
+        choke_eff = logistic(
+            p["k_choke"] * (df["choke"].values - p["choke0"])
+        )
 
+        qg_res = p["Cg"] * dp * choke_eff
+
+        # --------------------------------------------------
+        # Gas lift contribution (optional, additive)
+        # --------------------------------------------------
+        if "gl_mass_rate" in df.columns:
+            gl_mass = np.maximum(df["gl_mass_rate"].values, 0.0)
+
+            if "gl_open_ratio" in df.columns:
+                gl_or = np.clip(df["gl_open_ratio"].values, 0.0, 1.0)
+            else:
+                gl_or = 1.0
+
+            qg_lift = (
+                p["C_gl"]
+                * (gl_mass / GL_MASS_TO_STD_VOL)
+                * gl_or
+            )
+        else:
+            qg_lift = 0.0
+
+        qg = qg_res + qg_lift
+
+        # --------------------------------------------------
+        # Output
+        # --------------------------------------------------
         return pd.DataFrame(
-            {"qo_pred": qo, "qw_pred": qw, "qg_pred": qg},
-            index=df.index
+            {
+                "qo_pred": qo,
+                "qw_pred": qw,
+                "qg_pred": qg,
+            },
+            index=df.index,
         )
 
 # =============================
