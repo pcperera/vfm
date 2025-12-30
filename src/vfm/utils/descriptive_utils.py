@@ -215,7 +215,6 @@ def get_lowo_train_val_test_split(
     return df_train, df_val, df_calibration, df_test
 
 
-
 # def get_all_wells() -> list[str]:
 #     return  ["W06", "W10"]
 
@@ -229,7 +228,7 @@ def get_mpfm_vars():
     return ["qo_mpfm", "qg_mpfm", "qw_mpfm", "wc_mpfm"]
 
 def get_independent_vars():
-    return ["well_code", "dhp", "dht", "whp", "wht", "choke", "dcp"]
+    return ["well_code", "dhp", "dht", "whp", "wht", "choke", "dcp", "gl_mass_rate", "gl_open_ratio"]
 
 def get_independent_tp_vars():
     return ["dhp", "dht", "whp", "wht", "dcp"]

@@ -1,5 +1,5 @@
 import pandas as pd
-from src.utils.descriptive_utils import *
+from src.vfm.utils.descriptive_utils import *
 
 
 class Preprocessor:
@@ -13,6 +13,7 @@ class Preprocessor:
         well_ids = df["well_id"].unique()
         assert len(well_ids) == 1, "DataFrame contains multiple well IDs."
         well_id = well_ids[0]
+        print(f"{well_id} original record count: {len(df)}")
 
         # Data transformation
         df.sort_index(inplace=True)  # Ensure chronological order
@@ -48,12 +49,16 @@ class Preprocessor:
         df.dropna(subset=get_depdendent_vars(), inplace=True)
         df.dropna(subset=get_independent_vars_with_no_well_code(), inplace=True)
 
+        print(f"{well_id} Record count before target preprocessing: {len(df)}")
+
         # df = df[(df["qo_mpfm"] >= 0) & (df["qg_mpfm"] >= 0) & (df["qw_mpfm"] >= 0)]
         df = df[(df["qo_well_test"] >= 0) & (df["qg_well_test"] >= 0) & (df["qw_well_test"] >= 0)]
 
         # Drop rows where oil and gas rates are both zero.
         # df = df[~((df["qo_mpfm"] == 0) & (df["qg_mpfm"] == 0))]
         df = df[~((df["qo_well_test"] == 0) & (df["qg_well_test"] == 0))]
+
+        print(f"{well_id} Record count after target preprocessing: {len(df)}")
 
         df["gor_well_test"] = np.where(
             df["qo_well_test"] > 0,
@@ -68,7 +73,7 @@ class Preprocessor:
         )
 
         df = df[get_all_vars()]
-
+        print(f"{well_id} Record count after preprocessing: {len(df)}")
         return df    
 
 
@@ -76,12 +81,13 @@ class Preprocessor:
         df = df.copy(deep=True)
         dfs = []
         well_ids = df["well_id"].unique()
+        print(f"Total original record count {len(df)}")
 
         # # Calculate the time steps
         reference_time = df.index.min()
 
         for well_id in well_ids:
-            print(f"Preprocessing well {well_id} with columns {df.columns.tolist()}")
+            # print(f"Preprocessing well {well_id} with columns {df.columns.tolist()}")
             df_well = df[df["well_id"] == well_id]
             df_well = self._preprocess_well(df=df_well)
             df_well["time_idx"] = (df_well.index - reference_time).total_seconds() // 30 # Unit is 30s

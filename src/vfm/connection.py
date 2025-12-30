@@ -68,11 +68,14 @@ class Connection:
             mapping["DHT"]   = f"{well}_WELL_TEST_DOWNHOLE_TEMPERATURE"
             mapping["CHOKE"] = f"{well}_WELL_TEST_CHOKE_POS"
             mapping["DCP"]   = f"{well}_WELL_TEST_DOWNSTREAM_CHOKE_PRES"
+            mapping["GL_MASS_RATE"] = f"{well}_WELL_TEST_LIFT_GAS_MASSRATE"
+            mapping["GL_OPEN_RATIO"] = f"{well}_WELL_TEST_LIFT_GAS_OPEN_RATIO"
 
             # Well test rates (naming convention preserved)
             mapping["QO_WELL_TEST"] = f"{well}_WELL_TEST_OIL_RATE_TEST_SEPARATOR"
             mapping["QG_WELL_TEST"] = f"{well}_WELL_TEST_GAS_RATE_TEST_SEPARATOR"
             mapping["QW_WELL_TEST"] = f"{well}_WELL_TEST_QW_TEST_SEPARATOR"
+            # mapping["WC_WELL_TEST"] = f"{well}_WELL_TEST_WC_TEST_SEPARATOR"
 
             # MPFM
             mapping["QO_MPFM"] = f"{well}_WELL_TEST_OIL_RATE_MPFM"
