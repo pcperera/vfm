@@ -127,11 +127,11 @@
 \contentsline {section}{\numberline {5.1}Temporal Generalization Performance}{60}{section.5.1}%
 \contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{60}{section.5.2}%
 \contentsline {section}{\numberline {5.3}Code Availability and Reproducibility}{60}{section.5.3}%
-\contentsline {chapter}{\numberline {6}Discussion}{62}{chapter.6}%
-\contentsline {chapter}{\numberline {7}Future Work}{63}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{63}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{63}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{64}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{64}{section.7.4}%
-\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{64}{section.7.5}%
-\contentsline {chapter}{References}{65}{chapter*.21}%
+\contentsline {chapter}{\numberline {6}Discussion}{63}{chapter.6}%
+\contentsline {chapter}{\numberline {7}Future Work}{64}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{64}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{64}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{65}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{65}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{65}{section.7.5}%
+\contentsline {chapter}{References}{66}{chapter*.24}%

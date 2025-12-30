@@ -1005,9 +1005,10 @@ class PhysicsInformedHybridModel:
         mpfm_qg_col: str = "qg_mpfm",
         mpfm_qw_col: str = "qw_mpfm",
         is_hybrid_model: bool = True,
+        model_tag_prefix: str = None
     ):
         """
-        Plot predictions using DatetimeIndex as X-axis.
+        Plot predictions using DatetimeIndex as X-axis and save plots.
 
         Comparison:
         - Well Test rates → reference / ground truth
@@ -1020,6 +1021,16 @@ class PhysicsInformedHybridModel:
         # --------------------------------------------------
         if not isinstance(df.index, pd.DatetimeIndex):
             raise TypeError("DataFrame index must be a DatetimeIndex")
+
+        # --------------------------------------------------
+        # Output directory
+        # --------------------------------------------------
+        out_dir = os.path.join("doc", "4-thesis", "images", "results")
+        os.makedirs(out_dir, exist_ok=True)
+
+        model_tag = "hybrid" if is_hybrid_model else "physics"
+        if model_tag_prefix:
+            model_tag = f"{model_tag_prefix}_{model_tag}"
 
         for wid in df[self.well_id_col].unique():
             d = df[df[self.well_id_col] == wid].sort_index()
@@ -1040,39 +1051,20 @@ class PhysicsInformedHybridModel:
                 else self.predict_physics(d_lag)
             )
 
-            # --------------------------------------------------
-            # X-axis → DatetimeIndex
-            # --------------------------------------------------
             x = d_lag.index
 
             # --------------------------------------------------
             # Rate plots: qo, qw, qg
             # --------------------------------------------------
             rate_cfg = {
-                "qo": {
-                    "truth": y_qo_col,
-                    "mpfm": mpfm_qo_col,
-                    "pred": "qo_pred",
-                    "label": "Oil rate",
-                },
-                "qw": {
-                    "truth": y_qw_col,
-                    "mpfm": mpfm_qw_col,
-                    "pred": "qw_pred",
-                    "label": "Water rate",
-                },
-                "qg": {
-                    "truth": y_qg_col,
-                    "mpfm": mpfm_qg_col,
-                    "pred": "qg_pred",
-                    "label": "Gas rate",
-                },
+                "qo": {"truth": y_qo_col, "mpfm": mpfm_qo_col, "pred": "qo_pred", "label": "Oil rate"},
+                "qw": {"truth": y_qw_col, "mpfm": mpfm_qw_col, "pred": "qw_pred", "label": "Water rate"},
+                "qg": {"truth": y_qg_col, "mpfm": mpfm_qg_col, "pred": "qg_pred", "label": "Gas rate"},
             }
 
             for rate, cfg in rate_cfg.items():
                 fig, ax = plt.subplots(figsize=(10, 4))
 
-                # --- Well test (reference) ---
                 ax.plot(
                     x,
                     d_lag[cfg["truth"]].values,
@@ -1083,7 +1075,6 @@ class PhysicsInformedHybridModel:
                     color="black",
                 )
 
-                # --- MPFM ---
                 if cfg["mpfm"] in d_lag.columns:
                     ax.plot(
                         x,
@@ -1095,7 +1086,6 @@ class PhysicsInformedHybridModel:
                         markersize=4,
                     )
 
-                # --- Model prediction ---
                 ax.plot(
                     x,
                     p[cfg["pred"]].values,
@@ -1108,110 +1098,77 @@ class PhysicsInformedHybridModel:
                 ax.set_xlabel("Time")
                 ax.set_ylabel(f"{rate} (Sm$^3$/h)")
                 ax.set_title(f"{wid} : {cfg['label']}")
-
                 ax.legend()
                 ax.grid(True, alpha=0.3)
 
                 ax.xaxis.set_major_locator(mdates.AutoDateLocator())
                 ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
                 fig.autofmt_xdate()
-
                 plt.tight_layout()
+
+                # -------- SAVE --------
+                fname = f"{wid}_{rate}_{model_tag}.png"
+                fig.savefig(os.path.join(out_dir, fname), dpi=300)
+
                 plt.show()
+                plt.close(fig)
 
             # --------------------------------------------------
-            # WGR plot (qw / qg)
+            # WGR plot
             # --------------------------------------------------
-            y_wgr = compute_wgr(
-                d_lag[y_qw_col].values,
-                d_lag[y_qg_col].values,
-            )
-            p_wgr = compute_wgr(
-                p["qw_pred"].values,
-                p["qg_pred"].values,
-            )
+            y_wgr = compute_wgr(d_lag[y_qw_col].values, d_lag[y_qg_col].values)
+            p_wgr = compute_wgr(p["qw_pred"].values, p["qg_pred"].values)
 
             mask = np.isfinite(y_wgr) & np.isfinite(p_wgr)
             if mask.sum() >= 2:
                 fig, ax = plt.subplots(figsize=(10, 4))
 
-                ax.plot(
-                    x[mask],
-                    y_wgr[mask],
-                    label="WGR (Well Test)",
-                    linewidth=2.5,
-                    marker="o",
-                    color="black",
-                )
-
-                ax.plot(
-                    x[mask],
-                    p_wgr[mask],
-                    label="WGR (Predicted)",
-                    linewidth=2,
-                    marker="o",
-                )
+                ax.plot(x[mask], y_wgr[mask], label="WGR (Well Test)", linewidth=2.5, marker="o", color="black")
+                ax.plot(x[mask], p_wgr[mask], label="WGR (Predicted)", linewidth=2, marker="o")
 
                 ax.set_xlabel("Time")
                 ax.set_ylabel("WGR (qw / qg)")
                 ax.set_title(f"{wid} : WGR")
-
                 ax.legend()
                 ax.grid(True, alpha=0.3)
 
                 ax.xaxis.set_major_locator(mdates.AutoDateLocator())
                 ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
                 fig.autofmt_xdate()
-
                 plt.tight_layout()
+
+                fig.savefig(os.path.join(out_dir, f"{wid}_wgr_{model_tag}.png"), dpi=300)
                 plt.show()
+                plt.close(fig)
 
             # --------------------------------------------------
-            # GOR plot (qg / qo)
+            # GOR plot
             # --------------------------------------------------
-            y_gor = compute_gor(
-                d_lag[y_qg_col].values,
-                d_lag[y_qo_col].values,
-            )
-            p_gor = compute_gor(
-                p["qg_pred"].values,
-                p["qo_pred"].values,
-            )
+            y_gor = compute_gor(d_lag[y_qg_col].values, d_lag[y_qo_col].values)
+            p_gor = compute_gor(p["qg_pred"].values, p["qo_pred"].values)
 
             mask = np.isfinite(y_gor) & np.isfinite(p_gor)
             if mask.sum() >= 2:
                 fig, ax = plt.subplots(figsize=(10, 4))
 
-                ax.plot(
-                    x[mask],
-                    y_gor[mask],
-                    label="GOR (Well Test)",
-                    linewidth=2.5,
-                    marker="o",
-                    color="black",
-                )
-
-                ax.plot(
-                    x[mask],
-                    p_gor[mask],
-                    label="GOR (Predicted)",
-                    linewidth=2,
-                    marker="o",
-                )
+                ax.plot(x[mask], y_gor[mask], label="GOR (Well Test)", linewidth=2.5, marker="o", color="black")
+                ax.plot(x[mask], p_gor[mask], label="GOR (Predicted)", linewidth=2, marker="o")
 
                 ax.set_xlabel("Time")
                 ax.set_ylabel("GOR (qg / qo)")
                 ax.set_title(f"{wid} : GOR")
-
                 ax.legend()
                 ax.grid(True, alpha=0.3)
 
                 ax.xaxis.set_major_locator(mdates.AutoDateLocator())
                 ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
                 fig.autofmt_xdate()
-
                 plt.tight_layout()
+
+                fig.savefig(os.path.join(out_dir, f"{wid}_gor_{model_tag}.png"), dpi=300)
                 plt.show()
+                plt.close(fig)
+
 
     def calibrate_physics_only(
         self,

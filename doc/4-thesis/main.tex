@@ -238,7 +238,7 @@ Physics based VFM are also known as first principles VFM systems. Physics-based 
     The next stage involves constructing the \abbr{Inflow Performance Relationship}{IPR}, which describes how much fluid the reservoir can deliver at different downhole pressures. Depending on reservoir type, engineers may use Vogel, Darcy, Forchheimer, or multiphase inflow models to represent inflow behavior. The IPR curve captures the interaction between reservoir pressure, permeability, fluid PVT characteristics, and near-wellbore conditions such as skin or damage. A robust IPR is essential because it determines the maximum deliverability of the well and forms the upstream boundary condition for all wellbore flow simulations.
     \item \textbf{Vertical and Multiphase Lift Modeling (VLP Curve Generation)}:
     \abbr{Vertical Lift Performance}{VLP} modeling quantifies the pressure required to lift the reservoir fluids from the perforations to the surface. This step uses mechanistic or empirical multiphase flow correlations to compute pressure gradients along the wellbore, considering gas–liquid slip, flow regime transitions, holdup, frictional losses, and hydrostatic head. Factors such as tubing geometry, inclination, heat-transfer conditions, and artificial-lift mechanisms (ESP, gas lift, PCP) strongly influence the VLP results. The resulting VLP curve provides the wellbore pressure response for any given flow rate and forms the critical link between the reservoir and surface system.    
-    \item \textbf{System Matching (IPR–VLP Intersection)}:
+    \item \textbf{System Matching (IPR-VLP Intersection)}:
     Once the IPR and VLP curves are generated, the model determines the stable operating point of the well by finding the intersection between the two. This intersection represents the flow rate and bottomhole pressure at which reservoir inflow and wellbore outflow are in equilibrium. System matching ensures that the well model is physically consistent and reflects actual production behavior. Engineers often calibrate this stage using well test data, pressure surveys, or downhole gauges to align the theoretical model with observed performance. Accurate matching is essential for reliable predictions in virtual metering, production optimization, and artificial lift design.
     \item \textbf{Surface Network and Choke Modeling}:
     In many wells, surface constraints significantly influence flow performance. This stage incorporates choke models, manifold pressures, flowline hydraulics, separators, and facility back-pressure effects. Choke modeling uses vendor-specific or mechanistic equations to capture the nonlinear relationship between choke opening, upstream pressure, downstream pressure, and multiphase flow rate. Incorporating the surface network allows the model to reflect operational realities, including changing separator pressures, pipeline slugging tendencies, and facility limits, thereby improving forecast accuracy and steady-state or transient flow predictions.
@@ -1791,50 +1791,154 @@ This chapter presents the experimental results and analysis of the proposed hybr
 
 \section{Temporal Generalization Performance}
 
-Based on the temporal generalization evaluation setup described in Section~\ref{sec:temporal_setup}, this section presents per-well prediction accuracy on unseen time periods.
+This section presents per-well prediction accuracy on unseen time periods, based on the temporal generalization evaluation setup described in Section~\ref{sec:temporal_setup}.
 
-\begin{table}[!htb]
+\begin{table}[htbp]
 \centering
-\caption{Performance comparison on Well W10 against well test (reference) rates}
-\label{tab:w10_comparison}
-\begin{tabular}{lcccc}
-\hline
-\textbf{Rate} & \textbf{Model} & $\mathbf{R^2}$ & \textbf{RMSE} & \textbf{MAE} \\
- &  &  & (Sm$^3$/h) & (Sm$^3$/h) \\
-\hline
-\multirow{3}{*}{Oil ($q_o$)}
- & Physics-only & 0.40 & 25.77 & 19.71 \\
- & Hybrid (Physics--ML) & \textbf{0.75} & \textbf{16.64} & \textbf{12.55} \\
- & MPFM & 0.97 & 5.53 & 4.02 \\
-\hline
-\multirow{3}{*}{Gas ($q_g$)}
- & Physics-only & 0.72 & 2320.17 & 1677.23 \\
- & Hybrid (Physics--ML) & \textbf{0.91} & \textbf{1306.14} & \textbf{1027.52} \\
- & MPFM & 0.95 & 974.13 & 453.14 \\
-\hline
-\multirow{3}{*}{Water ($q_w$)}
- & Physics-only & 0.10 & 7.28 & 3.22 \\
- & Hybrid (Physics--ML) & \textbf{0.30} & \textbf{6.41} & \textbf{2.51} \\
- & MPFM & 0.83 & 3.22 & 2.71 \\
-\hline
+\caption{Model performance comparison for selected wells.
+Absolute error metrics are emphasized for water rate due to low-flow regimes.}
+\label{tab:best_wells_performance_all_phases}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llccccccccc}
+\toprule
+\textbf{Well} & \textbf{Model} &
+\multicolumn{3}{c}{\textbf{Oil Rate ($q_o$)}} &
+\multicolumn{2}{c}{\textbf{Water Rate ($q_w$)}} &
+\multicolumn{3}{c}{\textbf{Gas Rate ($q_g$)}} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-7} \cmidrule(lr){8-10}
+ &  & $R^2$ & MAE & RMSE & MAE & RMSE & $R^2$ & MAE & RMSE \\
+\midrule
+W06
+& Physics-only & 0.74 & 11.85 & 16.42 & 1.03 & 1.18 & 0.50 & 2411.60 & 2892.26 \\
+& Hybrid       & 0.84 & 9.44  & 12.68 & 1.41 & 1.82 & 0.93 & 905.44  & 1101.56 \\
+& MPFM         & 0.94 & 6.07  & 7.56  & 1.33 & 1.71 & 0.96 & 547.78  & 776.86 \\
+\midrule
+W10
+& Physics-only & 0.48 & 17.53 & 23.87 & 2.57 & 5.98 & 0.79 & 1506.82 & 2060.22 \\
+& Hybrid       & 0.76 & 10.90 & 16.06 & 2.56 & 6.42 & 0.95 & 845.74  & 1041.45 \\
+& MPFM         & 0.98 & 2.95  & 4.31  & 2.49 & 3.03 & 0.94 & 552.33  & 1137.35 \\
+\midrule
+W18
+& Physics-only & -0.59 & 21.61 & 24.95 & 12.61 & 16.92 & 0.37 & 3034.30 & 4512.62 \\
+& Hybrid       & 0.67  & 9.02  & 11.33 & 7.25  & 11.30 & 0.70 & 2303.57 & 3098.49 \\
+& MPFM         & -0.37 & 12.58 & 23.15 & 6.04  & 11.01 & -0.10 & 3215.30 & 5949.11 \\
+\midrule
+% W19
+% & Physics-only & -0.03 & 14.13 & 16.21 & 3.52 & 5.49 & 0.15 & 1441.38 & 1984.60 \\
+% & Hybrid       & 0.54  & 8.46  & 10.83 & 2.45 & 4.82 & 0.35 & 1331.85 & 1736.11 \\
+% & MPFM         & 0.95  & 2.44  & 3.62  & 2.53 & 4.47 & 0.99 & 150.17  & 215.62 \\
+\bottomrule
 \end{tabular}
+}
 \end{table}
+
+\begin{figure}[!htb]
+    \centering
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W10 gas rate temporal generalization performance}
+        {fig:w10_qg_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W10_qg_hybrid.png}}{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W10 oil rate temporal generalization performance}
+        {fig:w10_qo_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W10_qo_hybrid.png}}{}
+    \end{subfigure}
+
+    \vspace{0.5em}
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W10 water rate temporal generalization performance}
+        {fig:w10_qw_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W10_qw_hybrid.png}}{}
+    \end{subfigure}
+
+    \caption{Temporal generalization performance of the hybrid model for W10.
+    The plots show predicted and measured gas, oil, and water rates over time.}
+    \label{fig:w10_temporal_generalization}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W06 gas rate temporal generalization performance}
+        {fig:w06_qg_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W06_qg_hybrid.png}}{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W06 oil rate temporal generalization performance}
+        {fig:w06_qo_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W06_qo_hybrid.png}}{}
+    \end{subfigure}
+
+    \vspace{0.5em}
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W06 water rate temporal generalization performance}
+        {fig:w06_qw_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W06_qw_hybrid.png}}{}
+    \end{subfigure}
+
+    \caption{Temporal generalization performance of the hybrid model for W06.
+    The plots show predicted and measured gas, oil, and water rates over time.}
+    \label{fig:w06_temporal_generalization}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W18 gas rate temporal generalization performance}
+        {fig:w18_qg_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W18_qg_hybrid.png}}{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W18 oil rate temporal generalization performance}
+        {fig:w18_qo_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W18_qo_hybrid.png}}{}
+    \end{subfigure}
+
+    \vspace{0.5em}
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \uomFig
+        {W18 water rate temporal generalization performance}
+        {fig:w18_qw_model_performance}
+        {\includegraphics[width=\textwidth]{images/results/W18_qw_hybrid.png}}{}
+    \end{subfigure}
+
+    \caption{Temporal generalization performance of the hybrid model for W18.
+    The plots show predicted and measured gas, oil, and water rates over time.}
+    \label{fig:w18_temporal_generalization}
+\end{figure}
 
 \section{Spatial Generalization Performance}
 
-Based on the LOWO evaluation protocol defined in Section~\ref{sec:lowo_setup}, this section reports model performance on previously unseen wells.
-
+This section reports model performance on previously unseen wells, based on the LOWO evaluation protocol defined in Section~\ref{sec:lowo_setup}.
 
 \section{Code Availability and Reproducibility}
+\label{sec:reproducibility}
 
-All code implementations, experimental results, supporting documentation, and supplementary literature associated with this research are publicly available in the GitHub repository
-\url{https://github.com/pcperera/vfm}. This repository is maintained by the author and serves as the primary reference for the computational aspects of this thesis.
+All code implementations, experimental results, supporting documentation, and supplementary literature associated with this research are publicly available in the GitHub repository \url{https://github.com/pcperera/vfm}. 
+This repository is maintained by the author and serves as the primary reference for the computational aspects of this thesis.
 
 The repository includes the complete implementation of the proposed physics-informed residual learning framework for virtual flow metering, along with data preprocessing routines, model training and evaluation scripts, and visualization utilities used to generate the results presented in this thesis. Where applicable, documentation is provided to facilitate reproducibility and to enable further extension of the proposed methods.
 
 
 \chapter{Discussion}
-
 
 \chapter{Future Work}
 \label{chap:future-work}
