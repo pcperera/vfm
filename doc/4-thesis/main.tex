@@ -1605,19 +1605,18 @@ Overall, the computational design of the hybrid model achieves a favorable balan
 This chapter describes the experimental design, data partitioning strategy, and evaluation protocols used to assess the performance of the proposed physics-informed residual learning virtual flow metering (VFM) model. The experiments are designed to provide a rigorous and realistic assessment of model accuracy, robustness, and generalization capability under conditions that closely resemble practical deployment in oil and gas production environments.
 
 \section{Experimental Objectives}
+\label{sec:experimentation_objectives}
 
 The primary objectives of the experimental evaluation are to:
-\begin{itemize}
-    \item Quantitatively evaluate the accuracy of oil, water, and gas flow rate predictions produced by the proposed hybrid physics--machine learning model using well-test measurements as reference data.
+\begin{enumerate}
+    \item Quantitatively evaluate the accuracy of oil, water, and gas flow rate predictions produced by the proposed hybrid physics--machine learning model using well-test measurements as reference data. Assess temporal generalization by evaluating model performance on unseen time periods.
 
-    \item Compare the predictive performance of the proposed modeling approaches against multiphase flow meter (MPFM) estimates in order to assess the added value of the data-driven framework relative to field-measured metering solutions.
+    \item Quantify the performance gains achieved through hybrid residual correction model relative to physics-only model predictions across multiple wells.
 
-    \item Quantify the performance gains achieved through machine-learning-based residual correction relative to physics-only model predictions across multiple wells.
+    \item Compare the predictive performance of the proposed modeling approaches against MPFM estimates in order to assess the added value of the data-driven framework relative to field-measured metering solutions.
 
-    \item Assess temporal generalization by evaluating model performance on unseen time periods within wells without retraining.
-
-    \item Assess the spatial generalization capability of the proposed framework under realistic deployment conditions by evaluating model performance on unseen temporal data and on previously unseen wells using a leave-one-well-out (LOWO) strategy. For unseen wells, limited physics-model calibration is permitted, while the global machine-learning residual model is applied without retraining.
-\end{itemize}
+    \item Assess the spatial generalization capability of the proposed framework under realistic deployment conditions by evaluating model performance on previously unseen wells using a \abbr{Leave-One-Well-Out}{LOWO} strategy. For unseen wells, limited physics-model calibration is permitted, while the global machine-learning residual model is applied without retraining.
+\end{enumerate}
 
 
 \section{Experimental Data Partitioning}
@@ -1666,6 +1665,7 @@ Two experimental model configurations are considered:
 Comparing these configurations allows the incremental contribution of residual learning to be quantified.
 
 \section{Evaluation Metrics}
+\label{sec:evaluation_metrics}
 
 Model performance is quantified using a set of complementary metrics that capture absolute error, relative error, systematic bias, and goodness of fit. Let $y_i$ denote the measured value of a given flow rate at time index $i$, $\hat{y}_i$ the corresponding model prediction, and $N$ the number of evaluated samples.
 
@@ -1727,9 +1727,27 @@ where $q_o$, $q_w$, and $q_g$ denote oil, water, and gas flow rates, respectivel
 
 These ratios are computed from both measured and predicted flow rates, and the same evaluation metrics are applied. Data points associated with very low denominator values are excluded to avoid numerical instability.
 
-\section{Cross-Well Experimental Assessment}
+\section{Cross-Well Temporal Generalization Evaluation Setup}
+\label{sec:temporal_setup}
 
-To assess cross-well generalization, experimental results are reported on a per-well basis using unseen test data from multiple wells. The residual learning model is trained using data from all training wells, while test performance is evaluated separately for each well. This experimental setup demonstrates the transferability and robustness of the proposed physics-informed residual learning approach across diverse well conditions.
+The cross-well temporal generalization evaluation is designed to assess the ability of the proposed modeling framework to produce accurate flow-rate predictions on unseen time periods while remaining within the same set of wells. This evaluation reflects a common production monitoring scenario in which historical data are available for a well, and the objective is to forecast or infer flow rates under future operating conditions without retraining the model.
+
+For each well, the available time-series data are partitioned into training and testing subsets using a temporally ordered split. Earlier observations are used for physics-model calibration and, where applicable, training of the global machine-learning residual model, while later observations are held out exclusively for evaluation. This strategy preserves the natural temporal ordering of the data and prevents information leakage from future operating conditions into the training process.
+
+The physics-only and hybrid model configurations are evaluated under identical temporal splits. Physics-based model parameters are calibrated using the training portion of the data for each well. The machine-learning residual model is trained globally using training data from all wells and is applied during inference without retraining. Multiphase flow meter MPFM estimates are evaluated on the same test intervals for fair comparison.
+
+Model performance is quantified using well-test measurements as the reference standard and evaluated using the evaluation metrics defined in Section~\ref{sec:evaluation_metrics} for oil, water, and gas flow rates. 
+Reporting results on a per-well basis enables systematic assessment of temporal robustness under evolving operating conditions.
+
+\section{Spatial Generalization Evaluation Setup}
+\label{sec:lowo_setup}
+
+The spatial generalization evaluation assesses the ability of the proposed modeling framework to transfer predictive capability to previously unseen wells. 
+This evaluation is conducted using a LOWO validation strategy, which emulates realistic deployment conditions in which a trained model is applied to a new well with limited historical data.
+In each LOWO experiment, one well is excluded from model development and used solely for evaluation, while the remaining wells constitute the training set. The machine-learning residual model is trained globally using data from the training wells and is kept fixed during evaluation on the unseen well. For the held-out well, limited calibration of well-specific physics parameters is performed using a small subset of available data to ensure physical consistency, while retraining of the residual model is intentionally avoided.
+
+This setup enables isolation of the spatial transferability of the learned residual corrections across wells, while maintaining a realistic calibration procedure consistent with field operations. Both physics-only and hybrid model configurations are evaluated on the unseen well, and their performance is compared against MPFM estimates using well-test measurements as the reference standard.
+Model performance is quantified using well-test measurements as the reference standard and evaluated using the evaluation metrics defined in Section~\ref{sec:evaluation_metrics} for oil, water, and gas flow rates. 
 
 \section{Summary of Experimental Design}
 
@@ -1769,6 +1787,12 @@ Signed mean relative error (average discrepancy) &
 
 \chapter{Results and Analysis}
 
+This chapter presents the experimental results and analysis of the proposed hybrid physics--machine learning virtual flow metering framework. 
+
+\section{Temporal Generalization Performance}
+
+Based on the temporal generalization evaluation setup described in Section~\ref{sec:temporal_setup}, this section presents per-well prediction accuracy on unseen time periods.
+
 \begin{table}[!htb]
 \centering
 \caption{Performance comparison on Well W10 against well test (reference) rates}
@@ -1795,6 +1819,10 @@ Signed mean relative error (average discrepancy) &
 \hline
 \end{tabular}
 \end{table}
+
+\section{Spatial Generalization Performance}
+
+Based on the LOWO evaluation protocol defined in Section~\ref{sec:lowo_setup}, this section reports model performance on previously unseen wells.
 
 
 \section{Code Availability and Reproducibility}

@@ -3,8 +3,8 @@
 \contentsline {chapter}{Acknowledgement}{iii}{chapter*.3}%
 \contentsline {chapter}{Abstract}{iv}{chapter*.4}%
 \contentsline {chapter}{Table of Contents}{v}{chapter*.5}%
-\contentsline {chapter}{List of Figures}{ix}{chapter*.6}%
-\contentsline {chapter}{List of Tables}{x}{chapter*.7}%
+\contentsline {chapter}{List of Figures}{x}{chapter*.6}%
+\contentsline {chapter}{List of Tables}{xi}{chapter*.7}%
 \contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
 \contentsline {section}{\numberline {1.1}Asset Hierarchy}{2}{section.1.1}%
 \contentsline {section}{\numberline {1.2}Well Types}{3}{section.1.2}%
@@ -112,7 +112,7 @@
 \contentsline {section}{\numberline {4.1}Experimental Objectives}{54}{section.4.1}%
 \contentsline {section}{\numberline {4.2}Experimental Data Partitioning}{54}{section.4.2}%
 \contentsline {section}{\numberline {4.3}Production-Mimicking Experimental Workflow}{55}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Experimental Model Configurations}{56}{section.4.4}%
+\contentsline {section}{\numberline {4.4}Experimental Model Configurations}{55}{section.4.4}%
 \contentsline {section}{\numberline {4.5}Evaluation Metrics}{56}{section.4.5}%
 \contentsline {subsection}{\numberline {4.5.1}Coefficient of Determination}{56}{subsection.4.5.1}%
 \contentsline {subsection}{\numberline {4.5.2}Mean Absolute Error}{56}{subsection.4.5.2}%
@@ -120,15 +120,18 @@
 \contentsline {subsection}{\numberline {4.5.4}Mean Absolute Percentage Error}{57}{subsection.4.5.4}%
 \contentsline {subsection}{\numberline {4.5.5}Mean Percentage Error}{57}{subsection.4.5.5}%
 \contentsline {section}{\numberline {4.6}Evaluation of Derived Production Ratios}{57}{section.4.6}%
-\contentsline {section}{\numberline {4.7}Cross-Well Experimental Assessment}{58}{section.4.7}%
-\contentsline {section}{\numberline {4.8}Summary of Experimental Design}{58}{section.4.8}%
-\contentsline {chapter}{\numberline {5}Results and Analysis}{59}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Code Availability and Reproducibility}{59}{section.5.1}%
-\contentsline {chapter}{\numberline {6}Discussion}{60}{chapter.6}%
-\contentsline {chapter}{\numberline {7}Future Work}{61}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{61}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{61}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{62}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{62}{section.7.4}%
-\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{62}{section.7.5}%
-\contentsline {chapter}{References}{63}{chapter*.21}%
+\contentsline {section}{\numberline {4.7}Cross-Well Temporal Generalization Evaluation Setup}{58}{section.4.7}%
+\contentsline {section}{\numberline {4.8}Spatial Generalization Evaluation Setup}{58}{section.4.8}%
+\contentsline {section}{\numberline {4.9}Summary of Experimental Design}{59}{section.4.9}%
+\contentsline {chapter}{\numberline {5}Results and Analysis}{60}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Temporal Generalization Performance}{60}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{60}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Code Availability and Reproducibility}{60}{section.5.3}%
+\contentsline {chapter}{\numberline {6}Discussion}{62}{chapter.6}%
+\contentsline {chapter}{\numberline {7}Future Work}{63}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{63}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{63}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{64}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{64}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{64}{section.7.5}%
+\contentsline {chapter}{References}{65}{chapter*.21}%

@@ -726,3 +726,31 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{LOWO}%
+{%
+name={\acronymfont {\glsentryshort {LOWO}}},%
+sort={LOWO},%
+type={acronym},%
+first={LOWO},%
+firstplural={LOWOs},%
+text={LOWO},%
+plural={LOWOs},%
+description={Leave-One-Well-Out},%
+descriptionplural={Leave-One-Well-Out},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Leave-One-Well-Out},%
+longplural={Leave-One-Well-Outs},%
+short={LOWO},%
+shortplural={LOWOs},%
+counter={page},%
+parent={},%
+%
+}%
+
