@@ -1126,6 +1126,7 @@ class PhysicsInformedHybridModel:
         df: pd.DataFrame,
         is_hybrid_model: bool = True,
         model_tag_prefix: str = None,
+        plot_ratios: bool = False
     ):
         """
         Plot predictions using DatetimeIndex as X-axis and save plots.
@@ -1263,145 +1264,146 @@ class PhysicsInformedHybridModel:
                 plt.show()
                 plt.close(fig)
 
-            # --------------------------------------------------
-            # WGR plot (Well Test + MPFM + Predicted)
-            # --------------------------------------------------
-            y_wgr = compute_wgr(
-                d_lag[self.y_qw_col].values,
-                d_lag[self.y_qg_col].values,
-            )
-
-            p_wgr = compute_wgr(
-                p["qw_pred"].values,
-                p["qg_pred"].values,
-            )
-
-            mpfm_wgr = (
-                d_lag[self.mpfm_wgr_col].values
-                if self.mpfm_wgr_col in d_lag.columns
-                else None
-            )
-
-            mask = np.isfinite(y_wgr) & np.isfinite(p_wgr)
-            if mpfm_wgr is not None:
-                mask &= np.isfinite(mpfm_wgr)
-
-            if mask.sum() >= 2:
-                fig, ax = plt.subplots(figsize=(10, 4))
-
-                ax.plot(
-                    x[mask],
-                    y_wgr[mask],
-                    label="WGR (Well Test)",
-                    linewidth=2.5,
-                    marker="o",
-                    color=COLORS["reference"],
+            if plot_ratios:
+                # --------------------------------------------------
+                # WGR plot (Well Test + MPFM + Predicted)
+                # --------------------------------------------------
+                y_wgr = compute_wgr(
+                    d_lag[self.y_qw_col].values,
+                    d_lag[self.y_qg_col].values,
                 )
 
+                p_wgr = compute_wgr(
+                    p["qw_pred"].values,
+                    p["qg_pred"].values,
+                )
+
+                mpfm_wgr = (
+                    d_lag[self.mpfm_wgr_col].values
+                    if self.mpfm_wgr_col in d_lag.columns
+                    else None
+                )
+
+                mask = np.isfinite(y_wgr) & np.isfinite(p_wgr)
                 if mpfm_wgr is not None:
+                    mask &= np.isfinite(mpfm_wgr)
+
+                if mask.sum() >= 2:
+                    fig, ax = plt.subplots(figsize=(10, 4))
+
                     ax.plot(
                         x[mask],
-                        mpfm_wgr[mask],
-                        label="WGR (MPFM)",
-                        linewidth=2,
-                        linestyle="--",
-                        marker="x",
-                        color=COLORS["mpfm"],
+                        y_wgr[mask],
+                        label="WGR (Well Test)",
+                        linewidth=2.5,
+                        marker="o",
+                        color=COLORS["reference"],
                     )
 
-                ax.plot(
-                    x[mask],
-                    p_wgr[mask],
-                    label="WGR (Predicted)",
-                    linewidth=2,
-                    marker="o",
-                    color=pred_color,
+                    if mpfm_wgr is not None:
+                        ax.plot(
+                            x[mask],
+                            mpfm_wgr[mask],
+                            label="WGR (MPFM)",
+                            linewidth=2,
+                            linestyle="--",
+                            marker="x",
+                            color=COLORS["mpfm"],
+                        )
+
+                    ax.plot(
+                        x[mask],
+                        p_wgr[mask],
+                        label="WGR (Predicted)",
+                        linewidth=2,
+                        marker="o",
+                        color=pred_color,
+                    )
+
+                    ax.set_xlabel("Time")
+                    ax.set_ylabel("WGR (qw / qg)")
+                    ax.set_title(f"{wid} : WGR")
+                    ax.legend()
+                    ax.grid(True, alpha=0.3)
+
+                    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+                    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+                    fig.autofmt_xdate()
+                    plt.tight_layout()
+
+                    fig.savefig(os.path.join(out_dir, f"{wid}_wgr_{model_tag}.png"), dpi=300)
+                    plt.show()
+                    plt.close(fig)
+
+                # --------------------------------------------------
+                # GOR plot (Well Test + MPFM + Predicted)
+                # --------------------------------------------------
+                y_gor = compute_gor(
+                    d_lag[self.y_qg_col].values,
+                    d_lag[self.y_qo_col].values,
                 )
 
-                ax.set_xlabel("Time")
-                ax.set_ylabel("WGR (qw / qg)")
-                ax.set_title(f"{wid} : WGR")
-                ax.legend()
-                ax.grid(True, alpha=0.3)
-
-                ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-                ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
-                fig.autofmt_xdate()
-                plt.tight_layout()
-
-                fig.savefig(os.path.join(out_dir, f"{wid}_wgr_{model_tag}.png"), dpi=300)
-                plt.show()
-                plt.close(fig)
-
-            # --------------------------------------------------
-            # GOR plot (Well Test + MPFM + Predicted)
-            # --------------------------------------------------
-            y_gor = compute_gor(
-                d_lag[self.y_qg_col].values,
-                d_lag[self.y_qo_col].values,
-            )
-
-            p_gor = compute_gor(
-                p["qg_pred"].values,
-                p["qo_pred"].values,
-            )
-
-            mpfm_gor = (
-                d_lag[self.mpfm_gor_col].values
-                if self.mpfm_gor_col in d_lag.columns
-                else None
-            )
-
-            mask = np.isfinite(y_gor) & np.isfinite(p_gor)
-            if mpfm_gor is not None:
-                mask &= np.isfinite(mpfm_gor)
-
-            if mask.sum() >= 2:
-                fig, ax = plt.subplots(figsize=(10, 4))
-
-                ax.plot(
-                    x[mask],
-                    y_gor[mask],
-                    label="GOR (Well Test)",
-                    linewidth=2.5,
-                    marker="o",
-                    color=COLORS["reference"],
+                p_gor = compute_gor(
+                    p["qg_pred"].values,
+                    p["qo_pred"].values,
                 )
 
+                mpfm_gor = (
+                    d_lag[self.mpfm_gor_col].values
+                    if self.mpfm_gor_col in d_lag.columns
+                    else None
+                )
+
+                mask = np.isfinite(y_gor) & np.isfinite(p_gor)
                 if mpfm_gor is not None:
+                    mask &= np.isfinite(mpfm_gor)
+
+                if mask.sum() >= 2:
+                    fig, ax = plt.subplots(figsize=(10, 4))
+
                     ax.plot(
                         x[mask],
-                        mpfm_gor[mask],
-                        label="GOR (MPFM)",
-                        linewidth=2,
-                        linestyle="--",
-                        marker="x",
-                        color=COLORS["mpfm"],
+                        y_gor[mask],
+                        label="GOR (Well Test)",
+                        linewidth=2.5,
+                        marker="o",
+                        color=COLORS["reference"],
                     )
 
-                ax.plot(
-                    x[mask],
-                    p_gor[mask],
-                    label="GOR (Predicted)",
-                    linewidth=2,
-                    marker="o",
-                    color=pred_color,
-                )
+                    if mpfm_gor is not None:
+                        ax.plot(
+                            x[mask],
+                            mpfm_gor[mask],
+                            label="GOR (MPFM)",
+                            linewidth=2,
+                            linestyle="--",
+                            marker="x",
+                            color=COLORS["mpfm"],
+                        )
 
-                ax.set_xlabel("Time")
-                ax.set_ylabel("GOR (qg / qo)")
-                ax.set_title(f"{wid} : GOR")
-                ax.legend()
-                ax.grid(True, alpha=0.3)
+                    ax.plot(
+                        x[mask],
+                        p_gor[mask],
+                        label="GOR (Predicted)",
+                        linewidth=2,
+                        marker="o",
+                        color=pred_color,
+                    )
 
-                ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-                ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
-                fig.autofmt_xdate()
-                plt.tight_layout()
+                    ax.set_xlabel("Time")
+                    ax.set_ylabel("GOR (qg / qo)")
+                    ax.set_title(f"{wid} : GOR")
+                    ax.legend()
+                    ax.grid(True, alpha=0.3)
 
-                fig.savefig(os.path.join(out_dir, f"{wid}_gor_{model_tag}.png"), dpi=300)
-                plt.show()
-                plt.close(fig)
+                    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+                    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+                    fig.autofmt_xdate()
+                    plt.tight_layout()
+
+                    fig.savefig(os.path.join(out_dir, f"{wid}_gor_{model_tag}.png"), dpi=300)
+                    plt.show()
+                    plt.close(fig)
 
     def calibrate_physics_only(
         self,

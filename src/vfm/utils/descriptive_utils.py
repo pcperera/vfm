@@ -64,15 +64,11 @@ def get_random_train_test_split_per_well_with_order_preserved(
     raise RuntimeError("Could not satisfy split constraints")
 
 
-import numpy as np
-import pandas as pd
-
-
 def get_blocked_temporal_train_val_test_split(
     df: pd.DataFrame,
     well_id_col: str = "well_id",
     time_col: str | None = None,
-    n_blocks: int = 5,
+    n_blocks: int = None,
     val_fraction_per_block: float = 0.1,
     test_fraction_per_block: float = 0.2,
     min_block_size: int = 3,
@@ -126,6 +122,16 @@ def get_blocked_temporal_train_val_test_split(
     test_parts = []
 
     for well_id, df_well in df.groupby(well_id_col):
+
+        if not n_blocks:
+            start_ts = df_well.index.min()
+            end_ts = df_well.index.max()
+            n_blocks = (
+                (end_ts.year - start_ts.year) * 12
+                + (end_ts.month - start_ts.month)
+            )
+
+        print(f"{well_id}: n_blocks={n_blocks}")
 
         # --------------------------------------------------
         # Sort temporally

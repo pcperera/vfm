@@ -1134,51 +1134,50 @@ The optimization is solved using a trust-region-based nonlinear least squares al
 The set of model parameters calibrated during physics-model fitting, together with their physical interpretation and units, is summarized in Table~\ref{tab:physics_calibrated_parameters}.
 
 \begin{table}[!htb]
-\centering
-\caption{Calibrated parameters of the physics-based production model}
-\label{tab:physics_calibrated_parameters}
-\begin{tabular}{lll}
+\uomTable{Parameters and initial guesses used for nonlinear calibration of the physics-based well flow model}{tab:physics_calibrated_parameters}{\begin{tabularx}{1.0\textwidth}{lYYYY} 
 \hline
-\textbf{Parameter} & \textbf{Scientific purpose} & \textbf{Unit} \\
+\textbf{Parameter} & \textbf{Initial guess} & \textbf{Unit} & \textbf{Physical interpretation} \\
 \hline
 $P_{\mathrm{res}}$ 
-& Effective reservoir pressure governing inflow and drawdown behavior 
-& bara \\
-
+& $P_{\mathrm{wf,max}} + \Delta P$ 
+& bara
+& Effective reservoir pressure inferred from flowing pressure with hydrostatic or heuristic offset \\
 $q_{L,\max}$ 
-& Maximum achievable liquid production rate at negligible bottomhole pressure 
-& Sm$^{3}$/h \\
-
+& $\overline{(q_o + q_w)}$ 
+& Sm$^3$/h 
+& Maximum liquid production capacity (lumped inflow strength) \\
 $a$ 
-& Linear inflow coefficient controlling first-order pressure–rate sensitivity 
-& -- \\
-
+& $0.2$ 
+& -- 
+& Linear pressure sensitivity coefficient in the liquid inflow relationship \\
 $b$ 
-& Quadratic inflow coefficient accounting for nonlinear inflow effects 
-& -- \\
-
-$\boldsymbol{A}_{\mathrm{wc}}$ 
-& Logistic water-cut model coefficients governing oil–water phase partitioning 
-& -- \\
-
-$C_{g}$ 
-& Reservoir gas productivity coefficient relating pressure drawdown to gas rate 
-& Sm$^{3}$/h/$\sqrt{\text{bar}}$ \\
-
+& $0.5$ 
+& -- 
+& Quadratic pressure sensitivity coefficient accounting for nonlinearity \\
+$C_g$ 
+& $50.0$ 
+& Sm$^3$/h/$\sqrt{\text{bar}}$ 
+& Reservoir gas productivity coefficient in the pressure-driven gas-rate formulation \\
 $k_{\mathrm{ch}}$ 
-& Choke-response steepness parameter controlling sensitivity to choke opening 
-& -- \\
-
-$\mathrm{ch}_{0}$ 
-& Reference choke opening at which flow transitions from restricted to open 
-& fraction \\
-
+& $5.0$ 
+& -- 
+& Choke sensitivity parameter controlling the sharpness of the logistic choke response \\
+$\mathrm{ch}_0$ 
+& $0.3$ 
+& -- 
+& Reference (midpoint) choke opening for transition from restricted to open flow \\
 $C_{\mathrm{gl}}$ 
-& Gas-lift utilization coefficient mapping injected lift gas to produced gas contribution 
-& -- \\
+& $0.01$ 
+& -- 
+& Gas-lift efficiency coefficient scaling injected gas contribution \\
+$A_{\mathrm{wc},1\ldots8}$ 
+& $0.0$ 
+& -- 
+& Initial coefficients of the logistic water-cut closure model \\
 \hline
-\end{tabular}
+\end{tabularx}}{}
 \end{table}
+
 
 \subsubsection{Initialization and Regularization}
 
