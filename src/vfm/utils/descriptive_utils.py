@@ -19,8 +19,7 @@ def get_train_test_split(df: pd.DataFrame):
         shuffle=False
     )
 
-
-def get_random_train_test_split_per_well_with_order_preserved(
+def get_random_train_val_test_split_per_well_temporal_order(
     df,
     well_id_col="well_id",
     test_size=0.2,
@@ -34,6 +33,9 @@ def get_random_train_test_split_per_well_with_order_preserved(
     rng = np.random.default_rng(random_state)
     if test_size == 0:
         min_test = 0
+
+    if val_size == 0:
+        min_val = 0
 
     for _ in range(max_tries):
         train, val, test = [], [], []
@@ -64,7 +66,7 @@ def get_random_train_test_split_per_well_with_order_preserved(
     raise RuntimeError("Could not satisfy split constraints")
 
 
-def get_blocked_temporal_train_val_test_split(
+def get_blocked_train_val_test_split_with_temporal_order(
     df: pd.DataFrame,
     well_id_col: str = "well_id",
     time_col: str | None = None,
@@ -215,14 +217,14 @@ def get_lowo_train_val_test_split(
     df_test_all = df[df[well_id_col] == test_well_id].sort_index()
     df_train_val = df[df[well_id_col] != test_well_id].sort_index()
 
-    df_train, df_val, _ = get_random_train_test_split_per_well_with_order_preserved(df=df_train_val, val_size=0.2, test_size=0)
-    df_calibration, _, df_test = get_blocked_temporal_train_val_test_split(df=df_test_all, test_fraction_per_block=0.9, val_fraction_per_block=0)
+    df_train, df_val, _ = get_random_train_val_test_split_per_well_temporal_order(df=df_train_val, val_size=0.2, test_size=0)
+    df_calibration, _, df_test = get_random_train_val_test_split_per_well_temporal_order(df=df_test_all, test_size=0.9, val_size=0)
 
     return df_train, df_val, df_calibration, df_test
 
 
 # def get_all_wells() -> list[str]:
-#     return  ["W06", "W10"]
+#     return  ["W10"]
 
 def get_all_wells() -> list[str]:
     return  ["W06", "W08", "W10", "W11", "W15", "W18", "W19"]
