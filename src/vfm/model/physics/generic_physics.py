@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.optimize import least_squares
-from vfm.model.hybrid.constants import *
+from src.vfm.model.hybrid.constants import *
 
 
 # =====================================================

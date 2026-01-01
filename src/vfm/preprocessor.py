@@ -80,7 +80,7 @@ class Preprocessor:
 
         df = df[(df["qo_well_test"] >= 0) & (df["qg_well_test"] >= 0) & (df["qw_well_test"] >= 0)]
 
-        df = self._process_zero_water_rates(df=df)
+        # df = self._process_zero_water_rates(df=df)
 
         # Drop rows where oil and gas rates are both zero. 0))]
         df = df[~((df["qo_well_test"] == 0) & (df["qg_well_test"] == 0))]

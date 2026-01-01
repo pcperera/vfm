@@ -19,9 +19,9 @@ from src.vfm.model.physics.generic_physics import MultiphasePhysicsModel
 # =====================================================
 # Helpers
 # =====================================================
-def compute_wgr(qw, qg, min_qg=50.0):
+def compute_wgr(qw, qg, min_qg=50.0, eps=EPS):
     """
-    Compute Water–Gas Ratio (WGR) in a numerically and physically safe manner.
+    Compute Water-Gas Ratio (WGR) in a numerically and physically safe manner.
 
     WGR is computed only when gas rate exceeds a minimum threshold
     to avoid unphysical ratios during low-gas or liquid-loading conditions.
@@ -35,14 +35,14 @@ def compute_wgr(qw, qg, min_qg=50.0):
         (qg > min_qg) &
         np.isfinite(qw) &
         np.isfinite(qg) &
-        (qg > EPS)
+        (qg > eps)
     )
 
     wgr[mask] = qw[mask] / qg[mask]
     return wgr
 
 
-def compute_gor(qg, qo, min_qo=5.0):
+def compute_gor(qg, qo, min_qo=5.0, eps=EPS):
     """
     Compute Gas-Oil Ratio (GOR) in a numerically and physically safe manner.
 
@@ -58,7 +58,7 @@ def compute_gor(qg, qo, min_qo=5.0):
         (qo > min_qo) &
         np.isfinite(qg) &
         np.isfinite(qo) &
-        (qo > EPS)
+        (qo > eps)
     )
 
     gor[mask] = qg[mask] / qo[mask]
@@ -121,6 +121,67 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
         self.rmse_val = None
 
+    def _build_ml_features(
+        self,
+        df: pd.DataFrame,
+        phys: pd.DataFrame,
+    ):
+        """
+        Build ML feature matrix for residual learning.
+
+        The ML model learns corrections to physics-based predictions.
+        Features therefore consist of:
+            - Physics-predicted phase rates
+            - Operating conditions influencing residual behavior
+
+        Notes
+        -----
+        - True flow rates are NOT included (to avoid leakage)
+        - Well identifiers are NOT included (global model)
+        - All features are numerical and time-aligned
+        """
+
+        X = pd.DataFrame(index=df.index)
+
+        # --------------------------------------------------
+        # Physics predictions (primary features)
+        # --------------------------------------------------
+        X["qo_phys"] = phys["qo_pred"].values
+        X["qw_phys"] = phys["qw_pred"].values
+        X["qg_phys"] = phys["qg_pred"].values
+
+        # --------------------------------------------------
+        # Operating conditions (only if present)
+        # --------------------------------------------------
+        for col in [
+            "whp",    # wellhead pressure
+            "dhp",    # downhole pressure
+            "dcp",    # downstream choke pressure
+            "choke",  # choke opening
+            "wht",    # wellhead temperature
+            "dht",    # downhole temperature
+        ]:
+            if col in df.columns:
+                X[col] = df[col].values
+
+        # --------------------------------------------------
+        # Lagged operating conditions
+        # --------------------------------------------------
+        for lag in range(1, self.lags + 1):
+            for col in ["dhp", "whp"]:
+                lag_col = f"{col}_lag{lag}"
+                if lag_col in df.columns:
+                    X[lag_col] = df[lag_col].values
+
+
+        # --------------------------------------------------
+        # Numerical safety
+        # --------------------------------------------------
+        X = X.replace([np.inf, -np.inf], np.nan)
+        X = X.fillna(method="ffill").fillna(method="bfill")
+
+        return X
+
 
     # --------------------------------------------------
     # Lag features
@@ -137,6 +198,75 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         # IMPORTANT: DO NOT drop NaNs here
         return df_lag
 
+    # ==================================================
+    # Helper to build ML residual dataset
+    # ==================================================
+    def _build_residual_dataset(
+        self,
+        df: pd.DataFrame,
+        phys: pd.DataFrame,
+    ):
+        """
+        Build residual-learning dataset for the hybrid model.
+
+        Residual targets (learned by ML):
+            - Δlog(qo)
+            - Δlog(WGR)
+            - Δlog(qg)
+        """
+
+        # --------------------------------------------------
+        # ML features (independent variables + lags)
+        # --------------------------------------------------
+        X = self._build_ml_features(df, phys)
+
+        # --------------------------------------------------
+        # True values
+        # --------------------------------------------------
+        qo_true = df[self.y_qo_col].values
+        qw_true = df[self.y_qw_col].values
+        qg_true = df[self.y_qg_col].values
+
+        # --------------------------------------------------
+        # Physics predictions
+        # --------------------------------------------------
+        qo_phys = phys["qo_pred"].values
+        qw_phys = phys["qw_pred"].values
+        qg_phys = phys["qg_pred"].values
+
+        # --------------------------------------------------
+        # Numerical safety (PHYSICALLY CORRECT)
+        # --------------------------------------------------
+        qo_true = np.maximum(qo_true, EPS)
+        qg_true = np.maximum(qg_true, EPS)
+        qw_true = np.maximum(qw_true, 0.0)
+
+        qo_phys = np.maximum(qo_phys, EPS)
+        qg_phys = np.maximum(qg_phys, EPS)
+        qw_phys = np.maximum(qw_phys, 0.0)
+
+        # --------------------------------------------------
+        # Water–Gas Ratio (WGR)
+        # --------------------------------------------------
+        wgr_true = qw_true / np.clip(qg_true, EPS, None)
+        wgr_phys = qw_phys / np.clip(qg_phys, EPS, None)
+
+        # --------------------------------------------------
+        # Log-space residual targets
+        # ORDER MATTERS:
+        #   [qo_residual, wgr_residual, qg_residual]
+        # --------------------------------------------------
+        Y = np.column_stack([
+            np.log1p(qo_true) - np.log1p(qo_phys),
+            np.log1p(wgr_true) - np.log1p(wgr_phys),
+            np.log1p(qg_true) - np.log1p(qg_phys),
+        ])
+
+        if not np.isfinite(Y).all():
+            raise ValueError("Residual targets contain NaNs or infs")
+
+        return X, Y
+
 
     # --------------------------------------------------
     # Fit
@@ -144,183 +274,109 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
     def fit(
         self,
         df: pd.DataFrame,
-        df_val: pd.DataFrame | None = None
+        df_val: pd.DataFrame | None = None,
     ):
         """
-        Fit physics models per well and a global ML residual model.
+        Fit the hybrid Physics–ML model.
 
-        Enhancements over the base implementation:
-        -------------------------------------------
-        1. Geometry-informed hard constraints during physics calibration
-        (only when geometry is available).
-        2. Partial pooling (hierarchical regularization) of physics parameters
-        across wells to improve robustness for sparse wells.
-
-        If geometry or global physics priors are not available, the method
-        automatically falls back to the original per-well independent
-        physics calibration strategy.
+        Steps:
+        1. Fit a physics model per well
+        2. Create lagged features for ML residual learning
+        3. Build log-space residual targets [qo, WGR, qg]
+        4. Train a global ML residual model
+        5. Store feature ordering to prevent silent drift
+        6. Optionally compute validation diagnostics
         """
 
-        # ==================================================
-        # 1. First pass: fit physics models independently
-        #    (used to compute global physics priors)
-        # ==================================================
-        temp_phys_models: dict[str, MultiphasePhysicsModel] = {}
-
-        for wid, d in df.groupby(self.well_id_col):
-            try:
-                temp_phys_models[wid] = MultiphasePhysicsModel(well_id=wid, geometry=self.well_geometry.get(wid)).fit(
-                    d, self.y_qo_col, self.y_qg_col, self.y_qw_col
-                )
-            except Exception as e:
-                # Fail-safe: skip wells that cannot be calibrated
-                print(f"[WARN] Initial physics fit failed for well {wid}: {e}")
-
-        # ==================================================
-        # 2. Compute global physics priors (if possible)
-        # ==================================================
-        def _compute_global_physics_priors(phys_models: dict):
-            """
-            Compute global mean physics parameters across wells.
-            Used for partial pooling. Returns None if insufficient data.
-            """
-            params = [m.params_ for m in phys_models.values() if m.params_ is not None]
-            if not params:
-                return None
-
-            keys = ["qL_max", "a", "b", "Cg", "k_choke", "choke0"]
-            priors = {}
-
-            for k in keys:
-                values = [p[k] for p in params if np.isfinite(p.get(k, np.nan))]
-                if values:
-                    priors[k] = float(np.mean(values))
-
-            return priors if priors else None
-
-        global_physics_params = _compute_global_physics_priors(temp_phys_models)
-
-        # ==================================================
-        # 3. Second pass: refit physics models with
-        #    geometry constraints + partial pooling
-        # ==================================================
+        # --------------------------------------------------
+        # 1. Fit PHYSICS models (per well)
+        # --------------------------------------------------
         self.phys_models = {}
 
         for wid, d in df.groupby(self.well_id_col):
-            # Fetch geometry for this well (if available)
-            geom = None
-            if hasattr(self, "well_geometry"):
-                geom = self.well_geometry.get(wid)
+            model = MultiphasePhysicsModel(
+                well_id=wid,
+                geometry=self.well_geometry.get(wid)
+            )
+            model.fit(d, self.y_qo_col, self.y_qg_col, self.y_qw_col)
+            self.phys_models[wid] = model
 
-            try:
-                self.phys_models[wid] = MultiphasePhysicsModel(
-                    well_id=wid,
-                    geometry=geom,
-                    global_params=global_physics_params,
-                ).fit(d, self.y_qo_col, self.y_qg_col, self.y_qw_col)
-            except Exception as e:
-                # Fallback: original unconstrained physics model
-                print(f"[WARN] Geometry-aware fit failed for well {wid}, falling back: {e}")
-                self.phys_models[wid] = MultiphasePhysicsModel(well_id=wid).fit(
-                    d, self.y_qo_col, self.y_qg_col, self.y_qw_col
+        # --------------------------------------------------
+        # 2. Prepare TRAINING data for ML residual learning
+        # --------------------------------------------------
+        df_train_lag = self._create_lagged_features(df)
+        df_train_lag = df_train_lag.dropna()
+
+        if df_train_lag.empty:
+            raise ValueError("No training rows left after lagging.")
+
+        # Physics predictions on lagged data
+        phys_train = self.predict_physics(df_train_lag)
+
+        # --------------------------------------------------
+        # 3. Build residual dataset (X, Y)
+        # --------------------------------------------------
+        X_train_df, Y_train = self._build_residual_dataset(
+            df_train_lag,
+            phys_train,
+        )
+
+        # --------------------------------------------------
+        # 4. FIX FOR ISSUE 1: store ML feature ordering
+        # --------------------------------------------------
+        self._ml_feature_columns = X_train_df.columns.tolist()
+
+        X_train = X_train_df[self._ml_feature_columns].values
+
+        # --------------------------------------------------
+        # 5. Scale + polynomial expansion
+        # --------------------------------------------------
+        X_train_scaled = self.scaler.fit_transform(X_train)
+        X_train_poly = self.poly.fit_transform(X_train_scaled)
+
+        # --------------------------------------------------
+        # 6. Train ML residual model
+        # --------------------------------------------------
+        self.ml_residual.fit(X_train_poly, Y_train)
+
+        # --------------------------------------------------
+        # 7. OPTIONAL: validation diagnostics
+        # --------------------------------------------------
+        self.rmse_val = None
+
+        if df_val is not None:
+
+            df_val_lag = self._create_lagged_features(df_val)
+            df_val_lag = df_val_lag.dropna()
+
+            if not df_val_lag.empty:
+
+                phys_val = self.predict_physics(df_val_lag)
+
+                X_val_df, Y_val = self._build_residual_dataset(
+                    df_val_lag,
+                    phys_val,
                 )
 
-        # ==================================================
-        # 4. Helper to build ML residual dataset
-        # ==================================================
-        def _build_residual_dataset(
-            self,
-            df: pd.DataFrame,
-            phys: pd.DataFrame,
-        ):
-            """
-            Build residual-learning dataset for the hybrid model.
+                # Enforce identical feature ordering
+                X_val = X_val_df[self._ml_feature_columns].values
 
-            The ML model learns residuals in log-space relative to the physics model.
-            For water, residual learning is performed on Water–Gas Ratio (WGR)
-            instead of direct water rate to improve numerical stability and
-            physical consistency for gas wells.
+                X_val_scaled = self.scaler.transform(X_val)
+                X_val_poly = self.poly.transform(X_val_scaled)
 
-            Residual targets learned by ML:
-                - Δlog(qo)
-                - Δlog(WGR)
-                - Δlog(qg)
-            """
+                Y_val_pred = self.ml_residual.predict(X_val_poly)
 
-            # -------------------------------
-            # True values
-            # -------------------------------
-            qo_true = df[self.y_qo_col].values
-            qw_true = df[self.y_qw_col].values
-            qg_true = df[self.y_qg_col].values
+                # Per-output RMSE (interpretable)
+                rmse = np.sqrt(np.mean((Y_val - Y_val_pred) ** 2, axis=0))
 
-            # -------------------------------
-            # Physics predictions
-            # -------------------------------
-            qo_phys = phys["qo_pred"].values
-            qw_phys = phys["qw_pred"].values
-            qg_phys = phys["qg_pred"].values
-
-            # -------------------------------
-            # Numerical safety
-            # -------------------------------
-            qo_true = np.maximum(qo_true, EPS)
-            qg_true = np.maximum(qg_true, EPS)
-            qw_true = np.maximum(qw_true, 0.0)
-
-            qo_phys = np.maximum(qo_phys, EPS)
-            qg_phys = np.maximum(qg_phys, EPS)
-            qw_phys = np.maximum(qw_phys, 0.0)
-
-            # -------------------------------
-            # Water–Gas Ratio (WGR)
-            # -------------------------------
-            wgr_true = qw_true / np.clip(qg_true, EPS, None)
-            wgr_phys = qw_phys / np.clip(qg_phys, EPS, None)
-
-            # -------------------------------
-            # Log-space residual targets
-            # Order is IMPORTANT:
-            #   [qo_residual, wgr_residual, qg_residual]
-            # -------------------------------
-            y_res = np.column_stack([
-                np.log1p(qo_true) - np.log1p(qo_phys),
-                np.log1p(wgr_true + WGR_EPS) - np.log1p(wgr_phys + WGR_EPS),
-                np.log1p(qg_true) - np.log1p(qg_phys),
-            ])
-
-            return y_res
-
-
-        # ==================================================
-        # 5. Build TRAIN residual dataset
-        # ==================================================
-        X_train, Y_train = _build_residual_dataset(df)
-
-        Xs_train = self.scaler.fit_transform(X_train)
-        Xp_train = self.poly.fit_transform(Xs_train)
-
-        if not np.isfinite(Y_train).all():
-            raise ValueError("NaNs or infs in training residual targets")
-
-        # ==================================================
-        # 6. Fit ML residual model (GLOBAL)
-        # ==================================================
-        self.ml_residual.fit(Xp_train, Y_train)
-
-        # ==================================================
-        # 7. Optional validation diagnostics (unchanged)
-        # ==================================================
-        if df_val is not None:
-            X_val, Y_val = _build_residual_dataset(df_val)
-            Xs_val = self.scaler.transform(X_val)
-            Xp_val = self.poly.transform(Xs_val)
-
-            Y_val_pred = self.ml_residual.predict(Xp_val)
-            self.rmse_val = np.sqrt(mean_squared_error(Y_val, Y_val_pred))
-            print(f"[Validation] Residual RMSE = {self.rmse_val:.4f}")
+                self.rmse_val = {
+                    "qo": rmse[0],
+                    "wgr": rmse[1],
+                    "qg": rmse[2],
+                }
 
         return self
+
 
 
     def predict_physics(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -365,16 +421,35 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         to improve robustness for gas wells with intermittent water production.
         """
 
+        df_lag = self._create_lagged_features(df)
+
         # --------------------------------------------------
         # Physics predictions
         # --------------------------------------------------
-        phys = self.predict_physics(df)
+        phys = self.predict_physics(df_lag)
 
         # --------------------------------------------------
         # ML residual prediction
         # --------------------------------------------------
-        X = self._build_ml_features(df, phys)
-        res = self.ml_residual.predict(X)
+        X_df = self._build_ml_features(df_lag, phys)
+
+        # Enforce training feature order
+        missing = set(self._ml_feature_columns) - set(X_df.columns)
+        if missing:
+            raise RuntimeError(f"Missing ML features at inference: {missing}")
+
+        X = X_df[self._ml_feature_columns].values
+
+        Xs = self.scaler.transform(X)
+        Xp = self.poly.transform(Xs)
+
+        res = self.ml_residual.predict(Xp)
+
+        # --------------------------------------------------
+        # OPTIONAL: residual magnitude regularization
+        # --------------------------------------------------
+        res = np.clip(res, -RES_CLIP, RES_CLIP)
+
 
         # ==================================================
         # GAS (unchanged)
@@ -405,7 +480,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         wgr_phys = qw_phys / np.clip(qg_phys, EPS, None)
 
         # ML-corrected WGR (log-space)
-        log_wgr = np.log1p(wgr_phys + WGR_EPS) + res[:, 1]
+        log_wgr = np.log1p(wgr_phys) + res[:, 1]
         wgr_hybrid = np.expm1(log_wgr)
 
         # Gating: ML water allowed only if physics predicts water
@@ -431,7 +506,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 "qw_pred": qw,
                 "qg_pred": qg,
             },
-            index=df.index,
+            index=df_lag.index,
         )
 
 
@@ -684,8 +759,15 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             return df
 
         pred = self.predict_hybrid(df.loc[mask])
+        MAP = {
+            self.y_qo_col: "qo_pred",
+            self.y_qw_col: "qw_pred",
+            self.y_qg_col: "qg_pred",
+        }
+
         for col in self.dependant_vars:
-            df.loc[mask, col] = pred[f"{col.split('_')[0]}_pred"].values
+            df.loc[mask, col] = pred[MAP[col]].values
+
         return df
 
     # --------------------------------------------------

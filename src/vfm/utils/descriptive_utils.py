@@ -202,6 +202,26 @@ def get_blocked_train_val_test_split_with_temporal_order(
     return df_train, df_val, df_test
 
 
+def get_temporal_split_per_well(df, train_frac=0.7, val_frac=0.15):
+    train, val, test = [], [], []
+
+    for wid, d in df.groupby("well_id"):
+        d = d.sort_index()
+        n = len(d)
+
+        n_train = int(n * train_frac)
+        n_val = int(n * val_frac)
+
+        train.append(d.iloc[:n_train])
+        val.append(d.iloc[n_train:n_train + n_val])
+        test.append(d.iloc[n_train + n_val:])
+
+    return (
+        pd.concat(train),
+        pd.concat(val),
+        pd.concat(test),
+    )
+
 def get_lowo_train_val_test_split(
     df: pd.DataFrame,
     test_well_id: str,
@@ -221,6 +241,7 @@ def get_lowo_train_val_test_split(
     df_calibration, _, df_test = get_random_train_val_test_split_per_well_temporal_order(df=df_test_all, test_size=0.9, val_size=0)
 
     return df_train, df_val, df_calibration, df_test
+
 
 
 # def get_all_wells() -> list[str]:
@@ -281,3 +302,4 @@ def scores_to_df(scores: dict, model_name: str) -> pd.DataFrame:
                 })
 
     return pd.DataFrame(rows)
+

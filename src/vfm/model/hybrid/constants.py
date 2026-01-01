@@ -1,6 +1,6 @@
 EPS = 1e-5
 WGR_EPS = 1e-6
-
+RES_CLIP = 2.0  # log-space limit (≈ ×7.4 in linear space)
 
 # --------------------------------------------------
 # Scaling constants
