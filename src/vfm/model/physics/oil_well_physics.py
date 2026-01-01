@@ -32,12 +32,6 @@ class OilDominatedMultiphaseWellPhysicsModel:
     the original calibration behavior.
     """
 
-    # --------------------------------------------------
-    # Scaling constants
-    # --------------------------------------------------
-    P_SCALE = 100.0       # ~100 bar (numerical scaling only)
-    T_SCALE = 100.0       # ~100 °C (numerical scaling only)
-
     def __init__(
         self,
         estimate_pres_offset: float = 10.0,
@@ -76,9 +70,9 @@ class OilDominatedMultiphaseWellPhysicsModel:
     # --------------------------------------------------
     def _feature_matrix_for_wc(self, df):
         choke = df["choke"].values
-        dcp = df["dcp"].values / self.P_SCALE
-        dht = df["dht"].values / self.T_SCALE
-        wht = df["wht"].values / self.T_SCALE
+        dcp = df["dcp"].values / P_SCALE
+        dht = df["dht"].values / T_SCALE
+        wht = df["wht"].values / T_SCALE
 
         return np.vstack([
             np.ones(len(df)),
@@ -162,7 +156,7 @@ class OilDominatedMultiphaseWellPhysicsModel:
         # --------------------------------------------------
         # Reservoir gas rate (pressure-driven)
         # --------------------------------------------------
-        dp = np.sqrt(np.maximum(0.0, P_res - Pwf)) / self.P_SCALE
+        dp = np.sqrt(np.maximum(0.0, P_res - Pwf)) / P_SCALE
         choke_eff = logistic(k_ch * (df["choke"].values - ch0))
 
         qg_res = Cg * dp * choke_eff
@@ -363,7 +357,7 @@ class OilDominatedMultiphaseWellPhysicsModel:
         # --------------------------------------------------
         # Reservoir gas (pressure-driven)
         # --------------------------------------------------
-        dp = np.sqrt(np.maximum(0.0, p["P_res"] - Pwf)) / self.P_SCALE
+        dp = np.sqrt(np.maximum(0.0, p["P_res"] - Pwf)) / P_SCALE
         choke_eff = logistic(
             p["k_choke"] * (df["choke"].values - p["choke0"])
         )

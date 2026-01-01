@@ -1,4 +1,4 @@
-EPS = 1e-6
+EPS = 1e-9
 
 METRICS = [
     "r2",
@@ -8,8 +8,11 @@ METRICS = [
     "mpe (%)",    # aka signed MRE / avg discrepancy
 ]
 
-P_SCALE = 100.0       # ~100 bar
-T_SCALE = 100.0       # ~100 °C (scaling only)
+# --------------------------------------------------
+# Scaling constants
+# --------------------------------------------------
+P_SCALE = 100.0       # ~100 bar (numerical scaling only)
+T_SCALE = 100.0       # ~100 °C (numerical scaling only)
 
 
 # =====================================================

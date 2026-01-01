@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
-
-EPS = 1e-9
+from src.vfm.constants import *
 
 
 class GasDominatedMultiphaseWellPhysicsModel:
@@ -46,6 +45,14 @@ class GasDominatedMultiphaseWellPhysicsModel:
     # Fit
     # --------------------------------------------------
     def fit(self, df: pd.DataFrame):
+        """
+        Fit gas-dominated multiphase well physics.
+
+        Required columns:
+            dhp, whp, choke, qg
+        Optional:
+            qo, qw
+        """
 
         required = {"dhp", "whp", "choke", self.y_qg_col}
         missing = required - set(df.columns)
@@ -57,25 +64,44 @@ class GasDominatedMultiphaseWellPhysicsModel:
         choke = np.maximum(df["choke"].values, EPS)
         qg = np.maximum(df[self.y_qg_col].values, EPS)
 
-        # Gas deliverability
+        # --------------------------------------------------
+        # Store choke scale
+        # --------------------------------------------------
         self.d_choke_max = np.nanmax(choke)
-        dp2 = np.maximum(pr**2 - pwh**2, EPS)
 
-        n_est, logCg_est = np.polyfit(np.log(dp2), np.log(qg), 1)
-        self.n = float(np.clip(n_est, 0.4, 1.2))
-        self.Cg = float(np.exp(logCg_est))
-        self.alpha_choke = 0.5
+        # --------------------------------------------------
+        # GAS DELIVERABILITY (DROP-IN FIX)
+        # qg = Cg * sqrt(ΔP) / P_SCALE * choke_factor
+        # --------------------------------------------------
+        dp = np.maximum(pr - pwh, 0.0)
+        dp_eff = np.sqrt(dp) / self.P_SCALE
 
-        # CGR
-        if self.y_qo_col in df.columns:
-            self.cgr = float(np.nanmedian(df[self.y_qo_col].values / (qg + EPS)))
+        choke_factor = (choke / self.d_choke_max) ** self.alpha_choke
+
+        # Linear regression in log-space
+        X = np.log(dp_eff * choke_factor + EPS)
+        y = np.log(qg)
+
+        # Fit only intercept (Cg), slope fixed = 1
+        logCg = np.nanmedian(y - X)
+        self.Cg = float(np.exp(logCg))
+
+        # --------------------------------------------------
+        # CONDENSATE–GAS RATIO (CGR)
+        # --------------------------------------------------
+        if "qo" in df.columns:
+            self.cgr = float(
+                np.nanmedian(df["qo"].values / (qg + EPS))
+            )
         else:
-            self.cgr = EPS
+            self.cgr = 0.0
 
-        # WC model
-        if self.y_qw_col in df.columns and self.cgr > EPS:
+        # --------------------------------------------------
+        # WATER CUT (WC) MODEL
+        # --------------------------------------------------
+        if "qw" in df.columns and self.cgr > 0:
             qo = self.cgr * qg
-            wc = df[self.y_qw_col].values / (qo + df[self.y_qw_col].values + EPS)
+            wc = df["qw"].values / (qo + df["qw"].values + EPS)
             wc = np.clip(wc, EPS, 1 - EPS)
 
             Z = np.column_stack([
@@ -84,14 +110,15 @@ class GasDominatedMultiphaseWellPhysicsModel:
                 np.log(qg + EPS),
             ])
 
-            self.wc_coef, *_ = np.linalg.lstsq(
-                Z, np.log(wc / (1 - wc)), rcond=None
-            )
+            logit_wc = np.log(wc / (1 - wc))
+            self.wc_coef, *_ = np.linalg.lstsq(Z, logit_wc, rcond=None)
         else:
+            # Near-zero water cut default
             self.wc_coef = np.array([-10.0, 0.0, 0.0])
 
         self.is_fitted = True
         return self
+
 
     # --------------------------------------------------
     # Physics prediction (standalone)
@@ -105,17 +132,36 @@ class GasDominatedMultiphaseWellPhysicsModel:
         pwh = df["whp"].values
         choke = np.maximum(df["choke"].values, EPS)
 
-        dp2 = np.maximum(pr**2 - pwh**2, 0.0)
+        # --------------------------------------------------
+        # GAS RATE (DROP-IN FIX)
+        # Old (WRONG):
+        # dp2 = (pr**2 - pwh**2) / (P_SCALE ** 2)
+        # qg = Cg * (dp2 ** n) * choke_factor
+        #
+        # New (MATCHES OLD WORKING PHYSICS):
+        # qg ∝ sqrt(ΔP) / P_SCALE
+        # --------------------------------------------------
+        dp = np.maximum(pr - pwh, 0.0)
+        dp_eff = np.sqrt(dp) / P_SCALE
+
         choke_factor = (choke / self.d_choke_max) ** self.alpha_choke
 
-        qg = self.Cg * (dp2 ** self.n) * choke_factor
+        qg = self.Cg * dp_eff * choke_factor
+
+        # --------------------------------------------------
+        # OIL / CONDENSATE (via CGR)
+        # --------------------------------------------------
         qo = self.cgr * qg
 
+        # --------------------------------------------------
+        # WATER CUT MODEL (UNCHANGED)
+        # --------------------------------------------------
         Z = np.column_stack([
             np.ones(len(df)),
             pr - pwh,
             np.log(qg + EPS),
         ])
+
         wc = self._sigmoid(Z @ self.wc_coef)
         wc = np.clip(wc, 0.0, 0.95)
 
@@ -129,6 +175,7 @@ class GasDominatedMultiphaseWellPhysicsModel:
             },
             index=df.index,
         )
+
 
     # --------------------------------------------------
     # Latent interface (USED BY HYBRID)

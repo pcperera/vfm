@@ -58,6 +58,10 @@ class LatentPhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
     # Fit
     # --------------------------------------------------
     def fit(self, df):
+        dp = df["dhp"] - df["whp"]
+        print("dp min:", dp.min())
+        print("dp median:", dp.median())
+        print("dp <= 0 count:", (dp <= 0).sum())
 
         df = self._create_lagged_features(df).dropna()
 
@@ -128,7 +132,6 @@ class LatentPhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
     # Predict
     # --------------------------------------------------
     def predict_hybrid(self, df):
-
         df = self._create_lagged_features(df).dropna()
         out = []
 
@@ -155,7 +158,6 @@ class LatentPhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
         return pd.concat(out).sort_index()
 
-
     def score_physics(
         self,
         df,
@@ -167,28 +169,35 @@ class LatentPhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         for wid, d in df.groupby(self.well_id_col):
             p = df_pred[df_pred[self.well_id_col] == wid]
 
-            # --- CRITICAL FIX: align ground truth ---
+            # -----------------------------
+            # Align ground truth to predictions
+            # -----------------------------
             d_aligned = d.loc[p.index]
+
+            # -----------------------------
+            # IMPORTANT: use physics model columns
+            # -----------------------------
+            phys = self.phys_models[wid]
 
             results[wid] = {
                 "qo": dict(zip(
                     METRICS,
                     self.regression_metrics(
-                        d_aligned[self.y_qo_col].values,
+                        d_aligned[phys.y_qo_col].values,
                         p["qo_pred"].values,
                     ),
                 )),
                 "qw": dict(zip(
                     METRICS,
                     self.regression_metrics(
-                        d_aligned[self.y_qw_col].values,
+                        d_aligned[phys.y_qw_col].values,
                         p["qw_pred"].values,
                     ),
                 )),
                 "qg": dict(zip(
                     METRICS,
                     self.regression_metrics(
-                        d_aligned[self.y_qg_col].values,
+                        d_aligned[phys.y_qg_col].values,
                         p["qg_pred"].values,
                     ),
                 )),
@@ -211,18 +220,37 @@ class LatentPhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         for wid, d in df.groupby(self.well_id_col):
             p = df_pred[df_pred[self.well_id_col] == wid]
 
+            # -----------------------------
+            # Align ground truth to predictions
+            # -----------------------------
+            d_aligned = d.loc[p.index]
+
+            # -----------------------------
+            # IMPORTANT: use physics model columns
+            # -----------------------------
+            phys = self.phys_models[wid]
+
             results[wid] = {
                 "qo": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qo_col], p["qo_pred"])
+                    regression_metrics(
+                        d_aligned[phys.y_qo_col].values,
+                        p["qo_pred"].values,
+                    ),
                 )),
                 "qw": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qw_col], p["qw_pred"])
+                    regression_metrics(
+                        d_aligned[phys.y_qw_col].values,
+                        p["qw_pred"].values,
+                    ),
                 )),
                 "qg": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qg_col], p["qg_pred"])
+                    regression_metrics(
+                        d_aligned[phys.y_qg_col].values,
+                        p["qg_pred"].values,
+                    ),
                 )),
             }
 

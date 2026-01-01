@@ -5,12 +5,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import HistGradientBoostingRegressor
 from src.vfm.constants import *
+from src.vfm.utils.metrics_utils import *
 from src.vfm.model.hybrid.base_physics_informed import BasePhysicsInformedHybridModel
 from src.vfm.model.physics.oil_well_physics import OilDominatedMultiphaseWellPhysicsModel
 
@@ -471,20 +472,20 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             results[wid] = {
                 "qo": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qo_col], p["qo_pred"])
+                    regression_metrics(d[self.y_qo_col], p["qo_pred"])
                 )),
                 "qw": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qw_col], p["qw_pred"])
+                    regression_metrics(d[self.y_qw_col], p["qw_pred"])
                 )),
                 "qg": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qg_col], p["qg_pred"])
+                    regression_metrics(d[self.y_qg_col], p["qg_pred"])
                 )),
                 "wgr": (
                     dict(zip(
                         METRICS,
-                        super().regression_metrics(y_wgr[mask_wgr], p_wgr[mask_wgr])
+                        regression_metrics(y_wgr[mask_wgr], p_wgr[mask_wgr])
                     ))
                     if mask_wgr.sum() >= 2
                     else {m: np.nan for m in METRICS}
@@ -492,7 +493,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 "gor": (
                     dict(zip(
                         METRICS,
-                        super().regression_metrics(y_gor[mask_gor], p_gor[mask_gor])
+                        regression_metrics(y_gor[mask_gor], p_gor[mask_gor])
                     ))
                     if mask_gor.sum() >= 2
                     else {m: np.nan for m in METRICS}
@@ -555,20 +556,20 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             results[wid] = {
                 "qo": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qo_col], d["qo_pred"])
+                    regression_metrics(d[self.y_qo_col], d["qo_pred"])
                 )),
                 "qw": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qw_col], d["qw_pred"])
+                    regression_metrics(d[self.y_qw_col], d["qw_pred"])
                 )),
                 "qg": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qg_col], d["qg_pred"])
+                    regression_metrics(d[self.y_qg_col], d["qg_pred"])
                 )),
                 "wgr": (
                     dict(zip(
                         METRICS,
-                        super().regression_metrics(y_wgr[mask_wgr], p_wgr[mask_wgr])
+                        regression_metrics(y_wgr[mask_wgr], p_wgr[mask_wgr])
                     ))
                     if mask_wgr.sum() >= 2
                     else {m: np.nan for m in METRICS}
@@ -576,7 +577,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 "gor": (
                     dict(zip(
                         METRICS,
-                        super().regression_metrics(y_gor[mask_gor], p_gor[mask_gor])
+                        regression_metrics(y_gor[mask_gor], p_gor[mask_gor])
                     ))
                     if mask_gor.sum() >= 2
                     else {m: np.nan for m in METRICS}
@@ -632,20 +633,20 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             results[wid] = {
                 "qo": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qo_col], d[self.mpfm_qo_col])
+                    regression_metrics(d[self.y_qo_col], d[self.mpfm_qo_col])
                 )),
                 "qw": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qw_col], d[self.mpfm_qw_col])
+                    regression_metrics(d[self.y_qw_col], d[self.mpfm_qw_col])
                 )),
                 "qg": dict(zip(
                     METRICS,
-                    super().regression_metrics(d[self.y_qg_col], d[self.mpfm_qg_col])
+                    regression_metrics(d[self.y_qg_col], d[self.mpfm_qg_col])
                 )),
                 "wgr": (
                     dict(zip(
                         METRICS,
-                        super().regression_metrics(
+                        regression_metrics(
                             y_wgr[mask_wgr],
                             p_wgr[mask_wgr]
                         )
@@ -656,7 +657,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 "gor": (
                     dict(zip(
                         METRICS,
-                        super().regression_metrics(
+                        regression_metrics(
                             y_gor[mask_gor],
                             p_gor[mask_gor]
                         )
