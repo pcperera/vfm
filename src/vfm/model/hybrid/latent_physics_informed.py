@@ -1,7 +1,7 @@
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import HistGradientBoostingRegressor
 from src.vfm.model.hybrid.base_physics_informed import BasePhysicsInformedHybridModel
-from src.vfm.constants import METRICS
+from vfm.model.hybrid.constants import METRICS
 import numpy as np
 import pandas as pd
 

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from src.vfm.constants import *
+from vfm.model.hybrid.constants import *
 
 
 class GasDominatedMultiphaseWellPhysicsModel:

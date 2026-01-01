@@ -1,12 +1,6 @@
-EPS = 1e-9
+EPS = 1e-5
+WGR_EPS = 1e-6
 
-METRICS = [
-    "r2",
-    "mae",
-    "rmse",
-    "mape (%)",   # aka MARE
-    "mpe (%)",    # aka signed MRE / avg discrepancy
-]
 
 # --------------------------------------------------
 # Scaling constants
@@ -20,3 +14,9 @@ T_SCALE = 100.0         # ~100 °C (numerical scaling only)
 # =====================================================
 GL_MASS_TO_STD_VOL = 1.25  # kg/Sm3 (typical lift gas density)
 GAS_GRAVITY_REF = 0.65  # Reference gas gravity (dimensionless)
+
+
+# --------------------------------------------------
+# Water
+# --------------------------------------------------
+WATER_GATE_THRESHOLD = 2.0

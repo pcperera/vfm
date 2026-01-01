@@ -10,7 +10,7 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import HistGradientBoostingRegressor
-from src.vfm.constants import *
+from src.vfm.model.hybrid.constants import *
 from src.vfm.utils.metrics_utils import *
 from src.vfm.model.hybrid.base_physics_informed import BasePhysicsInformedHybridModel
 from src.vfm.model.physics.generic_physics import MultiphasePhysicsModel
@@ -19,28 +19,46 @@ from src.vfm.model.physics.generic_physics import MultiphasePhysicsModel
 # =====================================================
 # Helpers
 # =====================================================
-
 def compute_wgr(qw, qg, min_qg=50.0):
+    """
+    Compute Water–Gas Ratio (WGR) in a numerically and physically safe manner.
+
+    WGR is computed only when gas rate exceeds a minimum threshold
+    to avoid unphysical ratios during low-gas or liquid-loading conditions.
+    """
+    qw = np.asarray(qw, dtype=float)
+    qg = np.asarray(qg, dtype=float)
+
     wgr = np.full_like(qw, np.nan, dtype=float)
 
     mask = (
         (qg > min_qg) &
-        ~np.isnan(qw) &
-        ~np.isnan(qg) &
-        (qg != 0)
+        np.isfinite(qw) &
+        np.isfinite(qg) &
+        (qg > EPS)
     )
 
     wgr[mask] = qw[mask] / qg[mask]
     return wgr
 
+
 def compute_gor(qg, qo, min_qo=5.0):
+    """
+    Compute Gas-Oil Ratio (GOR) in a numerically and physically safe manner.
+
+    GOR is computed only when oil rate exceeds a minimum threshold
+    to avoid unphysical inflation under near-zero oil flow conditions.
+    """
+    qg = np.asarray(qg, dtype=float)
+    qo = np.asarray(qo, dtype=float)
+
     gor = np.full_like(qg, np.nan, dtype=float)
 
     mask = (
         (qo > min_qo) &
-        ~np.isnan(qg) &
-        ~np.isnan(qo) &
-        (qo != 0)
+        np.isfinite(qg) &
+        np.isfinite(qo) &
+        (qo > EPS)
     )
 
     gor[mask] = qg[mask] / qo[mask]
@@ -100,6 +118,8 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 random_state=42,
             )
         )
+
+        self.rmse_val = None
 
 
     # --------------------------------------------------
@@ -208,68 +228,69 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         # ==================================================
         # 4. Helper to build ML residual dataset
         # ==================================================
-        def _build_residual_dataset(df_in: pd.DataFrame):
+        def _build_residual_dataset(
+            self,
+            df: pd.DataFrame,
+            phys: pd.DataFrame,
+        ):
             """
-            Construct input/output pairs for ML residual learning.
+            Build residual-learning dataset for the hybrid model.
 
-            Inputs:
-            - Independent variables
-            - Physics model predictions
+            The ML model learns residuals in log-space relative to the physics model.
+            For water, residual learning is performed on Water–Gas Ratio (WGR)
+            instead of direct water rate to improve numerical stability and
+            physical consistency for gas wells.
 
-            Outputs:
-            - Log-space residuals between measured and physics-predicted rates
+            Residual targets learned by ML:
+                - Δlog(qo)
+                - Δlog(WGR)
+                - Δlog(qg)
             """
 
-            df_lag = self._create_lagged_features(df_in)
+            # -------------------------------
+            # True values
+            # -------------------------------
+            qo_true = df[self.y_qo_col].values
+            qw_true = df[self.y_qw_col].values
+            qg_true = df[self.y_qg_col].values
 
-            X_all, y_all = [], []
+            # -------------------------------
+            # Physics predictions
+            # -------------------------------
+            qo_phys = phys["qo_pred"].values
+            qw_phys = phys["qw_pred"].values
+            qg_phys = phys["qg_pred"].values
 
-            model_input_cols = (
-                self.independent_vars +
-                [self.y_qo_col, self.y_qw_col, self.y_qg_col]
-            )
+            # -------------------------------
+            # Numerical safety
+            # -------------------------------
+            qo_true = np.maximum(qo_true, EPS)
+            qg_true = np.maximum(qg_true, EPS)
+            qw_true = np.maximum(qw_true, 0.0)
 
-            min_rows = max(5, self.lags + 3)
+            qo_phys = np.maximum(qo_phys, EPS)
+            qg_phys = np.maximum(qg_phys, EPS)
+            qw_phys = np.maximum(qw_phys, 0.0)
 
-            for wid, d in df_lag.groupby(self.well_id_col):
+            # -------------------------------
+            # Water–Gas Ratio (WGR)
+            # -------------------------------
+            wgr_true = qw_true / np.clip(qg_true, EPS, None)
+            wgr_phys = qw_phys / np.clip(qg_phys, EPS, None)
 
-                if wid not in self.phys_models:
-                    continue
+            # -------------------------------
+            # Log-space residual targets
+            # Order is IMPORTANT:
+            #   [qo_residual, wgr_residual, qg_residual]
+            # -------------------------------
+            y_res = np.column_stack([
+                np.log1p(qo_true) - np.log1p(qo_phys),
+                np.log1p(wgr_true + WGR_EPS) - np.log1p(wgr_phys + WGR_EPS),
+                np.log1p(qg_true) - np.log1p(qg_phys),
+            ])
 
-                # IMPORTANT: drop rows with NaNs in any required column
-                d = d.dropna(subset=model_input_cols)
+            return y_res
 
-                if len(d) < min_rows:
-                    print(f"[SKIP] Well {wid}: only {len(d)} usable rows")
-                    continue
-
-                phys = self.phys_models[wid].predict(d)
-
-                X = np.column_stack([
-                    d[self.independent_vars].values,
-                    phys[["qo_pred", "qw_pred", "qg_pred"]].values,
-                ])
-
-                y_true = np.maximum(
-                    d[[self.y_qo_col, self.y_qw_col, self.y_qg_col]].values, EPS
-                )
-                y_phys = np.maximum(phys.values, EPS)
-
-                # Residuals in log-space (stabilizes scale)
-                y_res = np.log1p(y_true) - np.log1p(y_phys)
-
-                mask = np.isfinite(y_res).all(axis=1)
-                if mask.any():
-                    X_all.append(X[mask])
-                    y_all.append(y_res[mask])
-
-            if not X_all:
-                raise ValueError(
-                    "No valid residual training data found "
-                    "(check lag count, split size, or NaNs)"
-                )
-
-            return np.vstack(X_all), np.vstack(y_all)
 
         # ==================================================
         # 5. Build TRAIN residual dataset
@@ -296,8 +317,8 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             Xp_val = self.poly.transform(Xs_val)
 
             Y_val_pred = self.ml_residual.predict(Xp_val)
-            rmse_val = np.sqrt(mean_squared_error(Y_val, Y_val_pred))
-            print(f"[Validation] Residual RMSE = {rmse_val:.4f}")
+            self.rmse_val = np.sqrt(mean_squared_error(Y_val, Y_val_pred))
+            print(f"[Validation] Residual RMSE = {self.rmse_val:.4f}")
 
         return self
 
@@ -337,98 +358,82 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
     # --------------------------------------------------
     def predict_hybrid(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Hybrid prediction with:
-        - Oil frozen to physics
-        - Water residual learning with regime gating
-        - Gas residual learning always on
+        Hybrid prediction combining physics-based rates with ML residual corrections.
+
+        Gas and oil rates are corrected directly in log-space.
+        Water rate is reconstructed via ML-corrected Water-Gas Ratio (WGR)
+        to improve robustness for gas wells with intermittent water production.
         """
 
-        # Threshold below which we consider the well "dry"
-        WATER_GATE_THRESHOLD = 2.0  # Sm3/h (tune if needed)
+        # --------------------------------------------------
+        # Physics predictions
+        # --------------------------------------------------
+        phys = self.predict_physics(df)
 
-        df_lag = self._create_lagged_features(df)
-        outputs = []
+        # --------------------------------------------------
+        # ML residual prediction
+        # --------------------------------------------------
+        X = self._build_ml_features(df, phys)
+        res = self.ml_residual.predict(X)
 
-        for wid, d in df_lag.groupby(self.well_id_col, sort=False):
+        # ==================================================
+        # GAS (unchanged)
+        # ==================================================
+        qg_phys = np.maximum(phys["qg_pred"].values, EPS)
 
-            if wid not in self.phys_models:
-                raise KeyError(f"No physics model found for well '{wid}'")
+        qg = np.expm1(
+            np.log1p(qg_phys) + res[:, 2]
+        )
+        qg = np.maximum(qg, 0.0)
 
-            # -------------------------------
-            # Physics prediction
-            # -------------------------------
-            phys = self.phys_models[wid].predict(d)
+        # ==================================================
+        # OIL (unchanged, gated if applicable)
+        # ==================================================
+        qo_phys = np.maximum(phys["qo_pred"].values, EPS)
 
-            # -------------------------------
-            # ML features
-            # -------------------------------
-            X = np.column_stack([
-                d[self.independent_vars].values,
-                phys[["qo_pred", "qw_pred", "qg_pred"]].values,
-            ])
+        qo = np.expm1(
+            np.log1p(qo_phys) + res[:, 0]
+        )
+        qo = np.maximum(qo, 0.0)
 
-            Xp = self.poly.transform(self.scaler.transform(X))
-            res = self.ml_residual.predict(Xp)
+        # ==================================================
+        # WATER (NEW: WGR-based reconstruction)
+        # ==================================================
+        qw_phys = np.maximum(phys["qw_pred"].values, 0.0)
 
-            # -------------------------------
-            # Oil: gated ML correction
-            # -------------------------------
-            qo_phys = np.maximum(phys["qo_pred"].values, EPS)
-            qo = qo_phys.copy()
+        # Physics WGR
+        wgr_phys = qw_phys / np.clip(qg_phys, EPS, None)
 
-            # Example gate 1: high water cut
-            wc = phys["qw_pred"].values / np.maximum(qo_phys + phys["qw_pred"].values, EPS)
-            oil_gate = wc > 0.3   # tune threshold
+        # ML-corrected WGR (log-space)
+        log_wgr = np.log1p(wgr_phys + WGR_EPS) + res[:, 1]
+        wgr_hybrid = np.expm1(log_wgr)
 
-            # Example gate 2: large residual magnitude
-            oil_gate |= np.abs(res[:, 0]) > 0.15  # log-space threshold
+        # Gating: ML water allowed only if physics predicts water
+        mask = qw_phys > WATER_GATE_THRESHOLD
 
-            qo[oil_gate] = np.expm1(
-                np.log1p(qo_phys[oil_gate]) + res[oil_gate, 0]
-            )
+        qw = np.zeros_like(qg)
+        qw[mask] = qg[mask] * wgr_hybrid[mask]
+        qw = np.maximum(qw, 0.0)
 
-            qo = np.maximum(qo, 0.0)
+        # ==================================================
+        # LIQUID CONSISTENCY (preserved)
+        # ==================================================
+        qL = qo + qw
+        qw = np.clip(qw, 0.0, qL)
+        qo = np.maximum(0.0, qL - qw)
 
-            # -------------------------------
-            # Gas: physics + ML residual
-            # -------------------------------
-            qg = np.expm1(
-                np.log1p(np.maximum(phys["qg_pred"].values, EPS)) + res[:, 2]
-            )
-            qg = np.maximum(qg, 0.0)
+        # --------------------------------------------------
+        # Output dataframe
+        # --------------------------------------------------
+        return pd.DataFrame(
+            {
+                "qo_pred": qo,
+                "qw_pred": qw,
+                "qg_pred": qg,
+            },
+            index=df.index,
+        )
 
-            # -------------------------------
-            # Water: regime-gated ML
-            # -------------------------------
-            qw_phys = np.maximum(phys["qw_pred"].values, 0.0)
-            qw = np.zeros_like(qw_phys)
-
-            # Only allow ML correction when water is already flowing
-            mask = qw_phys > WATER_GATE_THRESHOLD
-
-            qw[mask] = np.expm1(
-                np.log1p(qw_phys[mask]) + res[mask, 1]
-            )
-
-            qw = np.maximum(qw, 0.0)
-
-            # -------------------------------
-            # Liquid consistency
-            # -------------------------------
-            qL = qo + qw
-            qw = np.clip(qw, 0.0, qL)
-            qo = np.maximum(0.0, qL - qw)
-
-            outputs.append(pd.DataFrame(
-                {
-                    "qo_pred": qo,
-                    "qw_pred": qw,
-                    "qg_pred": qg,
-                },
-                index=d.index,
-            ))
-
-        return pd.concat(outputs).sort_index()
 
     # --------------------------------------------------
     # Physics-only score
@@ -443,30 +448,29 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             p = self.phys_models[wid].predict(d)
 
             # -----------------------------
+            # Numerical safety
+            # -----------------------------
+            qw_true = np.maximum(d[self.y_qw_col].values, 0.0)
+            qg_true = np.maximum(d[self.y_qg_col].values, EPS)
+            qo_true = np.maximum(d[self.y_qo_col].values, EPS)
+
+            qw_pred = np.maximum(p["qw_pred"].values, 0.0)
+            qg_pred = np.maximum(p["qg_pred"].values, EPS)
+            qo_pred = np.maximum(p["qo_pred"].values, EPS)
+
+            # -----------------------------
             # WGR
             # -----------------------------
-            y_wgr = compute_wgr(
-                d[self.y_qw_col].values,
-                d[self.y_qg_col].values
-            )
-            p_wgr = compute_wgr(
-                p["qw_pred"].values,
-                p["qg_pred"].values
-            )
+            y_wgr = compute_wgr(qw_true, qg_true)
+            p_wgr = compute_wgr(qw_pred, qg_pred)
 
             mask_wgr = np.isfinite(y_wgr) & np.isfinite(p_wgr)
 
             # -----------------------------
             # GOR
             # -----------------------------
-            y_gor = compute_gor(
-                d[self.y_qg_col].values,
-                d[self.y_qo_col].values
-            )
-            p_gor = compute_gor(
-                p["qg_pred"].values,
-                p["qo_pred"].values
-            )
+            y_gor = compute_gor(qg_true, qo_true)
+            p_gor = compute_gor(qg_pred, qo_pred)
 
             mask_gor = np.isfinite(y_gor) & np.isfinite(p_gor)
 
@@ -527,30 +531,29 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         for wid, d in df_pred.groupby(self.well_id_col):
 
             # -----------------------------
+            # Numerical safety
+            # -----------------------------
+            qw_true = np.maximum(d[self.y_qw_col].values, 0.0)
+            qg_true = np.maximum(d[self.y_qg_col].values, EPS)
+            qo_true = np.maximum(d[self.y_qo_col].values, EPS)
+
+            qw_pred = np.maximum(d["qw_pred"].values, 0.0)
+            qg_pred = np.maximum(d["qg_pred"].values, EPS)
+            qo_pred = np.maximum(d["qo_pred"].values, EPS)
+
+            # -----------------------------
             # WGR
             # -----------------------------
-            y_wgr = compute_wgr(
-                d[self.y_qw_col].values,
-                d[self.y_qg_col].values
-            )
-            p_wgr = compute_wgr(
-                d["qw_pred"].values,
-                d["qg_pred"].values
-            )
+            y_wgr = compute_wgr(qw_true, qg_true)
+            p_wgr = compute_wgr(qw_pred, qg_pred)
 
             mask_wgr = np.isfinite(y_wgr) & np.isfinite(p_wgr)
 
             # -----------------------------
             # GOR
             # -----------------------------
-            y_gor = compute_gor(
-                d[self.y_qg_col].values,
-                d[self.y_qo_col].values
-            )
-            p_gor = compute_gor(
-                d["qg_pred"].values,
-                d["qo_pred"].values
-            )
+            y_gor = compute_gor(qg_true, qo_true)
+            p_gor = compute_gor(qg_pred, qo_pred)
 
             mask_gor = np.isfinite(y_gor) & np.isfinite(p_gor)
 
