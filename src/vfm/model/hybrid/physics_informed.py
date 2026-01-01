@@ -13,7 +13,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 from src.vfm.constants import *
 from src.vfm.utils.metrics_utils import *
 from src.vfm.model.hybrid.base_physics_informed import BasePhysicsInformedHybridModel
-from src.vfm.model.physics.oil_well_physics import OilDominatedMultiphaseWellPhysicsModel
+from src.vfm.model.physics.generic_physics import MultiphasePhysicsModel
 
 
 # =====================================================
@@ -145,11 +145,11 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         # 1. First pass: fit physics models independently
         #    (used to compute global physics priors)
         # ==================================================
-        temp_phys_models: dict[str, OilDominatedMultiphaseWellPhysicsModel] = {}
+        temp_phys_models: dict[str, MultiphasePhysicsModel] = {}
 
         for wid, d in df.groupby(self.well_id_col):
             try:
-                temp_phys_models[wid] = OilDominatedMultiphaseWellPhysicsModel().fit(
+                temp_phys_models[wid] = MultiphasePhysicsModel().fit(
                     d, self.y_qo_col, self.y_qg_col, self.y_qw_col
                 )
             except Exception as e:
@@ -193,14 +193,14 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 geom = self.well_geometry.get(wid)
 
             try:
-                self.phys_models[wid] = OilDominatedMultiphaseWellPhysicsModel(
+                self.phys_models[wid] = MultiphasePhysicsModel(
                     geometry=geom,
                     global_params=global_physics_params,
                 ).fit(d, self.y_qo_col, self.y_qg_col, self.y_qw_col)
             except Exception as e:
                 # Fallback: original unconstrained physics model
                 print(f"[WARN] Geometry-aware fit failed for well {wid}, falling back: {e}")
-                self.phys_models[wid] = OilDominatedMultiphaseWellPhysicsModel().fit(
+                self.phys_models[wid] = MultiphasePhysicsModel().fit(
                     d, self.y_qo_col, self.y_qg_col, self.y_qw_col
                 )
 
@@ -1002,7 +1002,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         for wid, d in df.groupby(self.well_id_col):
             geom = self.well_geometry.get(wid)
 
-            self.phys_models[wid] = OilDominatedMultiphaseWellPhysicsModel(
+            self.phys_models[wid] = MultiphasePhysicsModel(
                 geometry=geom,
                 global_params=None,  # IMPORTANT: do not update global priors
             ).fit(d, self.y_qo_col, self.y_qg_col, self.y_qw_col)

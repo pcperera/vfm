@@ -20,13 +20,18 @@ class Preprocessor:
         if pos.empty:
             return df
 
-        qw_min = pos[qw_col].min()
-        t_wb = pos.index.min()
+        # qw_min = pos[qw_col].min()
+        # t_wb = pos.index.min()
 
-        mask = (df[self._well_col] == well_id) & (df.index >= t_wb) & (df[qw_col] == 0)
-        df.loc[mask, qw_col] = qw_min
-        assert (df["qw_well_test"] != 0).all(), \
-            "Zero values found in qw_well_test after preprocessing"
+        # mask = (df[self._well_col] == well_id) & (df.index >= t_wb) & (df[qw_col] == 0)
+        # df.loc[mask, qw_col] = qw_min
+        # assert (df["qw_well_test"] != 0).all(), \
+        #     "Zero values found in qw_well_test after preprocessing"
+
+        nonzero_min = df.loc[df[qw_col] > 0, qw_col].min()
+        eps = nonzero_min / 1000
+        print(f"eps={eps}")
+        df[qw_col] = np.where(df[qw_col] == 0.0, eps, df[qw_col])
 
         return df
 

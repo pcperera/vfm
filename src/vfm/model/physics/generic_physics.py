@@ -17,9 +17,9 @@ def logistic(x):
     return 1 / (1 + np.exp(-x))
 
 # =====================================================
-# Oil Well Physics Model
+# Multiphase Physics Model
 # =====================================================
-class OilDominatedMultiphaseWellPhysicsModel:
+class MultiphasePhysicsModel:
     """
     Physics-based well flow model with:
     - Liquid inflow relationship
