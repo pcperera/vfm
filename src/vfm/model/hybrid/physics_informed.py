@@ -149,7 +149,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
         for wid, d in df.groupby(self.well_id_col):
             try:
-                temp_phys_models[wid] = MultiphasePhysicsModel().fit(
+                temp_phys_models[wid] = MultiphasePhysicsModel(well_id=wid, geometry=self.well_geometry.get(wid)).fit(
                     d, self.y_qo_col, self.y_qg_col, self.y_qw_col
                 )
             except Exception as e:
@@ -194,13 +194,14 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
             try:
                 self.phys_models[wid] = MultiphasePhysicsModel(
+                    well_id=wid,
                     geometry=geom,
                     global_params=global_physics_params,
                 ).fit(d, self.y_qo_col, self.y_qg_col, self.y_qw_col)
             except Exception as e:
                 # Fallback: original unconstrained physics model
                 print(f"[WARN] Geometry-aware fit failed for well {wid}, falling back: {e}")
-                self.phys_models[wid] = MultiphasePhysicsModel().fit(
+                self.phys_models[wid] = MultiphasePhysicsModel(well_id=wid).fit(
                     d, self.y_qo_col, self.y_qg_col, self.y_qw_col
                 )
 
@@ -1003,6 +1004,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             geom = self.well_geometry.get(wid)
 
             self.phys_models[wid] = MultiphasePhysicsModel(
+                well_id=wid,
                 geometry=geom,
                 global_params=None,  # IMPORTANT: do not update global priors
             ).fit(d, self.y_qo_col, self.y_qg_col, self.y_qw_col)

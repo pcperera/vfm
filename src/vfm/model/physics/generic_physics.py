@@ -34,6 +34,7 @@ class MultiphasePhysicsModel:
 
     def __init__(
         self,
+        well_id: str = None,
         estimate_pres_offset: float = 10.0,
         fit_pres: bool = True,
         geometry: dict | None = None,        # optional
@@ -55,6 +56,7 @@ class MultiphasePhysicsModel:
         n_ref : int
             Reference number of samples for full parameter freedom.
         """
+        self.well_id = well_id
         self.fit_pres = fit_pres
         self.estimate_pres_offset = estimate_pres_offset
 
@@ -159,7 +161,8 @@ class MultiphasePhysicsModel:
         dp = np.sqrt(np.maximum(0.0, P_res - Pwf)) / P_SCALE
         choke_eff = logistic(k_ch * (df["choke"].values - ch0))
 
-        qg_res = Cg * dp * choke_eff
+        gas_scale = self._gas_gravity_scaling()
+        qg_res = Cg * gas_scale * dp * choke_eff
 
         # --------------------------------------------------
         # Gas lift contribution (additive, optional)
@@ -235,7 +238,8 @@ class MultiphasePhysicsModel:
         # --------------------------------------------------
         # 3. Geometry-informed reservoir pressure bounds
         # --------------------------------------------------
-        BH_TVD = self.geometry.get("BH_TVD")
+        BH_TVD = self.geometry.get("bh_tvd")
+        assert BH_TVD is None or np.isscalar(BH_TVD), "BH_TVD must be a scalar value" 
 
         RHO_LIQ = 850.0  # kg/m3 (representative liquid density)
         G = 9.81         # m/s2
@@ -362,7 +366,8 @@ class MultiphasePhysicsModel:
             p["k_choke"] * (df["choke"].values - p["choke0"])
         )
 
-        qg_res = p["Cg"] * dp * choke_eff
+        gas_scale = self._gas_gravity_scaling()
+        qg_res = p["Cg"] * gas_scale * dp * choke_eff
 
         # --------------------------------------------------
         # Gas lift contribution (optional, additive)
@@ -397,3 +402,25 @@ class MultiphasePhysicsModel:
             index=df.index,
         )
 
+    # --------------------------------------------------
+    # Gas gravity scaling (optional)
+    # --------------------------------------------------
+    def _gas_gravity_scaling(self):
+        """
+        Compute gas gravity scaling factor for gas deliverability.
+
+        Returns
+        -------
+        float
+            Scaling factor applied to gas-rate coefficient.
+            Defaults to 1.0 if gas gravity is unavailable.
+        """
+        gamma_g = self.geometry.get("gas_gravity")
+
+        if gamma_g is None:
+            return 1.0
+
+        gamma_g = float(gamma_g)
+        gamma_g = max(gamma_g, EPS)
+
+        return np.sqrt(GAS_GRAVITY_REF / gamma_g)
