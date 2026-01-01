@@ -248,8 +248,8 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         # --------------------------------------------------
         # Water–Gas Ratio (WGR)
         # --------------------------------------------------
-        wgr_true = qw_true / np.clip(qg_true, EPS, None)
-        wgr_phys = qw_phys / np.clip(qg_phys, EPS, None)
+        wgr_true = compute_wgr(qw_true, qg_true)
+        wgr_phys = compute_wgr(qw_phys, qg_phys)
 
         # --------------------------------------------------
         # Log-space residual targets
@@ -261,6 +261,12 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             np.log1p(wgr_true) - np.log1p(wgr_phys),
             np.log1p(qg_true) - np.log1p(qg_phys),
         ])
+
+        mask = np.isfinite(wgr_true) & np.isfinite(wgr_phys)
+
+        # Apply mask consistently to X and Y
+        X = X.loc[mask]
+        Y = Y[mask]
 
         if not np.isfinite(Y).all():
             raise ValueError("Residual targets contain NaNs or infs")
