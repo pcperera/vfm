@@ -256,7 +256,7 @@ def get_lowo_train_val_test_split(
 
 
 # def get_all_wells() -> list[str]:
-#     return  ["W10"]
+#     return  ["W08"]
 
 def get_all_wells() -> list[str]:
     return  ["W06", "W08", "W10", "W11", "W15", "W18", "W19"]

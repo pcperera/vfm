@@ -170,6 +170,14 @@ class Preprocessor:
         df["pres_drop"] = df["dhp"] - df["whp"]
         df["temp_drop"] = df["dht"] - df["wht"]
 
+        # --------------------------------------------------
+        # Detect & remove post-breakthrough data (input-only)
+        # --------------------------------------------------
+        # df = self._filter_post_breakthrough(df)
+        # if df.empty:
+        #     print(f"[Warning] All data removed after breakthrough filtering for {well_id}")
+        #     return df
+
         # Convert choke to fraction
         df["choke"] /= 100
 
@@ -193,7 +201,6 @@ class Preprocessor:
 
         df = df[(df["qo_well_test"] >= 0) & (df["qg_well_test"] >= 0) & (df["qw_well_test"] >= 0)]
 
-        # df = self._process_zero_water_rates(df=df)
         df = self._drop_non_physical_well_tests(df=df)
 
         # Drop rows where oil and gas rates are both zero. 0))]
@@ -244,3 +251,69 @@ class Preprocessor:
 
         return df   
     
+
+    def _detect_breakthrough_input_only(
+        self,
+        df: pd.DataFrame,
+        window: int = 10,
+        cv_thresh: float = 0.25,
+        min_persist: int = 3,
+    ) -> pd.Timestamp | None:
+        """
+        Detect post-breakthrough onset using input-only + physics-consistency signals.
+        """
+
+        df = df.sort_index().copy()
+
+        # Rolling coefficient of variation (CV)
+        dp = df["pres_drop"]
+        dt = df["temp_drop"]
+
+        cv_dp = (
+            dp.rolling(window, min_periods=window).std() /
+            (dp.rolling(window, min_periods=window).mean().abs() + 1e-6)
+        )
+
+        cv_dt = (
+            dt.rolling(window, min_periods=window).std() /
+            (dt.rolling(window, min_periods=window).mean().abs() + 1e-6)
+        )
+
+        # Candidate instability
+        unstable = (
+            (cv_dp > cv_thresh) |
+            (cv_dt > cv_thresh)
+        )
+
+        # Persistence filter
+        persistent = (
+            unstable
+            .rolling(min_persist, min_periods=min_persist)
+            .sum()
+            >= min_persist
+        )
+
+        if not persistent.any():
+            return None
+
+        return persistent.idxmax()
+
+
+
+    def _filter_post_breakthrough(
+        self,
+        df: pd.DataFrame,
+    ) -> pd.DataFrame:
+        """
+        Remove post-breakthrough periods based on input-only detection.
+        """
+
+        t_break = self._detect_breakthrough_input_only(df)
+
+        if t_break is None:
+            print("[Breakthrough] No breakthrough detected")
+            return df
+
+        print(f"[Breakthrough] Detected at {t_break}, filtering post-breakthrough data")
+
+        return df.loc[df.index < t_break]

@@ -751,6 +751,72 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 ),
             }
 
+
+        # ==================================================
+        # GLOBAL METRICS (pooled across all wells)
+        # ==================================================
+        qo_true_all, qo_pred_all = [], []
+        qw_true_all, qw_pred_all = [], []
+        qg_true_all, qg_pred_all = [], []
+
+        wgr_true_all, wgr_pred_all = [], []
+        gor_true_all, gor_pred_all = [], []
+
+        for wid, d in df.groupby(self.well_id_col):
+            p = self.phys_models[wid].predict(d)
+
+            qw_true = np.maximum(d[self.y_qw_col].values, 0.0)
+            qg_true = np.maximum(d[self.y_qg_col].values, EPS)
+            qo_true = np.maximum(d[self.y_qo_col].values, EPS)
+
+            qw_pred = np.maximum(p["qw_pred"].values, 0.0)
+            qg_pred = np.maximum(p["qg_pred"].values, EPS)
+            qo_pred = np.maximum(p["qo_pred"].values, EPS)
+
+            qo_true_all.append(qo_true)
+            qo_pred_all.append(qo_pred)
+            qw_true_all.append(qw_true)
+            qw_pred_all.append(qw_pred)
+            qg_true_all.append(qg_true)
+            qg_pred_all.append(qg_pred)
+
+            # WGR
+            y_wgr = compute_wgr(qw_true, qg_true)
+            p_wgr = compute_wgr(qw_pred, qg_pred)
+            mask = np.isfinite(y_wgr) & np.isfinite(p_wgr)
+            wgr_true_all.append(y_wgr[mask])
+            wgr_pred_all.append(p_wgr[mask])
+
+            # GOR
+            y_gor = compute_gor(qg_true, qo_true)
+            p_gor = compute_gor(qg_pred, qo_pred)
+            mask = np.isfinite(y_gor) & np.isfinite(p_gor)
+            gor_true_all.append(y_gor[mask])
+            gor_pred_all.append(p_gor[mask])
+
+        results["GLOBAL"] = {
+            "qo": get_global_metrics(
+                np.concatenate(qo_true_all),
+                np.concatenate(qo_pred_all),
+            ),
+            "qw": get_global_metrics(
+                np.concatenate(qw_true_all),
+                np.concatenate(qw_pred_all),
+            ),
+            "qg": get_global_metrics(
+                np.concatenate(qg_true_all),
+                np.concatenate(qg_pred_all),
+            ),
+            "wgr": get_global_metrics(
+                np.concatenate(wgr_true_all),
+                np.concatenate(wgr_pred_all),
+            ),
+            "gor": get_global_metrics(
+                np.concatenate(gor_true_all),
+                np.concatenate(gor_pred_all),
+            ),
+        }
+
         return results
 
 
@@ -834,8 +900,74 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 ),
             }
 
+        # ==================================================
+        # GLOBAL METRICS (pooled across all wells)
+        # ==================================================
+        qo_true_all, qo_pred_all = [], []
+        qw_true_all, qw_pred_all = [], []
+        qg_true_all, qg_pred_all = [], []
+
+        wgr_true_all, wgr_pred_all = [], []
+        gor_true_all, gor_pred_all = [], []
+
+        for wid, d in df_pred.groupby(self.well_id_col):
+
+            qw_true = np.maximum(d[self.y_qw_col].values, 0.0)
+            qg_true = np.maximum(d[self.y_qg_col].values, EPS)
+            qo_true = np.maximum(d[self.y_qo_col].values, EPS)
+
+            qw_pred = np.maximum(d["qw_pred"].values, 0.0)
+            qg_pred = np.maximum(d["qg_pred"].values, EPS)
+            qo_pred = np.maximum(d["qo_pred"].values, EPS)
+
+            qo_true_all.append(qo_true)
+            qo_pred_all.append(qo_pred)
+            qw_true_all.append(qw_true)
+            qw_pred_all.append(qw_pred)
+            qg_true_all.append(qg_true)
+            qg_pred_all.append(qg_pred)
+
+            # WGR
+            y_wgr = compute_wgr(qw_true, qg_true)
+            p_wgr = compute_wgr(qw_pred, qg_pred)
+            mask = np.isfinite(y_wgr) & np.isfinite(p_wgr)
+            wgr_true_all.append(y_wgr[mask])
+            wgr_pred_all.append(p_wgr[mask])
+
+            # GOR
+            y_gor = compute_gor(qg_true, qo_true)
+            p_gor = compute_gor(qg_pred, qo_pred)
+            mask = np.isfinite(y_gor) & np.isfinite(p_gor)
+            gor_true_all.append(y_gor[mask])
+            gor_pred_all.append(p_gor[mask])
+
+        results["GLOBAL"] = {
+            "qo": get_global_metrics(
+                np.concatenate(qo_true_all),
+                np.concatenate(qo_pred_all),
+            ),
+            "qw": get_global_metrics(
+                np.concatenate(qw_true_all),
+                np.concatenate(qw_pred_all),
+            ),
+            "qg": get_global_metrics(
+                np.concatenate(qg_true_all),
+                np.concatenate(qg_pred_all),
+            ),
+            "wgr": get_global_metrics(
+                np.concatenate(wgr_true_all),
+                np.concatenate(wgr_pred_all),
+            ),
+            "gor": get_global_metrics(
+                np.concatenate(gor_true_all),
+                np.concatenate(gor_pred_all),
+            ),
+        }
+
+
         return results
     
+
     def score_mpfm(
         self,
         df
@@ -849,6 +981,16 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
         # IMPORTANT: create lagged features once (for alignment consistency)
         df_lag = self._create_lagged_features(df)
+
+        # --------------------------------------------------
+        # GLOBAL collectors (pooled across wells)
+        # --------------------------------------------------
+        qo_true_all, qo_pred_all = [], []
+        qw_true_all, qw_pred_all = [], []
+        qg_true_all, qg_pred_all = [], []
+
+        wgr_true_all, wgr_pred_all = [], []
+        gor_true_all, gor_pred_all = [], []
 
         for wid, d in df_lag.groupby(self.well_id_col):
 
@@ -880,6 +1022,9 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
             mask_gor = np.isfinite(y_gor) & np.isfinite(p_gor)
 
+            # -----------------------------
+            # Per-well metrics
+            # -----------------------------
             results[wid] = {
                 "qo": dict(zip(
                     METRICS,
@@ -917,8 +1062,76 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 ),
             }
 
-        return results
+            # -----------------------------
+            # Collect GLOBAL arrays
+            # -----------------------------
+            qo_true_all.append(d[self.y_qo_col].values)
+            qo_pred_all.append(d[self.mpfm_qo_col].values)
 
+            qw_true_all.append(d[self.y_qw_col].values)
+            qw_pred_all.append(d[self.mpfm_qw_col].values)
+
+            qg_true_all.append(d[self.y_qg_col].values)
+            qg_pred_all.append(d[self.mpfm_qg_col].values)
+
+            if mask_wgr.sum() > 0:
+                wgr_true_all.append(y_wgr[mask_wgr])
+                wgr_pred_all.append(p_wgr[mask_wgr])
+
+            if mask_gor.sum() > 0:
+                gor_true_all.append(y_gor[mask_gor])
+                gor_pred_all.append(p_gor[mask_gor])
+
+        # --------------------------------------------------
+        # GLOBAL metrics (pooled across all wells)
+        # --------------------------------------------------
+        results["GLOBAL"] = {
+            "qo": dict(zip(
+                METRICS,
+                regression_metrics(
+                    np.concatenate(qo_true_all),
+                    np.concatenate(qo_pred_all),
+                )
+            )),
+            "qw": dict(zip(
+                METRICS,
+                regression_metrics(
+                    np.concatenate(qw_true_all),
+                    np.concatenate(qw_pred_all),
+                )
+            )),
+            "qg": dict(zip(
+                METRICS,
+                regression_metrics(
+                    np.concatenate(qg_true_all),
+                    np.concatenate(qg_pred_all),
+                )
+            )),
+            "wgr": (
+                dict(zip(
+                    METRICS,
+                    regression_metrics(
+                        np.concatenate(wgr_true_all),
+                        np.concatenate(wgr_pred_all),
+                    )
+                ))
+                if len(wgr_true_all) > 0
+                else {m: np.nan for m in METRICS}
+            ),
+            "gor": (
+                dict(zip(
+                    METRICS,
+                    regression_metrics(
+                        np.concatenate(gor_true_all),
+                        np.concatenate(gor_pred_all),
+                    )
+                ))
+                if len(gor_true_all) > 0
+                else {m: np.nan for m in METRICS}
+            ),
+        }
+
+        return results
 
 
     # --------------------------------------------------
@@ -1063,7 +1276,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                     d_lag[cfg["truth"]].values,
                     label="Well Test (Reference)",
                     linewidth=2.5,
-                    marker="o",
+                    # marker="o",
                     markersize=4,
                     color=COLORS["reference"],
                 )
@@ -1075,7 +1288,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                         label="MPFM",
                         linewidth=2,
                         linestyle="--",
-                        marker="x",
+                        # marker="x",
                         markersize=4,
                         color=COLORS["mpfm"],
                     )
@@ -1087,7 +1300,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                     if is_hybrid_model
                     else "Physics Prediction",
                     linewidth=2,
-                    marker="o",
+                    # marker="o",
                     markersize=4,
                     color=pred_color,
                 )
@@ -1141,7 +1354,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                         y_wgr[mask],
                         label="WGR (Well Test)",
                         linewidth=2.5,
-                        marker="o",
+                        # marker="o",
                         color=COLORS["reference"],
                     )
 
@@ -1152,7 +1365,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                             label="WGR (MPFM)",
                             linewidth=2,
                             linestyle="--",
-                            marker="x",
+                            # marker="x",
                             color=COLORS["mpfm"],
                         )
 
@@ -1161,7 +1374,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                         p_wgr[mask],
                         label="WGR (Predicted)",
                         linewidth=2,
-                        marker="o",
+                        # marker="o",
                         color=pred_color,
                     )
 
@@ -1211,7 +1424,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                         y_gor[mask],
                         label="GOR (Well Test)",
                         linewidth=2.5,
-                        marker="o",
+                        # marker="o",
                         color=COLORS["reference"],
                     )
 
@@ -1222,7 +1435,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                             label="GOR (MPFM)",
                             linewidth=2,
                             linestyle="--",
-                            marker="x",
+                            # marker="x",
                             color=COLORS["mpfm"],
                         )
 
@@ -1231,7 +1444,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                         p_gor[mask],
                         label="GOR (Predicted)",
                         linewidth=2,
-                        marker="o",
+                        # marker="o",
                         color=pred_color,
                     )
 
@@ -1268,3 +1481,86 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 global_params=None,  # IMPORTANT: do not update global priors
             ).fit(d, self.y_qo_col, self.y_qg_col, self.y_qw_col)
 
+
+
+    def estimate_per_well_bias_batch(
+            self,
+        y_true: np.ndarray,
+        y_pred: np.ndarray,
+        min_samples: int = 10,
+    ):
+        """
+        Estimate per-well bias using batch averaging in log-space.
+
+        Parameters
+        ----------
+        y_true : np.ndarray, shape (N, 3)
+            True rates [qo, wgr, qg]
+        y_pred : np.ndarray, shape (N, 3)
+            Hybrid predictions (physics + ML, no bias)
+        min_samples : int
+            Minimum samples required to estimate bias
+
+        Returns
+        -------
+        np.ndarray or None
+            Bias vector [b_qo, b_wgr, b_qg] in log-space,
+            or None if insufficient data
+        """
+
+        if y_true.shape[0] < min_samples:
+            return None
+
+        # Safety: avoid log(0)
+        y_true = np.maximum(y_true, 1e-6)
+        y_pred = np.maximum(y_pred, 1e-6)
+
+        # Log-space residual
+        delta = np.log(y_true) - np.log(y_pred)
+
+        # Mean residual = bias
+        bias = np.mean(delta, axis=0)
+
+        return bias
+
+
+    def estimate_per_well_bias_ewma(
+        self,
+        bias_prev: np.ndarray | None,
+        y_true_t: np.ndarray,
+        y_pred_t: np.ndarray,
+        alpha: float = 0.05,
+    ):
+        """
+        Online EWMA update of per-well bias in log-space.
+
+        Parameters
+        ----------
+        bias_prev : np.ndarray or None
+            Previous bias estimate [b_qo, b_wgr, b_qg]
+        y_true_t : np.ndarray, shape (3,)
+            True rates at time t
+        y_pred_t : np.ndarray, shape (3,)
+            Hybrid predictions at time t (no bias)
+        alpha : float
+            Smoothing factor (0.01–0.1 recommended)
+
+        Returns
+        -------
+        np.ndarray
+            Updated bias vector [b_qo, b_wgr, b_qg]
+        """
+
+        # Initialize bias if not present
+        if bias_prev is None:
+            bias_prev = np.zeros(3)
+
+        # Safety: avoid log(0)
+        y_true_t = np.maximum(y_true_t, 1e-6)
+        y_pred_t = np.maximum(y_pred_t, 1e-6)
+
+        delta_t = np.log(y_true_t) - np.log(y_pred_t)
+
+        bias_new = (1.0 - alpha) * bias_prev + alpha * delta_t
+
+        return bias_new
