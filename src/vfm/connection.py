@@ -95,6 +95,7 @@ class Connection:
                 print(f"No data returned for well {well}")
                 continue
 
+
             # Rename columns to consistent lowercase feature names
             df = df.rename(columns={mapping[k]: k.lower() for k in mapping})
 

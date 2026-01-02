@@ -270,6 +270,9 @@ def get_independent_vars_with_no_well_code():
 def get_mpfm_ratios():
     return ["gor_mpfm", "wgr_mpfm"]
 
+def get_feature_vars():
+    return ["pres_drop", "temp_drop"]
+
 def get_well_test_ratios():
     return ["gor_well_test", "wgr_well_test"]
 
@@ -280,6 +283,7 @@ def get_all_vars():
     all_vars.extend(get_mpfm_vars())
     all_vars.extend(get_mpfm_ratios())
     all_vars.extend(get_well_test_ratios())
+    all_vars.extend(get_feature_vars())
     all_vars.append("well_id")
 
     return all_vars
