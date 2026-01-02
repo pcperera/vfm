@@ -22,8 +22,8 @@ def get_train_test_split(df: pd.DataFrame):
 def get_random_train_val_test_split_per_well_temporal_order(
     df,
     well_id_col="well_id",
-    test_size=0.2,
-    val_size=0.1,
+    test_frac=0.2,
+    val_frac=0.1,
     min_train=20,
     min_val=5,
     min_test=5,
@@ -31,10 +31,10 @@ def get_random_train_val_test_split_per_well_temporal_order(
     max_tries=50,
 ):
     rng = np.random.default_rng(random_state)
-    if test_size == 0:
+    if test_frac == 0:
         min_test = 0
 
-    if val_size == 0:
+    if val_frac == 0:
         min_val = 0
 
     for _ in range(max_tries):
@@ -42,9 +42,9 @@ def get_random_train_val_test_split_per_well_temporal_order(
 
         for _, d in df.groupby(well_id_col):
             r = rng.random(len(d))
-            test_mask = r < test_size
-            val_mask = (r >= test_size) & (r < test_size + val_size)
-            train_mask = r >= test_size + val_size
+            test_mask = r < test_frac
+            val_mask = (r >= test_frac) & (r < test_frac + val_frac)
+            train_mask = r >= test_frac + val_frac
 
             if (
                 train_mask.sum() < min_train or
@@ -202,15 +202,20 @@ def get_blocked_train_val_test_split_with_temporal_order(
     return df_train, df_val, df_test
 
 
-def get_temporal_split_per_well(df, train_frac=0.7, val_frac=0.15):
+def get_temporal_split_per_well(df, test_frac=0.15, val_frac=0.15):
     train, val, test = [], [], []
+
+    assert 0 <= test_frac < 1
+    assert 0 <= val_frac < 1
+    assert (test_frac + val_frac) < 1, "test_frac + val_frac must be < 1"
 
     for wid, d in df.groupby("well_id"):
         d = d.sort_index()
         n = len(d)
 
-        n_train = int(n * train_frac)
+        n_test = int(n * test_frac)
         n_val = int(n * val_frac)
+        n_train = n - n_val - n_test
 
         train.append(d.iloc[:n_train])
         val.append(d.iloc[n_train:n_train + n_val])
@@ -222,10 +227,12 @@ def get_temporal_split_per_well(df, train_frac=0.7, val_frac=0.15):
         pd.concat(test),
     )
 
+
 def get_lowo_train_val_test_split(
     df: pd.DataFrame,
     test_well_id: str,
     well_id_col: str = "well_id",
+    is_random: bool = True,
 ):
     """
     Leave-One-Well-Out split with RANDOMIZED block-wise validation.
@@ -237,8 +244,12 @@ def get_lowo_train_val_test_split(
     df_test_all = df[df[well_id_col] == test_well_id].sort_index()
     df_train_val = df[df[well_id_col] != test_well_id].sort_index()
 
-    df_train, df_val, _ = get_random_train_val_test_split_per_well_temporal_order(df=df_train_val, val_size=0.2, test_size=0)
-    df_calibration, _, df_test = get_random_train_val_test_split_per_well_temporal_order(df=df_test_all, test_size=0.9, val_size=0)
+    if is_random:
+        df_train, df_val, _ = get_random_train_val_test_split_per_well_temporal_order(df=df_train_val, val_frac=0.2, test_frac=0)
+        df_calibration, _, df_test = get_random_train_val_test_split_per_well_temporal_order(df=df_test_all, test_frac=0.9, val_frac=0)
+    else:
+        df_train, df_val, _ = get_temporal_split_per_well(df=df_train_val, val_frac=0.2, test_frac=0)
+        df_calibration, _, df_test = get_temporal_split_per_well(df=df_test_all, test_frac=0.9, val_frac=0)
 
     return df_train, df_val, df_calibration, df_test
 

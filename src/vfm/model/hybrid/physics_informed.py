@@ -106,18 +106,40 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         self.scaler = StandardScaler()
         self.poly = PolynomialFeatures(degree, include_bias=False)
 
-        self.ml_residual = MultiOutputRegressor(
-            HistGradientBoostingRegressor(
-                max_iter=300,
-                learning_rate=0.05,
-                max_depth=3,
-                min_samples_leaf=20,
-                early_stopping=True,
-                n_iter_no_change=30,
-                validation_fraction=None,  # we supply validation explicitly
-                random_state=42,
+        # ==================================================
+        # Regime-aware residual configuration
+        # ==================================================
+
+        # Pressure drawdown bins (bara)
+        # These define operating regimes
+        mu = 104.6
+        sigma = 8.5
+
+        self.dp_bins = [
+            -np.inf,
+            mu - sigma,      # ~96 bar
+            mu + sigma,      # ~113 bar
+            np.inf
+        ]
+
+        self.dp_labels = ["below_normal", "normal", "above_normal"]
+
+        # One ML residual model per regime
+        self.ml_residual_models = {
+            label: MultiOutputRegressor(
+                HistGradientBoostingRegressor(
+                    max_iter=300,
+                    learning_rate=0.05,
+                    max_depth=3,
+                    min_samples_leaf=20,
+                    early_stopping=True,
+                    n_iter_no_change=30,
+                    validation_fraction=None,
+                    random_state=42,
+                )
             )
-        )
+            for label in self.dp_labels
+        }
 
         self.rmse_val = None
 
@@ -198,6 +220,33 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         # IMPORTANT: DO NOT drop NaNs here
         return df_lag
 
+    # --------------------------------------------------
+    # Regime assignment
+    # --------------------------------------------------
+    def _assign_regime(self, df: pd.DataFrame) -> pd.Series:
+        """
+        Assign operating regime based on pressure drawdown.
+
+        Regimes are inferred using:
+            ΔP = dhp - whp
+
+        Returns
+        -------
+        pd.Series
+            Categorical regime labels aligned with df.index
+        """
+        if ("dhp" not in df.columns) or ("whp" not in df.columns):
+            raise KeyError("dhp and whp are required for regime assignment")
+
+        dp = df["dhp"] - df["whp"]
+
+        return pd.cut(
+            dp,
+            bins=self.dp_bins,
+            labels=self.dp_labels,
+        )
+
+
     # ==================================================
     # Helper to build ML residual dataset
     # ==================================================
@@ -213,48 +262,38 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             - Δlog(qo)
             - Δlog(WGR)
             - Δlog(qg)
+
+        Also returns operating regime labels.
         """
 
         # --------------------------------------------------
-        # ML features (independent variables + lags)
+        # ML features
         # --------------------------------------------------
         X = self._build_ml_features(df, phys)
 
         # --------------------------------------------------
         # True values
         # --------------------------------------------------
-        qo_true = df[self.y_qo_col].values
-        qw_true = df[self.y_qw_col].values
-        qg_true = df[self.y_qg_col].values
+        qo_true = np.maximum(df[self.y_qo_col].values, EPS)
+        qw_true = np.maximum(df[self.y_qw_col].values, 0.0)
+        qg_true = np.maximum(df[self.y_qg_col].values, EPS)
 
         # --------------------------------------------------
         # Physics predictions
         # --------------------------------------------------
-        qo_phys = phys["qo_pred"].values
-        qw_phys = phys["qw_pred"].values
-        qg_phys = phys["qg_pred"].values
+        qo_phys = np.maximum(phys["qo_pred"].values, EPS)
+        qw_phys = np.maximum(phys["qw_pred"].values, 0.0)
+        qg_phys = np.maximum(phys["qg_pred"].values, EPS)
 
         # --------------------------------------------------
-        # Numerical safety (PHYSICALLY CORRECT)
-        # --------------------------------------------------
-        qo_true = np.maximum(qo_true, EPS)
-        qg_true = np.maximum(qg_true, EPS)
-        qw_true = np.maximum(qw_true, 0.0)
-
-        qo_phys = np.maximum(qo_phys, EPS)
-        qg_phys = np.maximum(qg_phys, EPS)
-        qw_phys = np.maximum(qw_phys, 0.0)
-
-        # --------------------------------------------------
-        # Water–Gas Ratio (WGR)
+        # Water–Gas Ratio
         # --------------------------------------------------
         wgr_true = compute_wgr(qw_true, qg_true)
         wgr_phys = compute_wgr(qw_phys, qg_phys)
 
         # --------------------------------------------------
         # Log-space residual targets
-        # ORDER MATTERS:
-        #   [qo_residual, wgr_residual, qg_residual]
+        # ORDER: [qo, wgr, qg]
         # --------------------------------------------------
         Y = np.column_stack([
             np.log1p(qo_true) - np.log1p(qo_phys),
@@ -262,16 +301,24 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             np.log1p(qg_true) - np.log1p(qg_phys),
         ])
 
-        mask = np.isfinite(wgr_true) & np.isfinite(wgr_phys)
+        # --------------------------------------------------
+        # Regime assignment
+        # --------------------------------------------------
+        regime = self._assign_regime(df)
 
-        # Apply mask consistently to X and Y
+        # --------------------------------------------------
+        # Validity mask
+        # --------------------------------------------------
+        mask = (
+            np.isfinite(Y).all(axis=1)
+            & regime.notna()
+        )
+
         X = X.loc[mask]
         Y = Y[mask]
+        regime = regime.loc[mask]
 
-        if not np.isfinite(Y).all():
-            raise ValueError("Residual targets contain NaNs or infs")
-
-        return X, Y
+        return X, Y, regime
 
 
     # --------------------------------------------------
@@ -322,28 +369,45 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         # --------------------------------------------------
         # 3. Build residual dataset (X, Y)
         # --------------------------------------------------
-        X_train_df, Y_train = self._build_residual_dataset(
+        X_train_df, Y_train, regime = self._build_residual_dataset(
             df_train_lag,
             phys_train,
         )
 
-        # --------------------------------------------------
-        # 4. FIX FOR ISSUE 1: store ML feature ordering
-        # --------------------------------------------------
-        self._ml_feature_columns = X_train_df.columns.tolist()
-
-        X_train = X_train_df[self._ml_feature_columns].values
 
         # --------------------------------------------------
-        # 5. Scale + polynomial expansion
+        # 4. Debug: regime sample counts (TRAINING)
         # --------------------------------------------------
-        X_train_scaled = self.scaler.fit_transform(X_train)
-        X_train_poly = self.poly.fit_transform(X_train_scaled)
+        for label in self.dp_labels:
+            idx = (regime == label).values
+            print(f"[INFO] Regime {label}: {idx.sum()} samples")
+
 
         # --------------------------------------------------
         # 6. Train ML residual model
         # --------------------------------------------------
-        self.ml_residual.fit(X_train_poly, Y_train)
+        # Store feature ordering
+        self._ml_feature_columns = X_train_df.columns.tolist()
+        X_train = X_train_df[self._ml_feature_columns].values
+
+        # Scale + polynomial expansion
+        X_scaled = self.scaler.fit_transform(X_train)
+        X_poly = self.poly.fit_transform(X_scaled)
+
+        # --------------------------------------------------
+        # Train one residual model per regime
+        # --------------------------------------------------
+        for label in self.dp_labels:
+            idx = (regime == label).values
+
+            # Safety: skip small regimes
+            if idx.sum() < 30:
+                continue
+
+            self.ml_residual_models[label].fit(
+                X_poly[idx],
+                Y_train[idx],
+            )
 
         # --------------------------------------------------
         # 7. OPTIONAL: validation diagnostics
@@ -359,7 +423,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
                 phys_val = self.predict_physics(df_val_lag)
 
-                X_val_df, Y_val = self._build_residual_dataset(
+                X_val_df, Y_val, _ = self._build_residual_dataset(
                     df_val_lag,
                     phys_val,
                 )
@@ -370,7 +434,38 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 X_val_scaled = self.scaler.transform(X_val)
                 X_val_poly = self.poly.transform(X_val_scaled)
 
-                Y_val_pred = self.ml_residual.predict(X_val_poly)
+                # --------------------------------------------------
+                # Regime-aware residual prediction (VALIDATION)
+                # --------------------------------------------------
+                regime_val = self._assign_regime(df_val_lag).loc[X_val_df.index]
+
+                # Initialize residual predictions
+                Y_val_pred = np.zeros_like(Y_val)
+
+                # Track where ML residuals were actually applied
+                used_ml = np.zeros(len(Y_val), dtype=bool)
+
+                for label in self.dp_labels:
+                    idx = (regime_val == label).values
+                    if not idx.any():
+                        continue
+
+                    model = self.ml_residual_models[label]
+
+                    # Skip regimes without trained models
+                    if not hasattr(model, "estimators_"):
+                        continue
+
+                    Y_val_pred[idx] = model.predict(X_val_poly[idx])
+                    used_ml[idx] = True
+
+
+
+                ml_fraction = used_ml.mean()
+                self.val_ml_fraction = ml_fraction
+
+                print(f"[INFO] Validation ML usage fraction: {ml_fraction:.2f}")
+
 
                 # Per-output RMSE (interpretable)
                 rmse = np.sqrt(np.mean((Y_val - Y_val_pred) ** 2, axis=0))
@@ -449,7 +544,21 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         Xs = self.scaler.transform(X)
         Xp = self.poly.transform(Xs)
 
-        res = self.ml_residual.predict(Xp)
+        # --------------------------------------------------
+        # Regime-aware residual prediction
+        # --------------------------------------------------
+        regime = self._assign_regime(df_lag).loc[X_df.index]
+
+        res = np.zeros((len(Xp), 3))
+
+        for label in self.dp_labels:
+            idx = (regime == label).values
+            if idx.any():
+                model = self.ml_residual_models[label]
+                if not hasattr(model, "estimators_"):
+                    continue
+                res[idx] = model.predict(Xp[idx])
+
 
         # --------------------------------------------------
         # OPTIONAL: residual magnitude regularization
@@ -483,7 +592,8 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         qw_phys = np.maximum(phys["qw_pred"].values, 0.0)
 
         # Physics WGR
-        wgr_phys = qw_phys / np.clip(qg_phys, EPS, None)
+        wgr_phys = compute_wgr(qw_phys, qg_phys)
+        wgr_phys = np.nan_to_num(wgr_phys, nan=0.0)
 
         # ML-corrected WGR (log-space)
         log_wgr = np.log1p(wgr_phys) + res[:, 1]
@@ -784,7 +894,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         joblib.dump(self.phys_models, f"{directory}/physics.pkl")
         joblib.dump(self.scaler, f"{directory}/scaler.pkl")
         joblib.dump(self.poly, f"{directory}/poly.pkl")
-        joblib.dump(self.ml_residual, f"{directory}/ml.pkl")
+        joblib.dump(self.ml_residual_models, f"{directory}/ml_regimes.pkl")
 
     @classmethod
     def load(cls, directory, **kwargs):
@@ -792,7 +902,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         model.phys_models = joblib.load(f"{directory}/physics.pkl")
         model.scaler = joblib.load(f"{directory}/scaler.pkl")
         model.poly = joblib.load(f"{directory}/poly.pkl")
-        model.ml_residual = joblib.load(f"{directory}/ml.pkl")
+        model.ml_residual_models = joblib.load(f"{directory}/ml_regimes.pkl")
         return model
 
     # --------------------------------------------------
@@ -856,9 +966,9 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             # Predictions
             # --------------------------------------------------
             p = (
-                self.predict_hybrid(d_lag)
+                self.predict_hybrid(d)
                 if is_hybrid_model
-                else self.predict_physics(d_lag)
+                else self.predict_physics(d)
             )
 
             x = d_lag.index
@@ -1099,3 +1209,4 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 geometry=geom,
                 global_params=None,  # IMPORTANT: do not update global priors
             ).fit(d, self.y_qo_col, self.y_qg_col, self.y_qw_col)
+

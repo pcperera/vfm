@@ -111,7 +111,7 @@ class Preprocessor:
 
         n_rel_collapse_meadian = 0
         n_floor = 0
-        safety_floor_value = 50.0  # Sm3/h
+        safety_floor_value = 75.0  # Sm3/h
 
         if flowing_mask.sum() > 0:
             qg_flowing = df.loc[flowing_mask, self.qg_col]
@@ -123,7 +123,6 @@ class Preprocessor:
 
             invalid_collapse.loc[flowing_mask] = (rel_collapse_mask_median | floor_mask)
             n_rel_collapse_meadian = rel_collapse_mask_median.sum()
-
 
         # ------------------------------------
         # Combine all invalid rules
