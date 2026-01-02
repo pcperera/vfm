@@ -232,7 +232,7 @@ def get_lowo_train_val_test_split(
     df: pd.DataFrame,
     test_well_id: str,
     well_id_col: str = "well_id",
-    is_random: bool = True,
+    is_random_ordered: bool = True,
 ):
     """
     Leave-One-Well-Out split with RANDOMIZED block-wise validation.
@@ -244,7 +244,7 @@ def get_lowo_train_val_test_split(
     df_test_all = df[df[well_id_col] == test_well_id].sort_index()
     df_train_val = df[df[well_id_col] != test_well_id].sort_index()
 
-    if is_random:
+    if is_random_ordered:
         df_train, df_val, _ = get_random_train_val_test_split_per_well_temporal_order(df=df_train_val, val_frac=0.2, test_frac=0)
         df_calibration, _, df_test = get_random_train_val_test_split_per_well_temporal_order(df=df_test_all, test_frac=0.9, val_frac=0)
     else:

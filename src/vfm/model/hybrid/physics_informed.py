@@ -143,6 +143,12 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
         self.rmse_val = None
 
+        # --------------------------------------------------
+        # Per-well bias calibration (log-space)
+        # --------------------------------------------------
+        self.well_bias_ = {}   # { well_id: np.array([b_qo, b_wgr, b_qg]) }
+
+
     def _build_ml_features(
         self,
         df: pd.DataFrame,
@@ -409,6 +415,42 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
                 Y_train[idx],
             )
 
+
+        # --------------------------------------------------
+        # 8. Per-well bias calibration (TRAINING ONLY)
+        # --------------------------------------------------
+        self.well_bias_ = {}
+
+        # Compute hybrid residuals on training data
+        # (physics + regime-aware ML, WITHOUT well bias)
+        res_train = np.zeros_like(Y_train)
+
+        for label in self.dp_labels:
+            idx = (regime == label).values
+            if not idx.any():
+                continue
+
+            model = self.ml_residual_models[label]
+            if not hasattr(model, "estimators_"):
+                continue
+
+            res_train[idx] = model.predict(X_poly[idx])
+
+        # For each well, estimate mean residual (bias)
+        train_wells = df_train_lag.loc[X_train_df.index, self.well_id_col]
+
+        for wid in train_wells.unique():
+            widx = (train_wells == wid).values
+            if widx.sum() < 10:
+                continue  # safety
+
+            # Mean residual per output (log-space bias)
+            self.well_bias_[wid] = np.mean(
+                Y_train[widx] - res_train[widx],
+                axis=0
+            )
+
+
         # --------------------------------------------------
         # 7. OPTIONAL: validation diagnostics
         # --------------------------------------------------
@@ -551,13 +593,26 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
         res = np.zeros((len(Xp), 3))
 
+        wells = df_lag.loc[X_df.index, self.well_id_col]
+
         for label in self.dp_labels:
             idx = (regime == label).values
-            if idx.any():
-                model = self.ml_residual_models[label]
-                if not hasattr(model, "estimators_"):
-                    continue
-                res[idx] = model.predict(Xp[idx])
+            if not idx.any():
+                continue
+
+            model = self.ml_residual_models[label]
+            if not hasattr(model, "estimators_"):
+                continue
+
+            res[idx] = model.predict(Xp[idx])
+
+        # --------------------------------------------------
+        # Apply per-well bias (log-space)
+        # --------------------------------------------------
+        for wid, bias in self.well_bias_.items():
+            widx = (wells == wid).values
+            if widx.any():
+                res[widx] += bias
 
 
         # --------------------------------------------------
@@ -895,6 +950,8 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         joblib.dump(self.scaler, f"{directory}/scaler.pkl")
         joblib.dump(self.poly, f"{directory}/poly.pkl")
         joblib.dump(self.ml_residual_models, f"{directory}/ml_regimes.pkl")
+        joblib.dump(self.well_bias_, f"{directory}/well_bias.pkl")
+
 
     @classmethod
     def load(cls, directory, **kwargs):
@@ -903,6 +960,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         model.scaler = joblib.load(f"{directory}/scaler.pkl")
         model.poly = joblib.load(f"{directory}/poly.pkl")
         model.ml_residual_models = joblib.load(f"{directory}/ml_regimes.pkl")
+        model.well_bias_ = joblib.load(f"{directory}/well_bias.pkl")
         return model
 
     # --------------------------------------------------
