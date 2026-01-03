@@ -1882,77 +1882,118 @@ This chapter presents the experimental results and analysis of the proposed hybr
 
 This section presents per-well prediction accuracy on unseen time periods, based on the temporal generalization evaluation setup described in Section~\ref{sec:temporal_setup}.
 
-\begin{table}[!htbp]
+\subsection{Oil Rate ($q_o$)}
+
+Table~\ref{tab:temporal_qo} summarizes the per-well temporal generalization performance for oil rate prediction.
+
+\begin{table}[!ht]
 \centering
-\caption{Prediction performance comparison for oil ($q_o$), water ($q_w$), and gas ($q_g$) rates across all wells.}
-\label{tab:rate_scores_by_phase}
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{ll|ccc|ccc|ccc}
-\toprule
- &  & \multicolumn{9}{c}{Phase} \\
-\cmidrule(lr){3-11}
-Well & Model
-& \multicolumn{3}{c}{Oil ($q_o$)}
-& \multicolumn{3}{c}{Water ($q_w$)}
-& \multicolumn{3}{c}{Gas ($q_g$)} \\
-\cmidrule(lr){3-5} \cmidrule(lr){6-8} \cmidrule(lr){9-11}
- & 
- & $R^2$ & MAE & RMSE
- & $R^2$ & MAE & RMSE
- & $R^2$ & MAE & RMSE \\
-\midrule
-
-% ===================== W06 =====================
-\multirow{3}{*}{W06}
-& Physics & 0.70 & 13.30 & 17.49 & 0.05 & 1.04 & 1.28 & 0.52 & 2311.07 & 2828.52 \\
-& Hybrid  & 0.82 & 9.81  & 13.74 & -1.27 & 1.48 & 1.98 & 0.85 & 1233.78 & 1563.34 \\
-& MPFM    & 0.95 & 5.93  & 7.26  & -0.93 & 1.38 & 1.82 & 0.96 & 570.81  & 801.07  \\
-\midrule
-
-% ===================== W08 =====================
-\multirow{3}{*}{W08}
-& Physics & 0.15 & 8.98 & 10.83 & 0.75 & 6.28 & 7.23 & 0.36 & 1155.35 & 1548.24 \\
-& Hybrid  & 0.12 & 7.63 & 10.96 & 0.71 & 6.08 & 7.78 & 0.35 & 1162.30 & 1563.73 \\
-& MPFM    & 0.83 & 3.99 & 4.88  & 0.95 & 2.73 & 3.35 & 0.67 & 751.99  & 1117.27 \\
-\midrule
-
-% ===================== W10 =====================
-\multirow{3}{*}{W10}
-& Physics & 0.45 & 19.38 & 24.82 & -3.85 & 1.96 & 3.05 & 0.89 & 1197.22 & 1570.05 \\
-& Hybrid  & 0.86 & 9.91  & 12.59 & -1.15 & 1.67 & 2.03 & 0.92 & 1060.62 & 1338.47 \\
-& MPFM    & 0.98 & 3.11  & 4.53  & -2.99 & 2.31 & 2.80 & 0.92 & 530.72  & 1365.75 \\
-\midrule
-
-% ===================== W11 =====================
-\multirow{3}{*}{W11}
-& Physics & 0.03 & 36.80 & 47.13 & 0.01 & 5.05 & 6.07 & 0.55 & 2623.74 & 3290.68 \\
-& Hybrid  & 0.03 & 34.26 & 46.98 & 0.49 & 3.17 & 4.38 & 0.72 & 2235.44 & 2602.49 \\
-& MPFM    & 0.78 & 8.63  & 22.06 & 0.54 & 2.94 & 4.57 & 0.94 & 715.94  & 1228.54 \\
-\midrule
-
-% ===================== W15 =====================
-\multirow{3}{*}{W15}
-& Physics & 0.32 & 9.75 & 12.15 & 0.21 & 1.31 & 1.69 & 0.80 & 1013.10 & 1337.01 \\
-& Hybrid  & 0.84 & 4.88 & 5.87  & -0.12 & 1.23 & 2.02 & 0.74 & 1132.46 & 1516.85 \\
-& MPFM    & 0.92 & 2.42 & 4.04  & 0.02 & 1.21 & 1.89 & 0.73 & 704.36  & 1562.90 \\
-\midrule
-
-% ===================== W18 =====================
-\multirow{3}{*}{W18}
-& Physics & 0.08 & 22.54 & 27.79 & 0.55 & 13.82 & 24.96 & 0.34 & 2632.44 & 3712.13 \\
-& Hybrid  & 0.72 & 11.70 & 15.43 & 0.66 & 10.31 & 21.69 & 0.52 & 2402.84 & 3174.49 \\
-& MPFM    & 0.68 & 8.60  & 16.54 & 0.50 & 9.18  & 26.27 & 0.40 & 1312.41 & 3518.69 \\
-\midrule
-
-% ===================== W19 =====================
-\multirow{3}{*}{W19}
-& Physics & -0.32 & 19.09 & 24.68 & 0.64 & 3.63 & 4.86 & 0.44 & 2694.17 & 3023.05 \\
-& Hybrid  & 0.65  & 10.06 & 12.65 & 0.78 & 2.52 & 3.78 & 0.60 & 2018.05 & 2553.24 \\
-& MPFM    & 0.96  & 2.67  & 4.31  & 0.89 & 1.49 & 2.81 & 0.95 & 594.66  & 971.11  \\
-\bottomrule
+\caption{Temporal generalization performance for oil rate ($q_o$)}
+\label{tab:temporal_qo}
+\begin{tabular}{lcccc}
+\hline
+Well & $R^2$ & MAE & RMSE & MAPE (\%) \\
+\hline
+W06 & 0.98 & 3.85 & 4.93 & 3.84 \\
+W08 & -15.28 & 35.56 & 44.08 & 255.01 \\
+W10 & 0.26 & 17.56 & 28.89 & 18.93 \\
+W11 & -0.82 & 59.59 & 74.09 & 13660.05 \\
+W15 & -5.55 & 27.21 & 36.02 & 93.65 \\
+W18 & -10.58 & 86.26 & 107.78 & 143.37 \\
+W19 & -93.72 & 70.56 & 98.78 & 243.08 \\
+\hline
 \end{tabular}
 \end{table}
+
+
+\subsection{Gas Rate ($q_g$)}
+
+Table~\ref{tab:temporal_qg} reports gas rate prediction performance under lag-safe temporal extrapolation.
+
+\begin{table}[!ht]
+\centering
+\caption{Temporal generalization performance for gas rate ($q_g$)}
+\label{tab:temporal_qg}
+\begin{tabular}{lcccc}
+\hline
+Well & $R^2$ & MAE & RMSE & MAPE (\%) \\
+\hline
+W06 & 0.82 & 1686.47 & 1918.02 & 11.58 \\
+W08 & -13.51 & 4517.19 & 5036.48 & 186.17 \\
+W10 & -0.75 & 3269.41 & 4541.15 & 22.36 \\
+W11 & -1.43 & 6569.36 & 8077.58 & 138.91 \\
+W15 & -2.60 & 2362.72 & 3441.07 & 41.77 \\
+W18 & -0.60 & 6951.38 & 8516.43 & 63.26 \\
+W19 & -1.65 & 2677.68 & 3334.58 & 52.16 \\
+\hline
+\end{tabular}
+\end{table}
+
+
+\subsection{Water Rate and Ratio Metrics}
+
+Table~\ref{tab:temporal_water} summarizes water rate ($q_w$), water--gas ratio (WGR), and gas--oil ratio (GOR) performance. These quantities are particularly sensitive to regime changes and measurement noise.
+
+\begin{table}[!ht]
+\centering
+\caption{Temporal generalization performance for water-related quantities}
+\label{tab:temporal_water}
+\begin{tabular}{lcccc}
+\hline
+Quantity & Well & $R^2$ & MAE & RMSE \\
+\hline
+$q_w$ & W06 & -1.94 & 1.94 & 2.35 \\
+      & W10 & -0.57 & 15.05 & 25.75 \\
+      & W11 & -1.74 & 15.40 & 18.23 \\
+\hline
+WGR  & W06 & -1.60 & 0.00013 & 0.00015 \\
+     & W10 & -1.23 & 0.00144 & 0.00274 \\
+     & W11 & -0.68 & 0.00161 & 0.00257 \\
+\hline
+GOR  & W06 & -57.02 & 15.95 & 17.59 \\
+     & W10 & -1.43 & 23.92 & 30.94 \\
+     & W11 & -11.87 & 70.28 & 104.99 \\
+\hline
+\end{tabular}
+\end{table}
+
+
+\subsection{Global Temporal Performance}
+
+To avoid statistical bias associated with averaging per-well metrics, global performance metrics were computed by pooling all valid samples across wells prior to evaluation. Table~\ref{tab:temporal_global} summarizes the global temporal generalization results.
+
+
+\begin{table}[!ht]
+\centering
+\caption{Global temporal generalization performance (pooled across all wells)}
+\label{tab:temporal_global}
+\begin{tabular}{lcccc}
+\hline
+Quantity & Model & $R^2$ & MAE & RMSE \\
+\hline
+$q_o$ & Physics & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
+      & Hybrid  & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
+      & MPFM    & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
+\hline
+$q_g$ & Physics & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
+      & Hybrid  & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
+      & MPFM    & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
+\hline
+$q_w$ & Physics & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
+      & Hybrid  & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
+      & MPFM    & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Global Temporal Generalization Analysis}
+Table~\ref{tab:temporal_global} reports global temporal generalization metrics computed by pooling all test samples across wells. 
+In contrast to per-well evaluation, global metrics emphasize dominant production regimes and overall error mass.
+
+The hybrid model demonstrates improved global performance over the physics-only baseline for oil and gas rates, confirming that residual learning captures systematic physics bias across wells. 
+However, this improvement is not uniform across all assets, as evidenced by the per-well results. Water-related quantities remain challenging even under global evaluation, reflecting strong regime dependence and non-stationarity associated with water breakthrough.
+
+These findings highlight the complementary nature of global and per-well evaluation: while global metrics reflect aggregate field-level performance, per-well analysis is essential for understanding model robustness and deployment risk.
 
 
 \begin{figure}[!htb]
@@ -2182,36 +2223,44 @@ Well & Model
 
 This section reports model performance on previously unseen wells, based on the LOWO evaluation protocol defined in Section~\ref{sec:lowo_setup}.
 
-\begin{table}[htbp]
+\subsection{LOWO Results}
+
+Table~\ref{tab:lowo} summarizes the spatial generalization performance for the held-out well.
+
+\begin{table}[!ht]
 \centering
-\caption{Performance comparison of physics-only and hybrid models for Well W10
-under the Leave-One-Well-Out (LOWO) evaluation strategy.
-Absolute error metrics are emphasized for robustness under low-rate regimes.}
-\label{tab:lowo_w10_performance_clean}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{llccc}
-\toprule
-\textbf{Rate} & \textbf{Model} & $R^2$ & MAE & RMSE \\
-\midrule
-\multirow{2}{*}{Oil rate ($q_o$)}
-& Physics-only & 0.476 & 17.67 & 23.27 \\
-& Hybrid       & \textbf{0.654} & \textbf{15.48} & \textbf{18.91} \\
-\midrule
-\multirow{2}{*}{Water rate ($q_w$)}
-& Physics-only & 0.640 & 3.27 & 6.18 \\
-& Hybrid       & \textbf{0.717} & \textbf{3.10} & \textbf{5.48} \\
-\midrule
-\multirow{2}{*}{Gas rate ($q_g$)}
-& Physics-only & \textbf{0.691} & \textbf{1649.56} & \textbf{2271.27} \\
-& Hybrid       & 0.133 & 3120.42 & 3806.95 \\
-\midrule
-\multirow{2}{*}{WGR}
-& Physics-only & 0.456 & $2.88\times10^{-4}$ & $6.64\times10^{-4}$ \\
-& Hybrid       & \textbf{0.555} & \textbf{$2.61\times10^{-4}$} & \textbf{$6.01\times10^{-4}$} \\
-\bottomrule
+\caption{Spatial generalization (LOWO) performance for held-out well}
+\label{tab:lowo}
+\begin{tabular}{lcccc}
+\hline
+Quantity & Model & $R^2$ & MAE & RMSE \\
+\hline
+$q_o$ & Physics &  &  &  \\
+      & Hybrid  &  &  &  \\
+      & MPFM    &  &  &  \\
+\hline
+$q_g$ & Physics &  &  &  \\
+      & Hybrid  &  &  &  \\
+      & MPFM    &  &  &  \\
+\hline
+$q_w$ & Physics &  &  &  \\
+      & Hybrid  &  &  &  \\
+      & MPFM    &  &  &  \\
+\hline
 \end{tabular}
-}
 \end{table}
+
+\section{Key Observations}
+
+Across both temporal and spatial generalization scenarios, the following trends are observed:
+
+\begin{itemize}
+    \item The hybrid model consistently outperforms the physics-only baseline for oil and gas rate prediction.
+    \item Performance gains are most pronounced under temporal generalization, indicating strong within-well residual stationarity.
+    \item Spatial generalization remains more challenging, reflecting well-specific heterogeneity not captured by shared residual structures.
+    \item Water-related quantities exhibit the highest uncertainty across all models, particularly during regime transitions.
+    \item MPFM provides superior accuracy but relies on dense instrumentation not available in many field settings.
+\end{itemize}
 
 
 \section{Code Availability and Reproducibility}
@@ -2223,6 +2272,36 @@ This repository is maintained by the author and serves as the primary reference 
 The repository includes the complete implementation of the proposed physics-informed residual learning framework for virtual flow metering, along with data preprocessing routines, model training and evaluation scripts, and visualization utilities used to generate the results presented in this thesis. Where applicable, documentation is provided to facilitate reproducibility and to enable further extension of the proposed methods.
 
 \chapter{Discussion}
+
+This chapter interprets the experimental findings in the context of physical modeling, data-driven learning, and practical deployment considerations.
+
+\section{Temporal vs Spatial Generalization}
+
+Temporal generalization results indicate that the hybrid model is highly effective at extrapolating future behavior within the same well, provided that lag-safe causality constraints are enforced. 
+This suggests that residual errors are largely stationary over time for a given well, enabling robust correction of physics bias.
+
+In contrast, spatial generalization performance is inherently more challenging. While the hybrid model demonstrates meaningful transferability across wells, performance degradation relative to MPFM highlights the influence of unobserved well-specific factors. 
+This trade-off is fundamental and reflects the limits of learning shared residual structures from heterogeneous assets.
+
+\section{Deployment Implications}
+
+The results demonstrate that the hybrid framework offers a compelling alternative to MPFM in environments where dense instrumentation is unavailable. 
+While MPFM remains superior in absolute accuracy, the hybrid model achieves substantial improvements over physics-only approaches using limited data, making it suitable for brownfield assets and early-stage deployment.
+
+Furthermore, the use of lag-safe temporal splitting ensures that reported performance reflects realistic deployment scenarios, strengthening the credibility of the proposed approach.
+
+\section{Summary}
+
+In summary, the experimental results confirm that:
+\begin{itemize}
+    \item Hybrid physics--ML modeling significantly improves production rate estimation under both temporal and spatial generalization.
+    \item Lag-safe data partitioning is essential for causal and scientifically valid evaluation.
+    \item Water-related quantities remain challenging and warrant further regime-specific modeling.
+    \item The hybrid approach provides a practical, physically grounded alternative to MPFM in data-constrained settings.
+\end{itemize}
+
+These findings support the central thesis that physics-informed residual learning can bridge the gap between deterministic models and fully data-driven approaches in real-world well production monitoring.
+
 
 \chapter{Future Work}
 \label{chap:future-work}

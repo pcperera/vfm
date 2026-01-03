@@ -364,10 +364,10 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         # 2. Prepare TRAINING data for ML residual learning
         # --------------------------------------------------
         df_train_lag = self._create_lagged_features(df)
-        df_train_lag = df_train_lag.dropna()
+        df_train_lag = self._drop_unsafe_lag_rows(df_train_lag)
 
         if df_train_lag.empty:
-            raise ValueError("No training rows left after lagging.")
+            raise ValueError("No training rows left after lag-safety filtering.")
 
         # Physics predictions on lagged data
         phys_train = self.predict_physics(df_train_lag)
@@ -459,7 +459,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         if df_val is not None:
 
             df_val_lag = self._create_lagged_features(df_val)
-            df_val_lag = df_val_lag.dropna()
+            df_val_lag = self._drop_unsafe_lag_rows(df_val_lag)
 
             if not df_val_lag.empty:
 
@@ -565,6 +565,8 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         """
 
         df_lag = self._create_lagged_features(df)
+        df_lag = self._drop_unsafe_lag_rows(df_lag)
+
 
         # --------------------------------------------------
         # Physics predictions
@@ -831,6 +833,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
         # IMPORTANT: create lagged features once
         df_lag = self._create_lagged_features(df)
+        df_lag = self._drop_unsafe_lag_rows(df_lag)
 
         # Predict once (hybrid model is global)
         pred = self.predict_hybrid(df)
@@ -981,6 +984,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
         # IMPORTANT: create lagged features once (for alignment consistency)
         df_lag = self._create_lagged_features(df)
+        df_lag = self._drop_unsafe_lag_rows(df_lag)
 
         # --------------------------------------------------
         # GLOBAL collectors (pooled across wells)
@@ -1230,6 +1234,7 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
             # Lagged data for alignment
             # --------------------------------------------------
             d_lag = self._create_lagged_features(d)
+            d_lag = self._drop_unsafe_lag_rows(d_lag)
             if d_lag.empty:
                 continue
 
@@ -1564,3 +1569,23 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         bias_new = (1.0 - alpha) * bias_prev + alpha * delta_t
 
         return bias_new
+
+
+    def _drop_unsafe_lag_rows(self, df_lag: pd.DataFrame) -> pd.DataFrame:
+        """
+        Drop rows that contain NaNs in any lagged feature.
+
+        This enforces lag-safety across block boundaries and
+        prevents information leakage when block-based splitting is used.
+        """
+        lag_cols = [
+            f"{col}_lag{lag}"
+            for lag in range(1, self.lags + 1)
+            for col in ["dhp", "whp"]
+            if f"{col}_lag{lag}" in df_lag.columns
+        ]
+
+        if not lag_cols:
+            return df_lag
+
+        return df_lag.dropna(subset=lag_cols)

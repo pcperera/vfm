@@ -200,8 +200,8 @@ class Preprocessor:
         df.dropna(subset=get_independent_vars_with_no_well_code(), inplace=True)
 
         df = df[(df["qo_well_test"] >= 0) & (df["qg_well_test"] >= 0) & (df["qw_well_test"] >= 0)]
-
         df = self._drop_non_physical_well_tests(df=df)
+        df = df[df["qw_well_test"] > 0]
 
         # Drop rows where oil and gas rates are both zero. 0))]
         # df = df[~((df["qo_well_test"] == 0) & (df["qg_well_test"] == 0))]
