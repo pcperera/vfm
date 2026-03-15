@@ -1705,31 +1705,6 @@ The primary objectives of the experimental evaluation are to:
 \end{enumerate}
 
 
-\section{Experimental Data Partitioning}
-
-To support robust model development and unbiased evaluation, the available dataset is partitioned into training, validation, and test subsets on a per-well basis. The partitioning strategy is designed to (i) preserve temporal ordering within each subset, (ii) ensure representation of all wells across splits, and (iii) maintain sufficient sample sizes for model calibration and evaluation.
-
-For each well, the data are randomly assigned to the three subsets using fixed proportions:
-\begin{itemize}
-    \item \textbf{Training set}: 70\% of the data
-    \item \textbf{Validation set}: 10\% of the data
-    \item \textbf{Test set}: 20\% of the data
-\end{itemize}
-
-Although the assignment is random at the row level, the original temporal order of observations is preserved within each subset. This ensures that sequential dependencies are not violated during model training or evaluation, while still allowing sufficient variability across the splits.
-
-To guarantee statistical reliability, minimum sample size constraints are enforced for each well:
-\begin{itemize}
-    \item At least 20 samples in the training set
-    \item At least 5 samples in the validation set
-    \item At least 5 samples in the test set
-\end{itemize}
-
-If these constraints are not satisfied for any well, the split is discarded and re-sampled. This process is repeated up to a maximum number of attempts until a valid split satisfying all constraints is obtained. The final training, validation, and test datasets are formed by concatenating the corresponding subsets across all wells.
-
-This partitioning approach ensures that all wells contribute data to each experimental phase, avoids data leakage between training and testing, and reflects realistic operational conditions in which future observations are evaluated using models trained on historical data.
-
-
 \section{Production-Mimicking Experimental Workflow}
 
 All experiments are conducted using a production-mimicking workflow. Physics models calibrated during the training phase remain fixed throughout the experimentation, and the globally trained machine-learning residual model is applied strictly in inference mode. No retraining or parameter updates are performed during testing.
@@ -1816,7 +1791,8 @@ These ratios are computed from both measured and predicted flow rates, and the s
 \section{Cross-Well Temporal Generalization Evaluation Setup}
 \label{sec:temporal_setup}
 
-The cross-well temporal generalization evaluation is designed to assess the ability of the proposed modeling framework to produce accurate flow-rate predictions on unseen time periods while remaining within the same set of wells. This evaluation reflects a common production monitoring scenario in which historical data are available for a well, and the objective is to predict flow rates under future operating conditions without retraining the model.
+The cross-well temporal generalization evaluation is designed to assess the ability of the proposed modeling framework to produce accurate flow-rate predictions on unseen time periods while remaining within the same set of wells. 
+This evaluation reflects a common production monitoring scenario in which historical data are available for a well, and the objective is to predict flow rates under future operating conditions without retraining the model.
 
 For each well, the available time-series data are partitioned into training and testing subsets using a temporally ordered split. Earlier observations are used for physics-model calibration and, where applicable, training of the global machine-learning residual model, while later observations are held out exclusively for evaluation. This strategy preserves the natural temporal ordering of the data and prevents information leakage from future operating conditions into the training process.
 
@@ -1824,6 +1800,33 @@ The physics-only and hybrid model configurations are evaluated under identical t
 
 Model performance is quantified using well-test measurements as the reference standard and evaluated using the evaluation metrics defined in Section~\ref{sec:evaluation_metrics} for oil, water, and gas flow rates. 
 Reporting results on a per-well basis enables systematic assessment of temporal robustness under evolving operating conditions.
+
+\subsection{Experimental Data Partitioning}
+
+To support robust model development and unbiased evaluation, the available dataset is partitioned into training, validation, and test subsets on a per-well basis. 
+The partitioning strategy is designed to (i) preserve temporal ordering within each subset, (ii) ensure representation of all wells across splits, and (iii) maintain sufficient sample sizes for model calibration and evaluation.
+
+For each well, the data are randomly assigned to the three subsets using fixed proportions:
+
+\begin{itemize}
+    \item \textbf{Training set}: 70\% of the data
+    \item \textbf{Validation set}: 10\% of the data
+    \item \textbf{Test set}: 20\% of the data
+\end{itemize}
+
+Although the assignment is random at the row level, the original temporal order of observations is preserved within each subset. This ensures that sequential dependencies are not violated during model training or evaluation, while still allowing sufficient variability across the splits.
+
+To guarantee statistical reliability, minimum sample size constraints are enforced for each well:
+\begin{itemize}
+    \item At least 20 samples in the training set
+    \item At least 5 samples in the validation set
+    \item At least 5 samples in the test set
+\end{itemize}
+
+If these constraints are not satisfied for any well, the split is discarded and re-sampled. This process is repeated up to a maximum number of attempts until a valid split satisfying all constraints is obtained. The final training, validation, and test datasets are formed by concatenating the corresponding subsets across all wells.
+
+This partitioning approach ensures that all wells contribute data to each experimental phase, avoids data leakage between training and testing, and reflects realistic operational conditions in which future observations are evaluated using models trained on historical data.
+
 
 \section{Spatial Generalization Evaluation Setup}
 \label{sec:lowo_setup}
@@ -1884,23 +1887,37 @@ This section presents per-well prediction accuracy on unseen time periods, based
 
 \subsection{Oil Rate ($q_o$)}
 
-Table~\ref{tab:temporal_qo} summarizes the per-well temporal generalization performance for oil rate prediction.
+Table~\ref{tab:temporal_oil_rate_comparison} summarizes the per-well temporal generalization performance for oil rate prediction.
 
 \begin{table}[!ht]
 \centering
 \caption{Temporal generalization performance for oil rate ($q_o$)}
-\label{tab:temporal_qo}
-\begin{tabular}{lcccc}
+\label{tab:temporal_oil_rate_comparison}
+\begin{tabular}{lccccccc}
 \hline
-Well & $R^2$ & MAE & RMSE & MAPE (\%) \\
+Metric & W06 & W08 & W10 & W11 & W15 & W18 & W19 \\
 \hline
-W06 & 0.98 & 3.85 & 4.93 & 3.84 \\
-W08 & -15.28 & 35.56 & 44.08 & 255.01 \\
-W10 & 0.26 & 17.56 & 28.89 & 18.93 \\
-W11 & -0.82 & 59.59 & 74.09 & 13660.05 \\
-W15 & -5.55 & 27.21 & 36.02 & 93.65 \\
-W18 & -10.58 & 86.26 & 107.78 & 143.37 \\
-W19 & -93.72 & 70.56 & 98.78 & 243.08 \\
+\hline
+\multicolumn{8}{c}{Physics Model} \\
+\hline
+$R^2$ & 0.68 & -15.71 & -2.25 & -6.70 & -9.12 & -12.80 & -27.53 \\
+MAE & 17.11 & 13.40 & 44.73 & 80.22 & 34.72 & 119.13 & 52.70 \\
+RMSE & 21.39 & 15.46 & 65.53 & 133.25 & 38.52 & 127.93 & 57.37 \\
+MAPE (\%) & 22.31 & 97.64 & 57.50 & 4897.03 & 119.69 & 240.84 & 158.57 \\
+\hline
+\multicolumn{8}{c}{Hybrid Model} \\
+\hline
+$R^2$ & 0.98 & -15.28 & 0.26 & -0.82 & -5.55 & -10.58 & -93.72 \\
+MAE & 3.85 & 35.56 & 17.56 & 59.59 & 27.21 & 86.26 & 70.56 \\
+RMSE & 4.93 & 44.08 & 28.89 & 74.09 & 36.02 & 107.78 & 98.78 \\
+MAPE (\%) & 3.84 & 255.01 & 18.93 & 13660.05 & 93.65 & 143.37 & 243.08 \\
+\hline
+\multicolumn{8}{c}{MPFM} \\
+\hline
+$R^2$ & 0.99 & -1.13 & 0.99 & 0.87 & 0.96 & -0.46 & 0.89 \\
+MAE & 1.50 & 4.48 & 2.48 & 7.73 & 1.73 & 35.85 & 2.39 \\
+RMSE & 1.87 & 4.69 & 3.23 & 15.07 & 1.95 & 42.51 & 3.79 \\
+MAPE (\%) & 1.19 & 34.00 & 2.72 & 17.70 & 6.83 & 49.51 & 5.82 \\
 \hline
 \end{tabular}
 \end{table}
@@ -1908,92 +1925,81 @@ W19 & -93.72 & 70.56 & 98.78 & 243.08 \\
 
 \subsection{Gas Rate ($q_g$)}
 
-Table~\ref{tab:temporal_qg} reports gas rate prediction performance under lag-safe temporal extrapolation.
+Table~\ref{tab:temporal_gas_rate_comparison} reports gas rate prediction performance under lag-safe temporal extrapolation.
 
 \begin{table}[!ht]
 \centering
 \caption{Temporal generalization performance for gas rate ($q_g$)}
-\label{tab:temporal_qg}
-\begin{tabular}{lcccc}
+\label{tab:temporal_gas_rate_comparison}
+\begin{tabular}{lccccccc}
 \hline
-Well & $R^2$ & MAE & RMSE & MAPE (\%) \\
+Metric & W06 & W08 & W10 & W11 & W15 & W18 & W19 \\
 \hline
-W06 & 0.82 & 1686.47 & 1918.02 & 11.58 \\
-W08 & -13.51 & 4517.19 & 5036.48 & 186.17 \\
-W10 & -0.75 & 3269.41 & 4541.15 & 22.36 \\
-W11 & -1.43 & 6569.36 & 8077.58 & 138.91 \\
-W15 & -2.60 & 2362.72 & 3441.07 & 41.77 \\
-W18 & -0.60 & 6951.38 & 8516.43 & 63.26 \\
-W19 & -1.65 & 2677.68 & 3334.58 & 52.16 \\
+\hline
+\multicolumn{8}{c}{Physics Model} \\
+\hline
+$R^2$ & 0.74 & -32.44 & -0.06 & 0.67 & -3.83 & -0.21 & -10.25 \\
+MAE & 1918.57 & 3002.72 & 3005.48 & 2392.87 & 2911.02 & 6979.76 & 6313.71 \\
+RMSE & 2335.47 & 3050.79 & 3745.84 & 3020.14 & 3779.28 & 7378.19 & 6388.45 \\
+MAPE (\%) & 13.62 & 73.05 & 23.19 & 23.14 & 46.17 & 60.42 & 99.63 \\
+\hline
+
+\multicolumn{8}{c}{Hybrid Model} \\
+\hline
+$R^2$ &  &  &  &  &  &  &  \\
+MAE &  &  &  &  &  &  &  \\
+RMSE &  &  &  &  &  &  &  \\
+MAPE (\%) &  &  &  &  &  &  &  \\
+\hline
+
+\multicolumn{8}{c}{MPFM} \\
+\hline
+$R^2$ & 0.99 & -7.29 & 0.92 & 0.94 & 0.95 & -1.16 & 0.96 \\
+MAE & 335.26 & 1234.51 & 839.50 & 760.23 & 242.13 & 7767.51 & 328.60 \\
+RMSE & 365.24 & 1529.78 & 1045.27 & 1175.15 & 295.92 & 9963.35 & 364.95 \\
+MAPE (\%) & 2.36 & 31.65 & 5.85 & 12.25 & 4.36 & 37.90 & 4.75 \\
 \hline
 \end{tabular}
 \end{table}
 
+\subsection{Water Rate ($q_w$)}
 
-\subsection{Water Rate and Ratio Metrics}
-
-Table~\ref{tab:temporal_water} summarizes water rate ($q_w$), water--gas ratio (WGR), and gas--oil ratio (GOR) performance. These quantities are particularly sensitive to regime changes and measurement noise.
+Table~\ref{tab:temporal_water_rate_comparison} reports water rate prediction performance under lag-safe temporal extrapolation.
 
 \begin{table}[!ht]
 \centering
-\caption{Temporal generalization performance for water-related quantities}
-\label{tab:temporal_water}
-\begin{tabular}{lcccc}
+\caption{Temporal generalization performance for water rate ($q_w$)}
+\label{tab:temporal_water_rate_comparison}
+\begin{tabular}{lccccccc}
 \hline
-Quantity & Well & $R^2$ & MAE & RMSE \\
+Metric & W06 & W08 & W10 & W11 & W15 & W18 & W19 \\
 \hline
-$q_w$ & W06 & -1.94 & 1.94 & 2.35 \\
-      & W10 & -0.57 & 15.05 & 25.75 \\
-      & W11 & -1.74 & 15.40 & 18.23 \\
 \hline
-WGR  & W06 & -1.60 & 0.00013 & 0.00015 \\
-     & W10 & -1.23 & 0.00144 & 0.00274 \\
-     & W11 & -0.68 & 0.00161 & 0.00257 \\
+\multicolumn{8}{c}{Physics Model} \\
 \hline
-GOR  & W06 & -57.02 & 15.95 & 17.59 \\
-     & W10 & -1.43 & 23.92 & 30.94 \\
-     & W11 & -11.87 & 70.28 & 104.99 \\
+$R^2$ & -2.72 & -2.23 & -0.69 & -2.86 & -3.24 & -23.15 & -4.36 \\
+MAE & 2.42 & 13.69 & 18.55 & 20.99 & 5.59 & 51.50 & 17.43 \\
+RMSE & 2.84 & 14.34 & 29.06 & 23.80 & 6.39 & 52.66 & 19.07 \\
+MAPE (\%) & 100.00 & 40.40 & 99.60 & 441.02 & 100.00 & 93.14 & 100.32 \\
+\hline
+
+\multicolumn{8}{c}{Hybrid Model} \\
+\hline
+$R^2$ &  &  &  &  &  &  &  \\
+MAE &  &  &  &  &  &  &  \\
+RMSE &  &  &  &  &  &  &  \\
+MAPE (\%) &  &  &  &  &  &  &  \\
+\hline
+
+\multicolumn{8}{c}{MPFM} \\
+\hline
+$R^2$ & -1.51 & 0.85 & 0.98 & 0.16 & -0.51 & -2.45 & 0.60 \\
+MAE & 1.99 & 2.86 & 2.53 & 7.41 & 2.86 & 18.24 & 2.99 \\
+RMSE & 2.39 & 3.06 & 3.06 & 10.30 & 4.00 & 20.44 & 5.23 \\
+MAPE (\%) & 73.25 & 8.47 & 81.48 & 33.10 & 53.26 & 32.23 & 123.51 \\
 \hline
 \end{tabular}
 \end{table}
-
-
-\subsection{Global Temporal Performance}
-
-To avoid statistical bias associated with averaging per-well metrics, global performance metrics were computed by pooling all valid samples across wells prior to evaluation. Table~\ref{tab:temporal_global} summarizes the global temporal generalization results.
-
-
-\begin{table}[!ht]
-\centering
-\caption{Global temporal generalization performance (pooled across all wells)}
-\label{tab:temporal_global}
-\begin{tabular}{lcccc}
-\hline
-Quantity & Model & $R^2$ & MAE & RMSE \\
-\hline
-$q_o$ & Physics & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
-      & Hybrid  & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
-      & MPFM    & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
-\hline
-$q_g$ & Physics & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
-      & Hybrid  & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
-      & MPFM    & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
-\hline
-$q_w$ & Physics & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
-      & Hybrid  & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
-      & MPFM    & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} & \textit{(from GLOBAL)} \\
-\hline
-\end{tabular}
-\end{table}
-
-\subsection{Global Temporal Generalization Analysis}
-Table~\ref{tab:temporal_global} reports global temporal generalization metrics computed by pooling all test samples across wells. 
-In contrast to per-well evaluation, global metrics emphasize dominant production regimes and overall error mass.
-
-The hybrid model demonstrates improved global performance over the physics-only baseline for oil and gas rates, confirming that residual learning captures systematic physics bias across wells. 
-However, this improvement is not uniform across all assets, as evidenced by the per-well results. Water-related quantities remain challenging even under global evaluation, reflecting strong regime dependence and non-stationarity associated with water breakthrough.
-
-These findings highlight the complementary nature of global and per-well evaluation: while global metrics reflect aggregate field-level performance, per-well analysis is essential for understanding model robustness and deployment risk.
 
 
 \begin{figure}[!htb]
@@ -2003,14 +2009,14 @@ These findings highlight the complementary nature of global and per-well evaluat
         \uomFig
         {W06 gas rate temporal generalization performance}
         {fig:w06_qg_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W06_qg_hybrid.png}}{}
+        {\includegraphics[width=\textwidth]{images/finalized_results/W06_qg_hybrid.png}}{}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \uomFig
         {W06 oil rate temporal generalization performance}
         {fig:w06_qo_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W06_qo_hybrid.png}}{}
+        {\includegraphics[width=\textwidth]{images/finalized_results/W06_qo_hybrid.png}}{}
     \end{subfigure}
 
     \vspace{0.5em}
@@ -2019,44 +2025,12 @@ These findings highlight the complementary nature of global and per-well evaluat
         \uomFig
         {W06 water rate temporal generalization performance}
         {fig:w06_qw_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W06_qw_hybrid.png}}{}
+        {\includegraphics[width=\textwidth]{images/finalized_results/W06_qw_hybrid.png}}{}
     \end{subfigure}
 
     \caption{Temporal generalization performance of the hybrid model for W06.
     The plots show predicted and measured gas, oil, and water rates over time.}
     \label{fig:w06_temporal_generalization}
-\end{figure}
-
-
-\begin{figure}[!htb]
-    \centering
-
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W08 gas rate temporal generalization performance}
-        {fig:W08_qg_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W08_qg_hybrid.png}}{}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W08 oil rate temporal generalization performance}
-        {fig:W08_qo_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W08_qo_hybrid.png}}{}
-    \end{subfigure}
-
-    \vspace{0.5em}
-
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W08 water rate temporal generalization performance}
-        {fig:W08_qw_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W08_qw_hybrid.png}}{}
-    \end{subfigure}
-
-    \caption{Temporal generalization performance of the hybrid model for W08.
-    The plots show predicted and measured gas, oil, and water rates over time.}
-    \label{fig:W08_temporal_generalization}
 \end{figure}
 
 
@@ -2122,101 +2096,6 @@ These findings highlight the complementary nature of global and per-well evaluat
     \label{fig:W11_temporal_generalization}
 \end{figure}
 
-
-\begin{figure}[!htb]
-    \centering
-
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W15 gas rate temporal generalization performance}
-        {fig:W15_qg_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W15_qg_hybrid.png}}{}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W15 oil rate temporal generalization performance}
-        {fig:W15_qo_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W15_qo_hybrid.png}}{}
-    \end{subfigure}
-
-    \vspace{0.5em}
-
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W15 water rate temporal generalization performance}
-        {fig:W15_qw_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W15_qw_hybrid.png}}{}
-    \end{subfigure}
-
-    \caption{Temporal generalization performance of the hybrid model for W15.
-    The plots show predicted and measured gas, oil, and water rates over time.}
-    \label{fig:W15_temporal_generalization}
-\end{figure}
-
-
-\begin{figure}[!htb]
-    \centering
-
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W18 gas rate temporal generalization performance}
-        {fig:w18_qg_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W18_qg_hybrid.png}}{}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W18 oil rate temporal generalization performance}
-        {fig:w18_qo_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W18_qo_hybrid.png}}{}
-    \end{subfigure}
-
-    \vspace{0.5em}
-
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W18 water rate temporal generalization performance}
-        {fig:w18_qw_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W18_qw_hybrid.png}}{}
-    \end{subfigure}
-
-    \caption{Temporal generalization performance of the hybrid model for W18.
-    The plots show predicted and measured gas, oil, and water rates over time.}
-    \label{fig:w18_temporal_generalization}
-\end{figure}
-
-
-\begin{figure}[!htb]
-    \centering
-
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W19 gas rate temporal generalization performance}
-        {fig:W19_qg_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W19_qg_hybrid.png}}{}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W19 oil rate temporal generalization performance}
-        {fig:W19_qo_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W19_qo_hybrid.png}}{}
-    \end{subfigure}
-
-    \vspace{0.5em}
-
-    \begin{subfigure}[t]{0.48\textwidth}
-        \uomFig
-        {W19 water rate temporal generalization performance}
-        {fig:W19_qw_model_performance}
-        {\includegraphics[width=\textwidth]{images/results/W19_qw_hybrid.png}}{}
-    \end{subfigure}
-
-    \caption{Temporal generalization performance of the hybrid model for W19.
-    The plots show predicted and measured gas, oil, and water rates over time.}
-    \label{fig:W19_temporal_generalization}
-\end{figure}
 
 
 \section{Spatial Generalization Performance}
