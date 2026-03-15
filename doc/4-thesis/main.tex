@@ -1908,9 +1908,9 @@ MAPE (\%) & 22.31 & 97.64 & 57.50 & 4897.03 & 119.69 & 240.84 & 158.57 \\
 \multicolumn{8}{c}{Hybrid Model} \\
 \hline
 $R^2$ & 0.98 & -15.28 & 0.26 & -0.82 & -5.55 & -10.58 & -93.72 \\
-MAE & 3.85 & 35.56 & 17.56 & 59.59 & 27.21 & 86.26 & 70.56 \\
-RMSE & 4.93 & 44.08 & 28.89 & 74.09 & 36.02 & 107.78 & 98.78 \\
-MAPE (\%) & 3.84 & 255.01 & 18.93 & 13660.05 & 93.65 & 143.37 & 243.08 \\
+MAE & 5.25 & 17.86 & 23.36 & 49.30 & 40.71 & 89.04 & 69.55 \\
+RMSE & 6.36 & 18.75 & 34.96 & 56.25 & 50.64 & 129.04 & 83.87 \\
+MAPE (\%) & 5.98 & 141.08 & 27.30 & 46.72 & 158.72 & 217.09 & 234.62 \\
 \hline
 \multicolumn{8}{c}{MPFM} \\
 \hline
@@ -2110,21 +2110,21 @@ Table~\ref{tab:lowo} summarizes the spatial generalization performance for the h
 \centering
 \caption{Spatial generalization (LOWO) performance for held-out well}
 \label{tab:lowo}
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccc}
 \hline
-Quantity & Model & $R^2$ & MAE & RMSE \\
+Quantity & Model & $R^2$ & MAE & RMSE & MAPE (\%) \\
 \hline
-$q_o$ & Physics &  &  &  \\
-      & Hybrid  &  &  &  \\
-      & MPFM    &  &  &  \\
+$q_o$ & Physics & 0.07 & 20.26 & 29.53 & 20.22 \\
+      & Hybrid  & 0.54 & 15.15 & 20.71 & 14.87 \\
+      & MPFM    & 0.97 & 3.12  & 5.57  & 2.86 \\
 \hline
-$q_g$ & Physics &  &  &  \\
-      & Hybrid  &  &  &  \\
-      & MPFM    &  &  &  \\
+$q_g$ & Physics & 0.32 & 2424.02 & 3036.39 & 19.16 \\
+      & Hybrid  & 0.36 & 2334.83 & 2945.92 & 17.89 \\
+      & MPFM    & 0.95 & 494.63  & 862.86  & 3.43 \\
 \hline
-$q_w$ & Physics &  &  &  \\
-      & Hybrid  &  &  &  \\
-      & MPFM    &  &  &  \\
+$q_w$ & Physics & -0.24 & 5.35 & 12.09 & 100.00 \\
+      & Hybrid  & -0.30 & 4.89 & 12.41 & 10756.85 \\
+      & MPFM    & 0.93 & 2.42 & 2.86 & 89823.80 \\
 \hline
 \end{tabular}
 \end{table}
