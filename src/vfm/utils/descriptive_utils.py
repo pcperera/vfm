@@ -168,7 +168,7 @@ def get_lag_safe_block_split(
 
 
 
-def get_temporal_split_per_well(df, test_frac=0.15, val_frac=0.15, gap=2):
+def get_temporal_split_per_well(df, test_frac=0.15, val_frac=0.15, gap=1):
     train, val, test = [], [], []
 
     assert 0 <= test_frac < 1 
