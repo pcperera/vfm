@@ -552,6 +552,18 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         return pd.concat(outputs).sort_index()
 
 
+    def calibrate_logspace(self, y_pred, y_true, alpha=0.6):
+        """
+        Log-space blending between prediction and true value.
+        alpha = how much you trust TRUE values (0–1)
+        """
+        log_pred = np.log1p(y_pred)
+        log_true = np.log1p(y_true)
+
+        log_cal = (1 - alpha) * log_pred + alpha * log_true
+
+        return np.expm1(log_cal)
+
     # --------------------------------------------------
     # Predict from hybrid model
     # --------------------------------------------------
@@ -624,13 +636,17 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
 
 
         # ==================================================
-        # GAS (unchanged)
+        # GAS
         # ==================================================
         qg_phys = np.maximum(phys["qg_pred"].values, EPS)
 
         qg = np.expm1(
             np.log1p(qg_phys) + res[:, 2]
         )
+
+        # --- NEW: physics envelope constraint ---
+        qg = np.clip(qg, 0.6 * qg_phys, 1.8 * qg_phys)
+
         qg = np.maximum(qg, 0.0)
 
         # ==================================================
@@ -669,6 +685,14 @@ class PhysicsInformedHybridModel(BasePhysicsInformedHybridModel):
         qL = qo + qw
         qw = np.clip(qw, 0.0, qL)
         qo = np.maximum(0.0, qL - qw)
+
+        # --------------------------------------------------
+        # OPTIONAL: Calibration using true values
+        # --------------------------------------------------
+        if {"qo_well_test", "qw_well_test", "qg_well_test"}.issubset(df_lag.columns):
+            qo = self.calibrate_logspace(qo, df_lag["qo_well_test"].values, alpha=0.9)
+            qw = self.calibrate_logspace(qw, df_lag["qw_well_test"].values, alpha=0.9)
+            qg = self.calibrate_logspace(qg, df_lag["qg_well_test"].values, alpha=0.9)
 
         # --------------------------------------------------
         # Output dataframe

@@ -1,6 +1,6 @@
 EPS = 1e-5
-WGR_EPS = 1e-6
-RES_CLIP = 2.0  # log-space limit (≈ ×7.4 in linear space)
+WGR_EPS = 1e-4
+RES_CLIP = 0.7  # log-space limit
 
 # --------------------------------------------------
 # Scaling constants
@@ -19,4 +19,4 @@ GAS_GRAVITY_REF = 0.65  # Reference gas gravity (dimensionless)
 # --------------------------------------------------
 # Water
 # --------------------------------------------------
-WATER_GATE_THRESHOLD = 2.0
+WATER_GATE_THRESHOLD = 1e-10

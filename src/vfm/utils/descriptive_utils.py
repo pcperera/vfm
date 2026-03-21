@@ -168,11 +168,11 @@ def get_lag_safe_block_split(
 
 
 
-def get_temporal_split_per_well(df, test_frac=0.15, val_frac=0.15):
+def get_temporal_split_per_well(df, test_frac=0.15, val_frac=0.15, gap=2):
     train, val, test = [], [], []
 
-    assert 0 <= test_frac < 1
-    assert 0 <= val_frac < 1
+    assert 0 <= test_frac < 1 
+    assert 0 <= val_frac < 1 
     assert (test_frac + val_frac) < 1, "test_frac + val_frac must be < 1"
 
     for wid, d in df.groupby("well_id"):
@@ -183,15 +183,25 @@ def get_temporal_split_per_well(df, test_frac=0.15, val_frac=0.15):
         n_val = int(n * val_frac)
         n_train = n - n_val - n_test
 
-        train.append(d.iloc[:n_train])
-        val.append(d.iloc[n_train:n_train + n_val])
-        test.append(d.iloc[n_train + n_val:])
+        if n_train <= 0 or (n_val <= 0 and n_test <= 0):
+            print(f"Warning: Not enough data for well {wid} to create train/val/test split. Skipping.")
+            continue
 
-    return (
-        pd.concat(train),
-        pd.concat(val),
-        pd.concat(test),
-    )
+        train_end = n_train
+        val_start = train_end + gap
+        val_end = val_start + n_val
+        test_start = val_end + gap
+
+        print(f"n_train={n_train}, n_val={n_val}, n_test={n_test}")
+        if test_frac != 0 and test_start >= n:
+            print(f"arning: Not enough data for well {wid}: n={n}, train_end={train_end}, val_start={val_start}, val_end={val_end}, test_start={test_start}")
+            continue
+
+        train.append(d.iloc[:train_end])
+        val.append(d.iloc[val_start:val_end])
+        test.append(d.iloc[test_start:])
+
+    return pd.concat(train), pd.concat(val), pd.concat(test)
 
 
 def get_lowo_train_val_test_split(

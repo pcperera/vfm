@@ -146,7 +146,7 @@ class MultiphasePhysicsModel:
         # --------------------------------------------------
         # Water-cut closure
         # --------------------------------------------------
-        wc = logistic(self._feature_matrix_for_wc(df) @ A)
+        wc = 0.02 + 0.96 * logistic(self._feature_matrix_for_wc(df) @ A)
 
         qw = wc * qL
         qo = (1.0 - wc) * qL
@@ -385,6 +385,15 @@ class MultiphasePhysicsModel:
             qg_lift = 0.0
 
         qg = qg_res + qg_lift
+
+        # --------------------------------------------------
+        # DEBUG: physics water prediction
+        # --------------------------------------------------
+        if np.random.rand() < 0.01:  # prevent flooding logs
+            print("\n[DEBUG] Physics water stats")
+            print("qw min:", np.min(qw))
+            print("qw max:", np.max(qw))
+            print("qw mean:", np.mean(qw))        
 
         # --------------------------------------------------
         # Output
