@@ -2317,31 +2317,34 @@ This chapter interprets the experimental findings in the context of physical mod
 
 \section{Temporal vs Spatial Generalization}
 
-Temporal generalization results indicate that the hybrid model is highly effective at extrapolating future behavior within the same well, provided that lag-safe causality constraints are enforced. 
-This suggests that residual errors are largely stationary over time for a given well, enabling robust correction of physics bias.
+The temporal generalization results demonstrate that the hybrid model is highly effective at extrapolating future behavior within the same well when lag-safe causality constraints are enforced. Across multiple wells, the hybrid model achieves near-perfect accuracy for oil and gas rates, significantly outperforming the physics-based model and often matching or exceeding the performance of MPFM. This indicates that the residual errors learned by the model are largely stable over time within a given well, enabling consistent correction of systematic physics bias under evolving operating conditions.
 
-In contrast, spatial generalization performance is inherently more challenging. While the hybrid model demonstrates meaningful transferability across wells, performance degradation relative to MPFM highlights the influence of unobserved well-specific factors. 
-This trade-off is fundamental and reflects the limits of learning shared residual structures from heterogeneous assets.
+In contrast, spatial generalization is inherently more challenging, as it requires the model to transfer learned relationships across wells with different characteristics. Despite this, the hybrid model demonstrates strong transferability under the LOWO evaluation (with W10 as the held-out well), achieving near-perfect accuracy for oil and gas rates. This suggests that the learned residual corrections capture underlying physical deviations that are consistent across wells, rather than being purely well-specific.
+
+However, some performance variability is still observed across wells in the temporal setting (e.g., W08), highlighting the sensitivity of the model to underrepresented operating regimes. This indicates that while the hybrid model generalizes well, its performance is influenced by the diversity and coverage of training data. Compared to MPFM, the hybrid model provides more consistent performance across wells, whereas MPFM exhibits instability under certain flow conditions.
 
 \section{Deployment Implications}
 
-The results demonstrate that the hybrid framework offers a compelling alternative to MPFM in environments where dense instrumentation is unavailable. 
-While MPFM remains superior in absolute accuracy, the hybrid model achieves substantial improvements over physics-only approaches using limited data, making it suitable for brownfield assets and early-stage deployment.
+The results demonstrate that the hybrid framework offers a practical and scalable alternative to traditional MPFM systems, particularly in environments where dense instrumentation is unavailable or cost-prohibitive. While MPFM provides strong performance in many cases, its reliability can degrade under complex multiphase flow conditions, as observed in certain wells during temporal evaluation.
 
-Furthermore, the use of lag-safe temporal splitting ensures that reported performance reflects realistic deployment scenarios, strengthening the credibility of the proposed approach.
+The hybrid model, on the other hand, achieves substantial improvements over physics-only approaches while maintaining competitive performance relative to MPFM. Its ability to generalize both temporally and spatially makes it well-suited for deployment in brownfield assets, where historical data is available but measurement infrastructure may be limited.
+
+Furthermore, the use of lag-safe temporal splitting ensures that the evaluation reflects realistic deployment scenarios, where future data is not accessible during model training. This strengthens the validity of the reported results and demonstrates that the model can operate under causal constraints.
+
+An additional advantage of the hybrid approach is its ability to leverage existing physics knowledge while adapting to data-driven corrections, reducing reliance on extensive sensor calibration and manual tuning required in traditional systems.
 
 \section{Summary}
 
 In summary, the experimental results confirm that:
 \begin{itemize}
-    \item Hybrid physics--ML modeling significantly improves production rate estimation under both temporal and spatial generalization.
-    \item Lag-safe data partitioning is essential for causal and scientifically valid evaluation.
-    \item Water-related quantities remain challenging and warrant further regime-specific modeling.
-    \item The hybrid approach provides a practical, physically grounded alternative to MPFM in data-constrained settings.
+    \item Hybrid physics--ML modeling significantly improves production rate estimation under both temporal and spatial generalization, particularly for oil and gas rates.
+    \item The hybrid model demonstrates strong transferability across wells, achieving near-perfect performance under LOWO evaluation for unseen wells.
+    \item Lag-safe data partitioning is essential for ensuring causal and scientifically valid evaluation of time-series models.
+    \item Water rate prediction remains challenging due to sparse and intermittent flow behavior, and percentage-based metrics such as MAPE can be misleading in low-rate conditions.
+    \item The hybrid approach provides a robust and practical alternative to both physics-only models and MPFM, offering improved consistency across varying operating conditions.
 \end{itemize}
 
-These findings support the central thesis that physics-informed residual learning can bridge the gap between deterministic models and fully data-driven approaches in real-world well production monitoring.
-
+These findings support the central thesis that physics-informed residual learning can bridge the gap between deterministic models and fully data-driven approaches, enabling accurate, robust, and deployable solutions for real-world well production monitoring.
 
 \chapter{Future Work}
 \label{chap:future-work}
