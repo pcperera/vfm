@@ -130,16 +130,18 @@
 \contentsline {subsection}{\numberline {5.1.3}Water Rate ($q_w$)}{67}{subsection.5.1.3}%
 \contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{69}{section.5.2}%
 \contentsline {subsection}{\numberline {5.2.1}LOWO Results}{73}{subsection.5.2.1}%
-\contentsline {section}{\numberline {5.3}Key Observations}{74}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Code Availability and Reproducibility}{76}{section.5.4}%
-\contentsline {chapter}{\numberline {6}Discussion}{77}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Temporal vs Spatial Generalization}{77}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Deployment Implications}{77}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Summary}{78}{section.6.3}%
-\contentsline {chapter}{\numberline {7}Future Work}{79}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{79}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{79}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{80}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{80}{section.7.4}%
-\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{80}{section.7.5}%
-\contentsline {chapter}{References}{81}{chapter*.32}%
+\contentsline {section}{\numberline {5.3}Performance Comparison with Contemporary Hybrid VFM}{74}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Key Observations}{76}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Code Availability and Reproducibility}{78}{section.5.5}%
+\contentsline {chapter}{\numberline {6}Discussion}{79}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Temporal vs Spatial Generalization}{79}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Comparison with Comtemporary Hybrid VFM}{79}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Deployment Implications}{80}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Summary}{81}{section.6.4}%
+\contentsline {chapter}{\numberline {7}Future Work}{82}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{82}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{82}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{83}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{83}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{83}{section.7.5}%
+\contentsline {chapter}{References}{84}{chapter*.33}%
