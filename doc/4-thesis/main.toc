@@ -126,20 +126,20 @@
 \contentsline {chapter}{\numberline {5}Results and Analysis}{65}{chapter.5}%
 \contentsline {section}{\numberline {5.1}Temporal Generalization Performance}{65}{section.5.1}%
 \contentsline {subsection}{\numberline {5.1.1}Oil Rate ($q_o$)}{65}{subsection.5.1.1}%
-\contentsline {subsection}{\numberline {5.1.2}Gas Rate ($q_g$)}{65}{subsection.5.1.2}%
-\contentsline {subsection}{\numberline {5.1.3}Water Rate ($q_w$)}{66}{subsection.5.1.3}%
-\contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{70}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}LOWO Results}{70}{subsection.5.2.1}%
-\contentsline {section}{\numberline {5.3}Key Observations}{70}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Code Availability and Reproducibility}{71}{section.5.4}%
-\contentsline {chapter}{\numberline {6}Discussion}{72}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Temporal vs Spatial Generalization}{72}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Deployment Implications}{72}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Summary}{72}{section.6.3}%
-\contentsline {chapter}{\numberline {7}Future Work}{74}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{74}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{74}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{75}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{75}{section.7.4}%
-\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{75}{section.7.5}%
-\contentsline {chapter}{References}{76}{chapter*.31}%
+\contentsline {subsection}{\numberline {5.1.2}Gas Rate ($q_g$)}{66}{subsection.5.1.2}%
+\contentsline {subsection}{\numberline {5.1.3}Water Rate ($q_w$)}{67}{subsection.5.1.3}%
+\contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{69}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}LOWO Results}{73}{subsection.5.2.1}%
+\contentsline {section}{\numberline {5.3}Key Observations}{74}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Code Availability and Reproducibility}{75}{section.5.4}%
+\contentsline {chapter}{\numberline {6}Discussion}{76}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Temporal vs Spatial Generalization}{76}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Deployment Implications}{76}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Summary}{76}{section.6.3}%
+\contentsline {chapter}{\numberline {7}Future Work}{78}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{78}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{78}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{79}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{79}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{79}{section.7.5}%
+\contentsline {chapter}{References}{80}{chapter*.31}%

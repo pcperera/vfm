@@ -8,7 +8,7 @@
 \contentsline {table}{\numberline {3.5}{\ignorespaces Summary of available historical measurements for each production well}}{36}{table.caption.15}%
 \contentsline {table}{\numberline {3.6}{\ignorespaces Parameters and initial guesses used for nonlinear calibration of the physics-based well flow model}}{57}{table.caption.19}%
 \contentsline {table}{\numberline {4.1}{\ignorespaces Performance metrics used for model evaluation}}{64}{table.caption.20}%
-\contentsline {table}{\numberline {5.1}{\ignorespaces Temporal generalization performance for oil rate ($q_o$)}}{65}{table.caption.21}%
-\contentsline {table}{\numberline {5.2}{\ignorespaces Temporal generalization performance for gas rate ($q_g$)}}{66}{table.caption.22}%
-\contentsline {table}{\numberline {5.3}{\ignorespaces Temporal generalization performance for water rate ($q_w$)}}{66}{table.caption.23}%
-\contentsline {table}{\numberline {5.4}{\ignorespaces Spatial generalization (LOWO) performance for held-out well}}{70}{table.caption.30}%
+\contentsline {table}{\numberline {5.1}{\ignorespaces Temporal generalization performance for oil rate ($q_o$)}}{66}{table.caption.21}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Temporal generalization performance for gas rate ($q_g$)}}{68}{table.caption.22}%
+\contentsline {table}{\numberline {5.3}{\ignorespaces Temporal generalization performance for water rate ($q_w$)}}{69}{table.caption.23}%
+\contentsline {table}{\numberline {5.4}{\ignorespaces Spatial generalization (LOWO) performance for held-out well W10}}{74}{table.caption.30}%

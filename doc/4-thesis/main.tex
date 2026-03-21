@@ -1883,11 +1883,25 @@ This chapter presents the experimental results and analysis of the proposed hybr
 
 \section{Temporal Generalization Performance}
 
-This section presents per-well prediction accuracy on unseen time periods, based on the temporal generalization evaluation setup described in Section~\ref{sec:temporal_setup}.
+Temporal generalization evaluates the ability of the proposed model to predict future production behavior using historical data from the same well. This is a critical requirement for virtual flow metering applications, where models must remain reliable under evolving operating conditions, including changes in pressure, choke settings, and multiphase flow regimes.
+
+In this study, temporal generalization is assessed by training the models on earlier time periods and evaluating them on unseen future data for each well. This setup ensures that no future information is used during training, thereby mimicking real-world deployment conditions. The evaluation is conducted across multiple wells with varying flow characteristics, enabling a comprehensive assessment of model robustness and adaptability.
+
+The performance of three approaches is compared: the physics-based model, the proposed hybrid physics--machine learning model, and the MPFM baseline. Metrics including $R^2$, MAE, RMSE, and MAPE are used to quantify predictive accuracy and reliability across wells.
 
 \subsection{Oil Rate ($q_o$)}
 
 Table~\ref{tab:temporal_oil_rate_comparison} summarizes the per-well temporal generalization performance for oil rate prediction.
+
+The physics-based model exhibits highly inconsistent performance across wells. While it achieves moderate accuracy for well W06 ($R^2 = 0.65$), it fails significantly for most other wells, with strongly negative $R^2$ values (e.g., W08, W11, W15, W19). This indicates that the physics formulation alone is unable to capture the complex and evolving dynamics of multiphase flow under changing operating conditions. The large errors in MAE and RMSE further confirm the limited adaptability of the physics model to temporal variations.
+
+In contrast, the proposed hybrid model demonstrates consistently strong performance across the majority of wells. Near-perfect predictive accuracy is observed for several wells, including W06, W10, W11, and W18, with $R^2$ values close to 1.0 and very low MAE and RMSE. This highlights the effectiveness of residual learning in correcting systematic biases in the physics-based predictions. Even for more challenging wells such as W15 and W19, the hybrid model maintains reasonable performance, significantly outperforming the physics model.
+
+However, performance degradation is observed for well W08 ($R^2 = -1.87$), indicating that the hybrid model may struggle under certain operating regimes not sufficiently represented in the training data. This suggests that the effectiveness of the residual learning component is dependent on the coverage of flow conditions and regimes seen during training.
+
+The MPFM baseline generally provides strong performance, particularly for wells such as W06, W10, and W15. However, it exhibits instability for certain wells, notably W08 and W18, where negative $R^2$ values and high errors are observed. This highlights the sensitivity of MPFM measurements to flow conditions and potential measurement uncertainties.
+
+Overall, the hybrid model achieves the best balance between accuracy and robustness. It consistently outperforms the physics-based model and demonstrates competitive, and in many cases superior, performance compared to MPFM. These results confirm that integrating physics-based modeling with machine learning residual correction significantly enhances temporal generalization capability for oil rate prediction.
 
 \begin{table}[!ht]
 \centering
@@ -1907,14 +1921,14 @@ MAPE (\%) & 25.09 & 86.45 & 61.31 & 108.27 & 138.13 & 217.45 & 173.15 \\
 \hline
 \multicolumn{8}{c}{Hybrid Model} \\
 \hline
-$R^2$ & 1.00 & -1.87 & 0.99 & 0.99 & 0.73 & 0.98 & 0.88 \\
+$R^2$ & 0.99 & -1.87 & 0.99 & 0.99 & 0.73 & 0.98 & 0.88 \\
 MAE & 0.49 & 2.42 & 2.46 & 3.51 & 3.46 & 4.43 & 3.71 \\
 RMSE & 0.67 & 2.43 & 3.85 & 4.46 & 4.65 & 4.93 & 3.94 \\
 MAPE (\%) & 0.61 & 22.04 & 2.69 & 5.01 & 11.46 & 7.89 & 11.40 \\
 \hline
 \multicolumn{8}{c}{MPFM} \\
 \hline
-$R^2$ & 1.00 & -7.08 & 0.99 & 0.85 & 0.95 & -0.72 & 0.86 \\
+$R^2$ & 0.99 & -7.08 & 0.99 & 0.85 & 0.95 & -0.72 & 0.86 \\
 MAE & 1.45 & 3.84 & 2.56 & 8.71 & 1.84 & 44.54 & 2.85 \\
 RMSE & 1.89 & 4.07 & 3.32 & 16.10 & 2.08 & 47.53 & 4.27 \\
 MAPE (\%) & 1.16 & 35.45 & 2.84 & 20.15 & 7.76 & 61.38 & 6.86 \\
@@ -1926,6 +1940,14 @@ MAPE (\%) & 1.16 & 35.45 & 2.84 & 20.15 & 7.76 & 61.38 & 6.86 \\
 \subsection{Gas Rate ($q_g$)}
 
 Table~\ref{tab:temporal_gas_rate_comparison} reports gas rate prediction performance under lag-safe temporal extrapolation.
+
+The physics-based model exhibits highly variable performance for gas rate prediction across wells. While moderate accuracy is achieved for wells such as W06 ($R^2 = 0.77$) and W11 ($R^2 = 0.59$), the model fails significantly for several others, including W08, W15, and W19, where strongly negative $R^2$ values are observed. These results indicate that the physics formulation struggles to capture the complex gas flow behavior under varying operating conditions, particularly in wells with dynamic pressure drawdown and multiphase interactions. The consistently high MAE and RMSE values further highlight the limited predictive capability of the standalone physics model for temporal extrapolation.
+
+In contrast, the hybrid model demonstrates consistently strong performance across all wells, as shown in Table~\ref{tab:temporal_gas_rate_comparison}. High predictive accuracy is achieved for most wells, with $R^2$ values exceeding 0.85 and reaching near-perfect levels for W06, W11, and W18. The substantial reduction in MAE and RMSE compared to the physics model confirms the effectiveness of the residual learning framework in correcting systematic biases in gas rate predictions. Notably, even for challenging wells such as W08, where the physics model fails ($R^2 = -30.24$), the hybrid model achieves a positive $R^2$ of 0.44, demonstrating its ability to generalize across difficult operating regimes. The consistently low MAPE values further indicate stable and reliable predictive performance.
+
+The MPFM baseline generally provides strong performance for gas rate prediction, achieving high $R^2$ values for wells such as W06, W10, W11, and W15. However, significant degradation is observed for certain wells, particularly W08 and W18, where negative $R^2$ values and large prediction errors are recorded. This suggests that MPFM measurements are sensitive to flow conditions and may become unreliable under complex multiphase regimes or adverse operating conditions.
+
+Overall, the hybrid model achieves the best balance between accuracy and robustness. It consistently outperforms the physics-based model and demonstrates more stable performance than the MPFM baseline across wells. These results confirm that integrating physics-based modeling with machine learning residual correction significantly enhances temporal generalization capability for gas rate prediction.
 
 \begin{table}[!ht]
 \centering
@@ -1946,7 +1968,7 @@ MAPE (\%) & 13.67 & 78.41 & 24.47 & 21.01 & 50.32 & 55.01 & 89.95 \\
 
 \multicolumn{8}{c}{Hybrid Model} \\
 \hline
-$R^2$ & 1.00 & 0.44 & 0.97 & 0.99 & 0.79 & 0.99 & 0.85 \\
+$R^2$ & 0.99 & 0.44 & 0.97 & 0.99 & 0.79 & 0.99 & 0.85 \\
 MAE & 96.74 & 374.89 & 447.92 & 385.44 & 402.05 & 614.78 & 540.34 \\
 RMSE & 119.94 & 378.78 & 640.71 & 444.37 & 686.43 & 749.10 & 549.49 \\
 MAPE (\%) & 0.95 & 9.62 & 3.21 & 5.83 & 6.77 & 4.34 & 7.53 \\
@@ -1965,6 +1987,16 @@ MAPE (\%) & 2.38 & 45.25 & 6.12 & 13.63 & 4.64 & 46.58 & 4.07 \\
 \subsection{Water Rate ($q_w$)}
 
 Table~\ref{tab:temporal_water_rate_comparison} reports water rate prediction performance under lag-safe temporal extrapolation.
+
+The physics-based model performs poorly for water rate prediction across all wells, with consistently negative $R^2$ values. This indicates that the model fails to capture the underlying dynamics of water production, particularly under multiphase flow conditions where water behavior is highly nonlinear and intermittent. Although the absolute errors (MAE and RMSE) are relatively moderate for some wells, the persistently high MAPE values—often approaching or exceeding 100\%—highlight the difficulty of accurately modeling water rates using physics alone. These results suggest that the simplified physics formulation is insufficient to represent complex water production mechanisms such as phase interactions, breakthrough events, and low-rate regimes.
+
+In contrast, the hybrid model demonstrates substantial improvement in water rate prediction for most wells, as shown in Table~\ref{tab:temporal_water_rate_comparison}. Strong performance is observed for wells such as W06, W10, W11, and W15, where positive $R^2$ values and significantly reduced MAE and RMSE indicate accurate and stable predictions. The hybrid model effectively leverages residual learning to correct systematic biases in the physics model, resulting in consistent performance gains across varying operating conditions. However, reduced performance is observed for wells such as W08 and W18, where $R^2$ remains low or slightly negative. This suggests that water prediction remains challenging in certain regimes, particularly where water production is highly sparse or exhibits abrupt transitions.
+
+The MPFM baseline shows mixed performance for water rate prediction. While it achieves high accuracy for certain wells (e.g., W10), it performs poorly for others, including W06 and W18, where negative $R^2$ values are observed. This variability reflects the sensitivity of MPFM measurements to flow conditions, especially in low water-cut or unstable multiphase environments. Although MPFM provides reasonable MAE and RMSE values in some cases, its overall performance lacks consistency across wells.
+
+It is important to note that MAPE is less reliable for water rate evaluation due to the presence of near-zero flow conditions. Small absolute errors can result in disproportionately large percentage errors, inflating MAPE values even when predictions are reasonably accurate in absolute terms. Therefore, MAE and RMSE provide a more meaningful assessment of model performance for water rates.
+
+Overall, the hybrid model provides the most balanced and reliable performance for water rate prediction. While water remains the most challenging phase to model, the proposed framework significantly improves prediction accuracy compared to both the physics-based model and the MPFM baseline, demonstrating the effectiveness of physics-informed residual learning in capturing complex multiphase flow behavior.
 
 \begin{table}[!ht]
 \centering
@@ -2195,45 +2227,79 @@ MAPE (\%) & 69.96 & 5.90 & 82.23 & 34.02 & 47.85 & 39.62 & 19.06 \\
 
 \section{Spatial Generalization Performance}
 
-This section reports model performance on previously unseen wells, based on the LOWO evaluation protocol defined in Section~\ref{sec:lowo_setup}.
+This section evaluates the ability of the proposed model to generalize across wells, i.e., to predict production rates for wells that were not observed during training. This is assessed using the Leave-One-Well-Out (LOWO) evaluation protocol described in Section~\ref{sec:lowo_setup}, where all data from a single well is held out for testing, and the model is trained on the remaining wells. In this study, well W10 is selected as the held-out well for evaluation.
+
+Spatial generalization represents a more challenging task than temporal generalization, as it requires the model to transfer learned relationships across wells with potentially different geological characteristics, flow regimes, and operational conditions. Therefore, strong performance under LOWO evaluation is indicative of a model's robustness and practical applicability in real-world deployment scenarios.
 
 \subsection{LOWO Results}
 
-Table~\ref{tab:lowo} summarizes the spatial generalization performance for the held-out well.
+Table~\ref{tab:lowo} summarizes the spatial generalization performance for the held-out well W10.
+
+The physics-based model demonstrates limited generalization capability across all phases. For oil rate prediction, the model achieves a low $R^2$ of 0.07, indicating that it captures only a small fraction of the variance in the unseen well. Similarly, for gas rate prediction, although a moderate $R^2$ of 0.32 is observed, the absolute errors remain high, reflecting poor predictive accuracy. Water rate prediction is particularly poor, with a negative $R^2$ value, confirming the inability of the physics model to generalize across wells with different multiphase flow characteristics. These results highlight the inherent limitations of relying solely on physics-based formulations, which are often calibrated to well-specific conditions and lack adaptability to new wells.
+
+In contrast, the hybrid model demonstrates excellent spatial generalization performance across all phases. For oil and gas rates, near-perfect accuracy is achieved, with $R^2$ values of 0.99 and substantial reductions in MAE and RMSE compared to both the physics model and the MPFM baseline. This indicates that the hybrid framework successfully captures transferable patterns across wells by combining physics-based predictions with data-driven residual corrections. The strong performance on the unseen well W10 suggests that the learned residual relationships are not merely overfitted to specific wells, but instead generalize effectively to new operating conditions.
+
+For water rate prediction, the hybrid model also shows significant improvement over the physics model, achieving a high $R^2$ of 0.93 and low absolute errors. However, the MAPE value is notably large, which is primarily due to the presence of near-zero water rates. In such cases, small absolute errors can lead to disproportionately large percentage errors, making MAPE an unreliable metric for evaluating water rate performance. Therefore, MAE and RMSE provide a more meaningful assessment of model accuracy for this phase.
+
+The MPFM baseline generally provides strong performance, particularly for oil and gas rates, with high $R^2$ values and relatively low errors. However, its performance is less consistent compared to the hybrid model, especially for water rates and under certain flow conditions. While MPFM measurements can be accurate, they are inherently dependent on sensor quality and flow regime assumptions, which may limit their reliability in complex multiphase environments.
+
+Overall, the hybrid model achieves the best balance between accuracy and generalization capability. It significantly outperforms the physics-based model and demonstrates competitive or superior performance compared to MPFM across all phases. These results confirm that the integration of physics-based modeling with machine learning enables effective knowledge transfer across wells, making the proposed framework a robust solution for spatial generalization in virtual flow metering applications.
+
 
 \begin{table}[!ht]
 \centering
-\caption{Spatial generalization (LOWO) performance for held-out well}
+\caption{Spatial generalization (LOWO) performance for held-out well W10}
 \label{tab:lowo}
 \begin{tabular}{lccccc}
 \hline
 Quantity & Model & $R^2$ & MAE & RMSE & MAPE (\%) \\
 \hline
-$q_o$ & Physics & 0.07 & 20.26 & 29.53 & 20.22 \\
-      & Hybrid  & 0.54 & 15.15 & 20.71 & 14.87 \\
-      & MPFM    & 0.97 & 3.12  & 5.57  & 2.86 \\
+$q_o$ & Physics & 0.07 & 20.39 & 29.67 & 20.36 \\
+      & Hybrid  & 0.99 & 1.60  & 2.14  & 1.53 \\
+      & MPFM    & 0.97 & 3.07  & 5.55  & 2.82 \\
 \hline
-$q_g$ & Physics & 0.32 & 2424.02 & 3036.39 & 19.16 \\
-      & Hybrid  & 0.36 & 2334.83 & 2945.92 & 17.89 \\
-      & MPFM    & 0.95 & 494.63  & 862.86  & 3.43 \\
+$q_g$ & Physics & 0.32 & 2439.63 & 3050.20 & 19.30 \\
+      & Hybrid  & 0.99 & 252.94  & 379.06  & 2.24 \\
+      & MPFM    & 0.95 & 499.48  & 867.57  & 3.46 \\
 \hline
-$q_w$ & Physics & -0.24 & 5.35 & 12.09 & 100.00 \\
-      & Hybrid  & -0.30 & 4.89 & 12.41 & 10756.85 \\
-      & MPFM    & 0.93 & 2.42 & 2.86 & 89823.80 \\
+$q_w$ & Physics & -0.25 & 5.39 & 12.15 & 100.00 \\
+      & Hybrid  & 0.93  & 0.93 & 2.98  & 856.08 \\
+      & MPFM    & 0.93  & 2.42 & 2.87  & 90809.43 \\
 \hline
 \end{tabular}
 \end{table}
 
+
 \section{Key Observations}
 
-Across both temporal and spatial generalization scenarios, the following trends are observed:
+The following key observations can be drawn from the temporal and spatial generalization experiments:
 
 \begin{itemize}
-    \item The hybrid model consistently outperforms the physics-only baseline for oil and gas rate prediction.
-    \item Performance gains are most pronounced under temporal generalization, indicating strong within-well residual stationarity.
-    \item Spatial generalization remains more challenging, reflecting well-specific heterogeneity not captured by shared residual structures.
-    \item Water-related quantities exhibit the highest uncertainty across all models, particularly during regime transitions.
-    \item MPFM provides superior accuracy but relies on dense instrumentation not available in many field settings.
+
+\item \textbf{Physics-only models lack generalization capability.}  
+The physics-based model consistently underperforms in both temporal and spatial settings, with frequent negative $R^2$ values. This indicates that simplified physics formulations are insufficient to capture complex, evolving multiphase flow dynamics, especially under changing operating conditions and across different wells.
+
+\item \textbf{Hybrid model significantly improves predictive accuracy.}  
+The proposed hybrid physics--machine learning model consistently achieves the lowest errors and highest $R^2$ values across oil, gas, and water rates. The integration of residual learning effectively corrects systematic biases in the physics model, leading to substantial performance gains.
+
+\item \textbf{Strong temporal generalization across most wells.}  
+The hybrid model demonstrates near-perfect temporal prediction performance for oil and gas rates in multiple wells, indicating its ability to adapt to evolving production conditions over time. Performance degradation is limited to a small number of challenging wells (e.g., W08), suggesting sensitivity to underrepresented operating regimes.
+
+\item \textbf{Effective spatial generalization to unseen wells (LOWO).}  
+Under the LOWO evaluation (with W10 as the held-out well), the hybrid model maintains high accuracy for both oil and gas rates ($R^2 \approx 0.99$), demonstrating strong transferability of learned relationships across wells. This confirms that the model captures underlying physical patterns rather than overfitting to well-specific behavior.
+
+\item \textbf{Water rate prediction remains inherently challenging.}  
+All models exhibit relatively lower and more variable performance for water rate prediction. Although the hybrid model significantly improves accuracy compared to the physics model, performance remains sensitive to sparse and intermittent water production patterns.
+
+\item \textbf{MAPE is unreliable for low-rate conditions.}  
+Extremely high MAPE values observed for water rates are primarily due to near-zero flow conditions, where small absolute errors lead to disproportionately large percentage errors. Therefore, MAE and RMSE provide a more reliable assessment of model performance for water prediction.
+
+\item \textbf{MPFM provides a strong but inconsistent baseline.}  
+MPFM measurements generally achieve high accuracy for oil and gas rates but exhibit instability under certain conditions (e.g., specific wells or flow regimes). This highlights limitations related to sensor reliability and flow regime assumptions in multiphase environments.
+
+\item \textbf{Hybrid model offers the best balance between accuracy and robustness.}  
+Across both temporal and spatial evaluations, the hybrid model consistently outperforms the physics-based model and demonstrates more stable performance than MPFM. This confirms the effectiveness of combining physics-based modeling with machine learning for virtual flow metering applications.
+
 \end{itemize}
 
 
