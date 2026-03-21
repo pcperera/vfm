@@ -246,7 +246,7 @@
 \newlabel{ch:experimentation}{{4}{58}{Experimentation}{chapter.4}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4.1}Experimental Objectives}{58}{section.4.1}\protected@file@percent }
 \newlabel{sec:experimentation_objectives}{{4.1}{58}{Experimental Objectives}{section.4.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.2}Production-Mimicking Experimental Workflow}{58}{section.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Production-Mimicking Experimental Workflow}{59}{section.4.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {4.3}Experimental Model Configurations}{59}{section.4.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {4.4}Evaluation Metrics}{59}{section.4.4}\protected@file@percent }
 \newlabel{sec:evaluation_metrics}{{4.4}{59}{Evaluation Metrics}{section.4.4}{}}
@@ -254,7 +254,7 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4.2}Mean Absolute Error}{60}{subsection.4.4.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4.3}Root Mean Squared Error}{60}{subsection.4.4.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4.4}Mean Absolute Percentage Error}{60}{subsection.4.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.5}Mean Percentage Error}{60}{subsection.4.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.5}Mean Percentage Error}{61}{subsection.4.4.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {4.5}Evaluation of Derived Production Ratios}{61}{section.4.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {4.6}Cross-Well Temporal Generalization Evaluation Setup}{61}{section.4.6}\protected@file@percent }
 \newlabel{sec:temporal_setup}{{4.6}{61}{Cross-Well Temporal Generalization Evaluation Setup}{section.4.6}{}}
@@ -267,13 +267,13 @@
 \@writefile{toc}{\contentsline {chapter}{\numberline {5}Results and Analysis}{65}{chapter.5}\protected@file@percent }
 \@writefile{loa}{\addvspace {10\p@ }}
 \@writefile{toc}{\contentsline {section}{\numberline {5.1}Temporal Generalization Performance}{65}{section.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1.1}Oil Rate ($q_o$)}{65}{subsection.5.1.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Temporal generalization performance for oil rate ($q_o$)}}{66}{table.caption.21}\protected@file@percent }
-\newlabel{tab:temporal_oil_rate_comparison}{{5.1}{66}{Temporal generalization performance for oil rate ($q_o$)}{table.caption.21}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1.2}Gas Rate ($q_g$)}{66}{subsection.5.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1.1}Gas Rate ($q_g$)}{65}{subsection.5.1.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Temporal generalization performance for gas rate ($q_g$)}}{66}{table.caption.21}\protected@file@percent }
+\newlabel{tab:temporal_gas_rate_comparison}{{5.1}{66}{Temporal generalization performance for gas rate ($q_g$)}{table.caption.21}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1.2}Oil Rate ($q_o$)}{67}{subsection.5.1.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.1.3}Water Rate ($q_w$)}{67}{subsection.5.1.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Temporal generalization performance for gas rate ($q_g$)}}{68}{table.caption.22}\protected@file@percent }
-\newlabel{tab:temporal_gas_rate_comparison}{{5.2}{68}{Temporal generalization performance for gas rate ($q_g$)}{table.caption.22}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Temporal generalization performance for oil rate ($q_o$)}}{68}{table.caption.22}\protected@file@percent }
+\newlabel{tab:temporal_oil_rate_comparison}{{5.2}{68}{Temporal generalization performance for oil rate ($q_o$)}{table.caption.22}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {5.3}{\ignorespaces Temporal generalization performance for water rate ($q_w$)}}{69}{table.caption.23}\protected@file@percent }
 \newlabel{tab:temporal_water_rate_comparison}{{5.3}{69}{Temporal generalization performance for water rate ($q_w$)}{table.caption.23}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{69}{section.5.2}\protected@file@percent }
@@ -283,67 +283,75 @@
 \newlabel{sub@fig:w06_qo_model_performance}{{b}{70}{W06 oil rate temporal generalization performance}{figure.caption.24}{}}
 \newlabel{fig:w06_qw_model_performance}{{5.1c}{70}{W06 water rate temporal generalization performance}{figure.caption.24}{}}
 \newlabel{sub@fig:w06_qw_model_performance}{{c}{70}{W06 water rate temporal generalization performance}{figure.caption.24}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces Temporal generalization performance of the hybrid model for W06. The plots show predicted and measured gas, oil, and water rates over time.}}{70}{figure.caption.24}\protected@file@percent }
-\newlabel{fig:w06_temporal_generalization}{{5.1}{70}{Temporal generalization performance of the hybrid model for W06. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.24}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W06. The plots show predicted and measured gas, oil, and water rates over time.}}{70}{figure.caption.24}\protected@file@percent }
+\newlabel{fig:w06_temporal_generalization}{{5.1}{70}{Temporal generalization performance of Physics, Hybrid, and MPFM models for W06. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.24}{}}
 \newlabel{fig:w08_qg_model_performance}{{5.2a}{70}{W08 gas rate temporal generalization performance}{figure.caption.25}{}}
 \newlabel{sub@fig:w08_qg_model_performance}{{a}{70}{W08 gas rate temporal generalization performance}{figure.caption.25}{}}
 \newlabel{fig:w08_qo_model_performance}{{5.2b}{70}{W08 oil rate temporal generalization performance}{figure.caption.25}{}}
 \newlabel{sub@fig:w08_qo_model_performance}{{b}{70}{W08 oil rate temporal generalization performance}{figure.caption.25}{}}
 \newlabel{fig:w08_qw_model_performance}{{5.2c}{70}{W08 water rate temporal generalization performance}{figure.caption.25}{}}
 \newlabel{sub@fig:w08_qw_model_performance}{{c}{70}{W08 water rate temporal generalization performance}{figure.caption.25}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces Temporal generalization performance of the hybrid model for W08. The plots show predicted and measured gas, oil, and water rates over time.}}{70}{figure.caption.25}\protected@file@percent }
-\newlabel{fig:w08_temporal_generalization}{{5.2}{70}{Temporal generalization performance of the hybrid model for W08. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W08. The plots show predicted and measured gas, oil, and water rates over time.}}{70}{figure.caption.25}\protected@file@percent }
+\newlabel{fig:w08_temporal_generalization}{{5.2}{70}{Temporal generalization performance of Physics, Hybrid, and MPFM models for W08. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.25}{}}
 \newlabel{fig:w10_qg_model_performance}{{5.3a}{71}{W10 gas rate temporal generalization performance}{figure.caption.26}{}}
 \newlabel{sub@fig:w10_qg_model_performance}{{a}{71}{W10 gas rate temporal generalization performance}{figure.caption.26}{}}
 \newlabel{fig:w10_qo_model_performance}{{5.3b}{71}{W10 oil rate temporal generalization performance}{figure.caption.26}{}}
 \newlabel{sub@fig:w10_qo_model_performance}{{b}{71}{W10 oil rate temporal generalization performance}{figure.caption.26}{}}
 \newlabel{fig:w10_qw_model_performance}{{5.3c}{71}{W10 water rate temporal generalization performance}{figure.caption.26}{}}
 \newlabel{sub@fig:w10_qw_model_performance}{{c}{71}{W10 water rate temporal generalization performance}{figure.caption.26}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.3}{\ignorespaces Temporal generalization performance of the hybrid model for W10. The plots show predicted and measured gas, oil, and water rates over time.}}{71}{figure.caption.26}\protected@file@percent }
-\newlabel{fig:w10_temporal_generalization}{{5.3}{71}{Temporal generalization performance of the hybrid model for W10. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.26}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.3}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W10. The plots show predicted and measured gas, oil, and water rates over time.}}{71}{figure.caption.26}\protected@file@percent }
+\newlabel{fig:w10_temporal_generalization}{{5.3}{71}{Temporal generalization performance of Physics, Hybrid, and MPFM models for W10. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.26}{}}
 \newlabel{fig:W11_qg_model_performance}{{5.4a}{71}{W11 gas rate temporal generalization performance}{figure.caption.27}{}}
 \newlabel{sub@fig:W11_qg_model_performance}{{a}{71}{W11 gas rate temporal generalization performance}{figure.caption.27}{}}
 \newlabel{fig:W11_qo_model_performance}{{5.4b}{71}{W11 oil rate temporal generalization performance}{figure.caption.27}{}}
 \newlabel{sub@fig:W11_qo_model_performance}{{b}{71}{W11 oil rate temporal generalization performance}{figure.caption.27}{}}
 \newlabel{fig:W11_qw_model_performance}{{5.4c}{71}{W11 water rate temporal generalization performance}{figure.caption.27}{}}
 \newlabel{sub@fig:W11_qw_model_performance}{{c}{71}{W11 water rate temporal generalization performance}{figure.caption.27}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.4}{\ignorespaces Temporal generalization performance of the hybrid model for W11. The plots show predicted and measured gas, oil, and water rates over time.}}{71}{figure.caption.27}\protected@file@percent }
-\newlabel{fig:W11_temporal_generalization}{{5.4}{71}{Temporal generalization performance of the hybrid model for W11. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.4}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W11. The plots show predicted and measured gas, oil, and water rates over time.}}{71}{figure.caption.27}\protected@file@percent }
+\newlabel{fig:W11_temporal_generalization}{{5.4}{71}{Temporal generalization performance of Physics, Hybrid, and MPFM models for W11. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.27}{}}
 \newlabel{fig:W18_qg_model_performance}{{5.5a}{72}{W18 gas rate temporal generalization performance}{figure.caption.28}{}}
 \newlabel{sub@fig:W18_qg_model_performance}{{a}{72}{W18 gas rate temporal generalization performance}{figure.caption.28}{}}
 \newlabel{fig:W18_qo_model_performance}{{5.5b}{72}{W18 oil rate temporal generalization performance}{figure.caption.28}{}}
 \newlabel{sub@fig:W18_qo_model_performance}{{b}{72}{W18 oil rate temporal generalization performance}{figure.caption.28}{}}
 \newlabel{fig:W18_qw_model_performance}{{5.5c}{72}{W18 water rate temporal generalization performance}{figure.caption.28}{}}
 \newlabel{sub@fig:W18_qw_model_performance}{{c}{72}{W18 water rate temporal generalization performance}{figure.caption.28}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.5}{\ignorespaces Temporal generalization performance of the hybrid model for W18. The plots show predicted and measured gas, oil, and water rates over time.}}{72}{figure.caption.28}\protected@file@percent }
-\newlabel{fig:W18_temporal_generalization}{{5.5}{72}{Temporal generalization performance of the hybrid model for W18. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.28}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.5}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W18. The plots show predicted and measured gas, oil, and water rates over time.}}{72}{figure.caption.28}\protected@file@percent }
+\newlabel{fig:W18_temporal_generalization}{{5.5}{72}{Temporal generalization performance of Physics, Hybrid, and MPFM models for W18. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.28}{}}
 \newlabel{fig:W19_qg_model_performance}{{5.6a}{72}{W19 gas rate temporal generalization performance}{figure.caption.29}{}}
 \newlabel{sub@fig:W19_qg_model_performance}{{a}{72}{W19 gas rate temporal generalization performance}{figure.caption.29}{}}
 \newlabel{fig:W19_qo_model_performance}{{5.6b}{72}{W19 oil rate temporal generalization performance}{figure.caption.29}{}}
 \newlabel{sub@fig:W19_qo_model_performance}{{b}{72}{W19 oil rate temporal generalization performance}{figure.caption.29}{}}
 \newlabel{fig:W19_qw_model_performance}{{5.6c}{72}{W19 water rate temporal generalization performance}{figure.caption.29}{}}
 \newlabel{sub@fig:W19_qw_model_performance}{{c}{72}{W19 water rate temporal generalization performance}{figure.caption.29}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.6}{\ignorespaces Temporal generalization performance of the hybrid model for W19. The plots show predicted and measured gas, oil, and water rates over time.}}{72}{figure.caption.29}\protected@file@percent }
-\newlabel{fig:W19_temporal_generalization}{{5.6}{72}{Temporal generalization performance of the hybrid model for W19. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.29}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.6}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W19. The plots show predicted and measured gas, oil, and water rates over time.}}{72}{figure.caption.29}\protected@file@percent }
+\newlabel{fig:W19_temporal_generalization}{{5.6}{72}{Temporal generalization performance of Physics, Hybrid, and MPFM models for W19. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.29}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.2.1}LOWO Results}{73}{subsection.5.2.1}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {5.4}{\ignorespaces Spatial generalization (LOWO) performance for held-out well W10}}{74}{table.caption.30}\protected@file@percent }
 \newlabel{tab:lowo}{{5.4}{74}{Spatial generalization (LOWO) performance for held-out well W10}{table.caption.30}{}}
+\newlabel{fig:W10_qg_spatial_generalization_model_performance}{{5.7a}{74}{W10 gas rate spatial generalization performance}{figure.caption.31}{}}
+\newlabel{sub@fig:W10_qg_spatial_generalization_model_performance}{{a}{74}{W10 gas rate spatial generalization performance}{figure.caption.31}{}}
+\newlabel{fig:W10_qo_spatial_generalization_model_performance}{{5.7b}{74}{W10 oil rate spatial generalization performance}{figure.caption.31}{}}
+\newlabel{sub@fig:W10_qo_spatial_generalization_model_performance}{{b}{74}{W10 oil rate spatial generalization performance}{figure.caption.31}{}}
+\newlabel{fig:W10_qw_spatial_generalization_model_performance}{{5.7c}{74}{W10 water rate spatial generalization performance}{figure.caption.31}{}}
+\newlabel{sub@fig:W10_qw_spatial_generalization_model_performance}{{c}{74}{W10 water rate spatial generalization performance}{figure.caption.31}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.7}{\ignorespaces Spatial generalization performance of Physics, Hybrid, and MPFM models for W10. The plots show predicted and measured gas, oil, and water rates over time.}}{74}{figure.caption.31}\protected@file@percent }
+\newlabel{fig:W10_spatial_generalization}{{5.7}{74}{Spatial generalization performance of Physics, Hybrid, and MPFM models for W10. The plots show predicted and measured gas, oil, and water rates over time}{figure.caption.31}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5.3}Key Observations}{74}{section.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5.4}Code Availability and Reproducibility}{75}{section.5.4}\protected@file@percent }
-\newlabel{sec:reproducibility}{{5.4}{75}{Code Availability and Reproducibility}{section.5.4}{}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {6}Discussion}{76}{chapter.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.4}Code Availability and Reproducibility}{76}{section.5.4}\protected@file@percent }
+\newlabel{sec:reproducibility}{{5.4}{76}{Code Availability and Reproducibility}{section.5.4}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {6}Discussion}{77}{chapter.6}\protected@file@percent }
 \@writefile{loa}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {6.1}Temporal vs Spatial Generalization}{76}{section.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6.2}Deployment Implications}{76}{section.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6.3}Summary}{77}{section.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {7}Future Work}{78}{chapter.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6.1}Temporal vs Spatial Generalization}{77}{section.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6.2}Deployment Implications}{77}{section.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6.3}Summary}{78}{section.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {7}Future Work}{79}{chapter.7}\protected@file@percent }
 \@writefile{loa}{\addvspace {10\p@ }}
-\newlabel{chap:future-work}{{7}{78}{Future Work}{chapter.7}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{78}{section.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{78}{section.7.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{79}{section.7.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{79}{section.7.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{79}{section.7.5}\protected@file@percent }
+\newlabel{chap:future-work}{{7}{79}{Future Work}{chapter.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{79}{section.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{79}{section.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{80}{section.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{80}{section.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{80}{section.7.5}\protected@file@percent }
 \bibstyle{apalike}
 \bibdata{references}
 \bibcite{agwu2022modelling}{{1}{2022}{{Agwu et~al.}}{{}}}
@@ -358,7 +366,7 @@
 \bibcite{dake1978developments}{{10}{1978}{{Dake and Dake}}{{}}}
 \bibcite{dutta2018modeling}{{11}{2018}{{Dutta and Kumar}}{{}}}
 \bibcite{franklin2022physics}{{12}{2022}{{Franklin et~al.}}{{}}}
-\@writefile{toc}{\contentsline {chapter}{References}{80}{chapter*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{References}{81}{chapter*.32}\protected@file@percent }
 \bibcite{grimstad2021bayesian}{{13}{2021}{{Grimstad et~al.}}{{}}}
 \bibcite{gryzlov2023combining}{{14}{2023}{{Gryzlov et~al.}}{{}}}
 \bibcite{hansen2019multi}{{15}{2019}{{Hansen et~al.}}{{}}}
@@ -374,4 +382,4 @@
 \global \tablestrue
 \global \abbrstrue
 \global \appensfalse
-\gdef \@abspage@last{95}
+\gdef \@abspage@last{96}
