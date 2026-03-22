@@ -1,5 +1,5 @@
 \contentsline {chapter}{Declaration of the Candidate \& Supervisor}{i}{chapter*.1}%
-\contentsline {chapter}{Dedication}{ii}{chapter*.2}%
+\contentsline {chapter}{Dedication1}{ii}{chapter*.2}%
 \contentsline {chapter}{Acknowledgement}{iii}{chapter*.3}%
 \contentsline {chapter}{Abstract}{iv}{chapter*.4}%
 \contentsline {chapter}{Table of Contents}{v}{chapter*.5}%
@@ -58,7 +58,7 @@
 \contentsline {section}{\numberline {3.2}Dataset Description and Preprocessing}{33}{section.3.2}%
 \contentsline {subsection}{\numberline {3.2.1}Independent and Reference Variables}{34}{subsection.3.2.1}%
 \contentsline {subsection}{\numberline {3.2.2}Well-Level Preprocessing}{37}{subsection.3.2.2}%
-\contentsline {subsection}{\numberline {3.2.3}Derivation of Multiphase Flow Variables}{38}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.3}Derivation of Multiphase Flow Variables}{39}{subsection.3.2.3}%
 \contentsline {subsection}{\numberline {3.2.4}Temporal Index Construction}{39}{subsection.3.2.4}%
 \contentsline {subsection}{\numberline {3.2.5}Cross-Well Consolidation and Encoding}{39}{subsection.3.2.5}%
 \contentsline {section}{\numberline {3.3}Physics-Based Inflow Modelling}{40}{section.3.3}%
@@ -93,55 +93,48 @@
 \contentsline {subsection}{\numberline {3.5.4}Physical Consistency Enforcement}{51}{subsection.3.5.4}%
 \contentsline {subsection}{\numberline {3.5.5}Role of Gating and Safety Mechanisms}{52}{subsection.3.5.5}%
 \contentsline {subsection}{\numberline {3.5.6}Summary of Hybrid Rate Assembly}{52}{subsection.3.5.6}%
-\contentsline {section}{\numberline {3.6}Temporal Reconstruction of Historical Production Rates}{52}{section.3.6}%
-\contentsline {subsection}{\numberline {3.6.1}Problem Definition}{52}{subsection.3.6.1}%
-\contentsline {subsection}{\numberline {3.6.2}Distinction from Forecasting}{53}{subsection.3.6.2}%
-\contentsline {subsection}{\numberline {3.6.3}Hybrid Inference for Missing Time Indices}{53}{subsection.3.6.3}%
-\contentsline {subsection}{\numberline {3.6.4}Selective Reconstruction Logic}{53}{subsection.3.6.4}%
-\contentsline {subsection}{\numberline {3.6.5}Physical and Temporal Consistency}{54}{subsection.3.6.5}%
-\contentsline {subsection}{\numberline {3.6.6}Practical Implications}{54}{subsection.3.6.6}%
-\contentsline {section}{\numberline {3.7}Model Integration}{54}{section.3.7}%
-\contentsline {subsection}{\numberline {3.7.1}Step-by-Step Pipeline Summary}{54}{subsection.3.7.1}%
-\contentsline {subsection}{\numberline {3.7.2}Computational Considerations}{54}{subsection.3.7.2}%
-\contentsline {subsubsection}{\numberline {3.7.2.1}Model Decomposition and Computational Load}{54}{subsubsection.3.7.2.1}%
-\contentsline {subsubsection}{\numberline {3.7.2.2}Parameter Calibration and Training Efficiency}{55}{subsubsection.3.7.2.2}%
-\contentsline {subsubsection}{\numberline {3.7.2.3}Scalability Across Multiple Wells}{55}{subsubsection.3.7.2.3}%
-\contentsline {subsubsection}{\numberline {3.7.2.4}Numerical Stability and Robustness}{55}{subsubsection.3.7.2.4}%
-\contentsline {subsubsection}{\numberline {3.7.2.5}Inference Time and Deployment Considerations}{56}{subsubsection.3.7.2.5}%
-\contentsline {chapter}{\numberline {4}Experimentation}{58}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Experimental Objectives}{58}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Production-Mimicking Experimental Workflow}{59}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Experimental Model Configurations}{59}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Evaluation Metrics}{59}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}Coefficient of Determination}{59}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}Mean Absolute Error}{60}{subsection.4.4.2}%
-\contentsline {subsection}{\numberline {4.4.3}Root Mean Squared Error}{60}{subsection.4.4.3}%
-\contentsline {subsection}{\numberline {4.4.4}Mean Absolute Percentage Error}{60}{subsection.4.4.4}%
-\contentsline {subsection}{\numberline {4.4.5}Mean Percentage Error}{61}{subsection.4.4.5}%
-\contentsline {section}{\numberline {4.5}Evaluation of Derived Production Ratios}{61}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Cross-Well Temporal Generalization Evaluation Setup}{61}{section.4.6}%
-\contentsline {subsection}{\numberline {4.6.1}Experimental Data Partitioning}{62}{subsection.4.6.1}%
+\contentsline {section}{\numberline {3.6}Model Integration}{52}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Step-by-Step Pipeline Summary}{52}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Computational Considerations}{54}{subsection.3.6.2}%
+\contentsline {subsubsection}{\numberline {3.6.2.1}Model Decomposition and Computational Load}{54}{subsubsection.3.6.2.1}%
+\contentsline {subsubsection}{\numberline {3.6.2.2}Parameter Calibration and Training Efficiency}{54}{subsubsection.3.6.2.2}%
+\contentsline {subsubsection}{\numberline {3.6.2.3}Scalability Across Multiple Wells}{55}{subsubsection.3.6.2.3}%
+\contentsline {subsubsection}{\numberline {3.6.2.4}Numerical Stability and Robustness}{55}{subsubsection.3.6.2.4}%
+\contentsline {subsubsection}{\numberline {3.6.2.5}Inference Time and Deployment Considerations}{55}{subsubsection.3.6.2.5}%
+\contentsline {chapter}{\numberline {4}Experimentation}{57}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Experimental Objectives}{57}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Production-Mimicking Experimental Workflow}{58}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Experimental Model Configurations}{58}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Evaluation Metrics}{58}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Coefficient of Determination}{58}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Mean Absolute Error}{59}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Root Mean Squared Error}{59}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.4.4}Mean Absolute Percentage Error}{59}{subsection.4.4.4}%
+\contentsline {subsection}{\numberline {4.4.5}Mean Percentage Error}{60}{subsection.4.4.5}%
+\contentsline {section}{\numberline {4.5}Evaluation of Derived Production Ratios}{60}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Cross-Well Temporal Generalization Evaluation Setup}{60}{section.4.6}%
+\contentsline {subsection}{\numberline {4.6.1}Experimental Data Partitioning}{61}{subsection.4.6.1}%
 \contentsline {section}{\numberline {4.7}Spatial Generalization Evaluation Setup}{62}{section.4.7}%
-\contentsline {section}{\numberline {4.8}Summary of Experimental Design}{63}{section.4.8}%
-\contentsline {chapter}{\numberline {5}Results and Analysis}{65}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Temporal Generalization Performance}{65}{section.5.1}%
-\contentsline {subsection}{\numberline {5.1.1}Gas Rate ($q_g$)}{65}{subsection.5.1.1}%
-\contentsline {subsection}{\numberline {5.1.2}Oil Rate ($q_o$)}{67}{subsection.5.1.2}%
-\contentsline {subsection}{\numberline {5.1.3}Water Rate ($q_w$)}{67}{subsection.5.1.3}%
-\contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{69}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}LOWO Results}{73}{subsection.5.2.1}%
-\contentsline {section}{\numberline {5.3}Performance Comparison with Contemporary Hybrid VFM}{74}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Key Observations}{76}{section.5.4}%
-\contentsline {section}{\numberline {5.5}Code Availability and Reproducibility}{78}{section.5.5}%
-\contentsline {chapter}{\numberline {6}Discussion}{79}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Temporal vs Spatial Generalization}{79}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Comparison with Comtemporary Hybrid VFM}{79}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Deployment Implications}{80}{section.6.3}%
-\contentsline {section}{\numberline {6.4}Summary}{81}{section.6.4}%
-\contentsline {chapter}{\numberline {7}Future Work}{82}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{82}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{82}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{83}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{83}{section.7.4}%
-\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{83}{section.7.5}%
-\contentsline {chapter}{References}{84}{chapter*.33}%
+\contentsline {section}{\numberline {4.8}Summary of Experimental Design}{62}{section.4.8}%
+\contentsline {chapter}{\numberline {5}Results and Analysis}{64}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Temporal Generalization Performance}{64}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Gas Rate ($q_g$)}{64}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Oil Rate ($q_o$)}{66}{subsection.5.1.2}%
+\contentsline {subsection}{\numberline {5.1.3}Water Rate ($q_w$)}{66}{subsection.5.1.3}%
+\contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{68}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}LOWO Results}{72}{subsection.5.2.1}%
+\contentsline {section}{\numberline {5.3}Performance Comparison with Contemporary Hybrid VFM}{73}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Key Observations}{75}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Code Availability and Reproducibility}{77}{section.5.5}%
+\contentsline {chapter}{\numberline {6}Discussion}{78}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Temporal vs Spatial Generalization}{78}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Comparison with Comtemporary Hybrid VFM}{78}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Deployment Implications}{79}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Summary}{80}{section.6.4}%
+\contentsline {chapter}{\numberline {7}Future Work}{81}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Extension of Physics-Based Modeling}{81}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Advanced Residual Learning Architectures}{81}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{82}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{82}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{82}{section.7.5}%
+\contentsline {chapter}{References}{83}{chapter*.33}%

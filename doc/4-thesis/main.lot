@@ -1,15 +1,15 @@
 \contentsline {table}{\numberline {1.1}{\ignorespaces Well downhole and surface instrumentation}}{6}{table.caption.9}%
 \contentsline {table}{\numberline {2.1}{\ignorespaces Comparative evaluation of flow metering and virtual flow metering approaches}}{25}{table.2.1}%
 \contentsline {table}{\numberline {2.2}{\ignorespaces Literature summary}}{27}{table.2.2}%
-\contentsline {table}{\numberline {3.1}{\ignorespaces Indepdent operational variables}}{34}{table.caption.11}%
-\contentsline {table}{\numberline {3.2}{\ignorespaces Geometrical static data}}{34}{table.caption.12}%
+\contentsline {table}{\numberline {3.1}{\ignorespaces Indepdent operational variables}}{35}{table.caption.11}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Geometrical static data}}{35}{table.caption.12}%
 \contentsline {table}{\numberline {3.3}{\ignorespaces Reference ground truth variables}}{35}{table.caption.13}%
-\contentsline {table}{\numberline {3.4}{\ignorespaces MPFM estimated rates}}{35}{table.caption.14}%
+\contentsline {table}{\numberline {3.4}{\ignorespaces MPFM estimated rates}}{36}{table.caption.14}%
 \contentsline {table}{\numberline {3.5}{\ignorespaces Summary of available historical measurements for each production well}}{36}{table.caption.15}%
-\contentsline {table}{\numberline {3.6}{\ignorespaces Parameters and initial guesses used for nonlinear calibration of the physics-based well flow model}}{57}{table.caption.19}%
-\contentsline {table}{\numberline {4.1}{\ignorespaces Performance metrics used for model evaluation}}{64}{table.caption.20}%
-\contentsline {table}{\numberline {5.1}{\ignorespaces Temporal generalization performance for gas rate ($q_g$)}}{66}{table.caption.21}%
-\contentsline {table}{\numberline {5.2}{\ignorespaces Temporal generalization performance for oil rate ($q_o$)}}{68}{table.caption.22}%
-\contentsline {table}{\numberline {5.3}{\ignorespaces Temporal generalization performance for water rate ($q_w$)}}{69}{table.caption.23}%
-\contentsline {table}{\numberline {5.4}{\ignorespaces Spatial generalization (LOWO) performance for held-out well W10}}{74}{table.caption.30}%
-\contentsline {table}{\numberline {5.5}{\ignorespaces Comparison of global WGR prediction performance with contemporary hybrid VFM}}{76}{table.caption.32}%
+\contentsline {table}{\numberline {3.6}{\ignorespaces Parameters and initial guesses used for nonlinear calibration of the physics-based well flow model}}{56}{table.caption.19}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Performance metrics used for model evaluation}}{63}{table.caption.20}%
+\contentsline {table}{\numberline {5.1}{\ignorespaces Temporal generalization performance for gas rate ($q_g$)}}{65}{table.caption.21}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Temporal generalization performance for oil rate ($q_o$)}}{67}{table.caption.22}%
+\contentsline {table}{\numberline {5.3}{\ignorespaces Temporal generalization performance for water rate ($q_w$)}}{68}{table.caption.23}%
+\contentsline {table}{\numberline {5.4}{\ignorespaces Spatial generalization (LOWO) performance for held-out well W10}}{73}{table.caption.30}%
+\contentsline {table}{\numberline {5.5}{\ignorespaces Comparison of global WGR prediction performance with contemporary hybrid VFM}}{75}{table.caption.32}%
