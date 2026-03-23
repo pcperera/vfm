@@ -6,6 +6,11 @@ Agwu, O.~E., Okoro, E.~E., and Sanni, S.~E. (2022).
   extant models.
 \newblock {\em Journal of Petroleum Science and Engineering}, 208:109775.
 
+\bibitem[Ahmed, 2010]{ahmed2010reservoir}
+Ahmed, T. (2010).
+\newblock {\em Reservoir Engineering Handbook}.
+\newblock Elsevier, Burlington, MA, 4 edition.
+
 \bibitem[Al-Qutami et~al., 2017]{al2017development}
 Al-Qutami, T.~A., Ibrahim, R., Ismail, I., and Ishak, M.~A. (2017).
 \newblock Development of soft sensor to estimate multiphase flow rates using
@@ -38,6 +43,16 @@ Andrianov, N. (2018).
   forecasting.
 \newblock {\em IFAC-PapersOnLine}, 51(8):191--196.
 
+\bibitem[Beggs and Brill, 1973]{beggs1973study}
+Beggs, H.~D. and Brill, J.~P. (1973).
+\newblock A study of two-phase flow in inclined pipes.
+\newblock {\em Journal of Petroleum Technology}, 25(5):607--617.
+
+\bibitem[Beggs and Brill, 1994]{brill1999multiphase}
+Beggs, H.~D. and Brill, J.~P. (1994).
+\newblock {\em Two-Phase Flow in Pipes}.
+\newblock Society of Petroleum Engineers, Richardson, TX.
+
 \bibitem[Bikmukhametov and J{\"a}schke, 2020a]{bikmukhametov2020combining}
 Bikmukhametov, T. and J{\"a}schke, J. (2020a).
 \newblock Combining machine learning and process engineering physics towards
@@ -49,6 +64,17 @@ Bikmukhametov, T. and J{\"a}schke, J. (2020b).
 \newblock First principles and machine learning virtual flow metering: a
   literature review.
 \newblock {\em Journal of Petroleum Science and Engineering}, 184:106487.
+
+\bibitem[Box and Cox, 1964]{box1964analysis}
+Box, G. E.~P. and Cox, D.~R. (1964).
+\newblock An analysis of transformations.
+\newblock {\em Journal of the Royal Statistical Society: Series B
+  (Methodological)}, 26(2):211--243.
+
+\bibitem[Brown, 1984]{brown1984artificial}
+Brown, K.~E. (1984).
+\newblock {\em Artificial Lift Methods}.
+\newblock PennWell Books, Tulsa, OK.
 
 \bibitem[Corneliussen et~al., 2005]{corneliussen2005handbook}
 Corneliussen, S., for Oil, N.~S., Measurement, G., and (Organization), T.
@@ -73,6 +99,11 @@ Franklin, T.~S., Souza, L.~S., Fontes, R.~M., and Martins, M.~A. (2022).
   metering in oil wells: an esp lifted oil well system as a case study.
 \newblock {\em Digital Chemical Engineering}, 5:100056.
 
+\bibitem[Friedman, 2001]{friedman2001greedy}
+Friedman, J.~H. (2001).
+\newblock Greedy function approximation: A gradient boosting machine.
+\newblock {\em Annals of Statistics}, 29(5):1189--1232.
+
 \bibitem[Grimstad et~al., 2021]{grimstad2021bayesian}
 Grimstad, B., Hotvedt, M., Sandnes, A.~T., Kolbj{\o}rnsen, O., and Imsland,
   L.~S. (2021).
@@ -93,6 +124,18 @@ Hansen, L.~S., Pedersen, S., and Durdevic, P. (2019).
   pipelines: Trends and perspectives.
 \newblock {\em Sensors}, 19(9):2184.
 
+\bibitem[Hastie et~al., 2009]{hastie2009elements}
+Hastie, T., Tibshirani, R., and Friedman, J. (2009).
+\newblock {\em The Elements of Statistical Learning: Data Mining, Inference,
+  and Prediction}.
+\newblock Springer, 2 edition.
+
+\bibitem[He et~al., 2016]{he2016deep}
+He, K., Zhang, X., Ren, S., and Sun, J. (2016).
+\newblock Deep residual learning for image recognition.
+\newblock In {\em Proceedings of the IEEE Conference on Computer Vision and
+  Pattern Recognition (CVPR)}, pages 770--778.
+
 \bibitem[Hotvedt et~al., 2020]{hotvedt2020developing}
 Hotvedt, M., Grimstad, B., and Imsland, L. (2020).
 \newblock Developing a hybrid data-driven, mechanistic virtual flow meter-a
@@ -105,6 +148,28 @@ Ishak, M.~A., Al-qutami, T. A.~H., and Ismail, I. (2022).
   and first principle physics based.
 \newblock {\em International Journal on Smart Sensing and Intelligent Systems},
   15(1):1--21.
+
+\bibitem[Karniadakis et~al., 2021]{karniadakis2021physics}
+Karniadakis, G.~E., Kevrekidis, I.~G., Lu, L., Perdikaris, P., Wang, S., and
+  Yang, L. (2021).
+\newblock Physics-informed machine learning.
+\newblock {\em Nature Reviews Physics}, 3(6):422--440.
+
+\bibitem[Lake, 2006]{spe_petroleum_engineering_handbook}
+Lake, L.~W., editor (2006).
+\newblock {\em Petroleum Engineering Handbook}, volume 1--7.
+\newblock Society of Petroleum Engineers, Richardson, Texas.
+
+\bibitem[Lake, 2014]{lake2014enhanced}
+Lake, L.~W. (2014).
+\newblock {\em Enhanced Oil Recovery}.
+\newblock Society of Petroleum Engineers, Richardson, TX, 1 edition.
+
+\bibitem[Levenberg, 1944]{levenberg1944method}
+Levenberg, K. (1944).
+\newblock A method for the solution of certain non-linear problems in least
+  squares.
+\newblock {\em Quarterly of Applied Mathematics}, 2(2):164--168.
 
 \bibitem[Marfo and Kporxah, 2021]{marfo2021predicting}
 Marfo, S. and Kporxah, C. (2021).
@@ -140,11 +205,38 @@ Nemoto, R.~H., Ibarra, R., Staff, G., Akhiiartdinov, A., Brett, D., Dalby, P.,
   field.
 \newblock {\em Digital Chemical Engineering}, 9:100124.
 
+\bibitem[Nocedal and Wright, 2006]{nocedal2006numerical}
+Nocedal, J. and Wright, S.~J. (2006).
+\newblock {\em Numerical Optimization}.
+\newblock Springer, New York, 2 edition.
+
+\bibitem[Rawlins and Schellhardt, 1935]{rawlins1935backpressure}
+Rawlins, E.~L. and Schellhardt, M.~A. (1935).
+\newblock Backpressure data on natural gas wells and their application to
+  production practices.
+\newblock Technical Report Bulletin 7, U.S. Bureau of Mines.
+
+\bibitem[Santim et~al., 2020]{santim2020transient}
+Santim, C. G.~S. et~al. (2020).
+\newblock Transient multiphase flow modeling and validation in oil and gas
+  production systems.
+\newblock {\em Journal of Petroleum Science and Engineering}.
+
+\bibitem[Shippen and Bailey, 2012]{shippen2012multiphase}
+Shippen, M. and Bailey, W. (2012).
+\newblock Steady-state multiphase flow—past, present, and future.
+\newblock {\em Energy \& Fuels}, 26(10):6123--6132.
+
 \bibitem[Song et~al., 2022]{song2022intelligent}
 Song, S., Wu, M., Qi, J., Wu, H., Kang, Q., Shi, B., Shen, S., Li, Q., Yao, H.,
   Chen, H., et~al. (2022).
 \newblock An intelligent data-driven model for virtual flow meters in oil and
   gas development.
 \newblock {\em Chemical Engineering Research and Design}, 186:398--406.
+
+\bibitem[Vogel, 1968]{vogel1968inflow}
+Vogel, J.~V. (1968).
+\newblock Inflow performance relationships for solution-gas drive wells.
+\newblock {\em Journal of Petroleum Technology}, 20(1):83--92.
 
 \end{thebibliography}
