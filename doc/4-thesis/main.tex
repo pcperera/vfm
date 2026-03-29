@@ -1073,22 +1073,47 @@ The parameters $\mathbf{A}$ are estimated during model calibration as part of th
 \subsection{Gas Flow Modelling}
 \label{subsec:gas_rate}
 
-Gas production is modeled using a pressure-drop-driven relationship modulated by choke effectiveness. In producing wells, gas flow is strongly influenced by reservoir pressure drawdown and surface flow restrictions imposed by choke settings. Classical gas deliverability theory shows that gas flow rate depends on pressure differences (or pressure-squared differences) between the reservoir and the wellbore \citep{ahmed2010reservoir, rawlins1935backpressure}.
-The gas rate is modeled as:
+Gas production is modeled using a pressure-driven formulation modulated by choke effectiveness. In producing wells, gas flow is influenced by reservoir pressure drawdown and surface flow restrictions imposed by choke settings. Classical gas deliverability theory indicates that gas flow depends on pressure-squared differences between the reservoir and the wellbore \citep{ahmed2010reservoir, rawlins1935backpressure}. 
+Classical gas deliverability theory is often expressed as:
 
 \begin{equation}
-q_g = C_g \sqrt{P_{res} - P_{wf}} \cdot \sigma\!\left(k_{ch}(ch - ch_0)\right),
+q_g = C \left(P_{res}^2 - P_{wf}^2\right)^n,
+\end{equation}
+
+% where $C$ is a productivity constant and $n$ is a flow exponent reflecting the flow regime \citep{rawlins1935backpressure}. This formulation is based on compressible gas flow theory and is widely used in gas well performance analysis.
+
+In this work, a simplified pressure-drawdown relationship is adopted:
+
+\begin{equation}
+q_{g,res} = C_g \cdot S_g \cdot \sqrt{P_{res} - P_{wf}} \cdot \sigma\!\left(k_{ch}(ch - ch_0)\right),
 \end{equation}
 
 where:
 \begin{itemize}
-    \item $q_g$ is the gas production rate
-    \item $C_g$ is a gas flow coefficient
-    \item $ch$ denotes the choke opening
-    \item $k_{ch}$ and $ch_0$ control choke sensitivity and activation threshold
+    \item $q_{g,res}$ is the reservoir gas production rate,
+    \item $C_g$ is a gas flow coefficient,
+    \item $S_g$ is a scaling factor accounting for gas properties,
+    \item $P_{res}$ and $P_{wf}$ are reservoir and bottom-hole pressures, respectively,
+    \item $ch$ denotes the choke opening,
+    \item $k_{ch}$ and $ch_0$ control choke sensitivity and activation threshold,
+    \item $\sigma(\cdot)$ denotes the logistic (sigmoid) function.
 \end{itemize}
 
-The square-root pressure dependency is motivated by compressible gas flow through restrictions, while the logistic choke term captures the nonlinear influence of choke opening on gas throughput. This formulation provides stable behavior across a wide range of choke settings and avoids discontinuities associated with piecewise choke models.
+The square-root pressure dependency provides a simplified approximation of pressure-driven gas flow, offering numerical stability and robustness across varying operating conditions. The logistic choke term captures the nonlinear influence of choke opening on gas throughput while ensuring smooth and bounded behavior, thereby avoiding discontinuities associated with piecewise choke models.
+
+When gas lift is present, an additional contribution is included:
+
+\begin{equation}
+q_g = q_{g,res} + q_{g,lift},
+\end{equation}
+
+\begin{equation}
+q_{g,lift} = C_{gl} \cdot \dot{m}_{gas} \cdot OR,
+\end{equation}
+
+where $C_{gl}$ is a gas lift efficiency coefficient, $\dot{m}_{gas}$ is the injected gas mass rate, and $OR$ is the gas lift opening ratio. In the absence of gas lift signals, this term is set to zero.
+
+This formulation provides a computationally efficient and stable approximation of gas flow behavior, while retaining the key dependency on pressure drawdown and operational controls.
 
 \subsection{Parameter Calibration via Nonlinear Least Squares}
 \label{subsec:parameter_calibration}
