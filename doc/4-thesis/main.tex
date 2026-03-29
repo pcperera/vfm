@@ -1019,33 +1019,56 @@ where:
 
 This formulation captures the nonlinear decline in liquid production with increasing flowing pressure while remaining flexible enough to represent a wide range of well behaviors. The quadratic term allows the model to accommodate deviations from ideal Darcy flow caused by multiphase effects and near-wellbore pressure losses.
 
-
 \subsection{Logistic Water-Cut Closure Model}
 \label{subsec:wc_closure}
 
-Phase splitting between oil and water is achieved using a logistic water-cut closure. Logistic functions are commonly employed in petroleum engineering to model bounded variables such as water cut due to their smoothness and asymptotic behavior \citep{hastie2009elements}.
+Phase splitting between oil and water is modeled using a logistic water-cut closure. Logistic functions are widely used in petroleum engineering to represent bounded variables such as water cut due to their smoothness and asymptotic behavior \citep{hastie2009elements}.
+
 Water cut is defined as:
 
 \begin{equation}
-wc = \sigma\left(\mathbf{X}_{wc} \mathbf{A}\right),
+wc = wc_{min} + (wc_{max} - wc_{min}) \cdot \sigma\left(\mathbf{X}_{wc} \mathbf{A}\right),
 \end{equation}
 
 where:
 \begin{itemize}
-    \item $wc$ is the water cut ($0 \le wc \le 1$)
-    \item $\sigma(\cdot)$ denotes the logistic function
-    \item $\mathbf{X}_{wc}$ is a feature vector constructed from pressures, temperatures, and choke-related variables
-    \item $\mathbf{A}$ is a vector of learnable coefficients
+    \item $wc$ is the water cut,
+    \item $\sigma(\cdot)$ denotes the logistic (sigmoid) function,
+    \item $\mathbf{X}_{wc}$ is a feature vector constructed from operational variables such as choke opening, pressures, temperatures, and interaction terms,
+    \item $\mathbf{A}$ is a vector of learnable coefficients,
+    \item $wc_{min}$ and $wc_{max}$ are lower and upper bounds on water cut.
 \end{itemize}
 
-The logistic formulation ensures that predicted water cut remains physically bounded and provides a smooth transition between oil-dominated and water-dominated flow regimes. The inclusion of operational variables allows the model to reflect changes in phase behavior due to pressure drawdown, thermal effects, and choke regulation.
+In this work, $wc_{min} = 0.02$ and $wc_{max} = 0.98$, ensuring that predicted water cut remains within physically plausible limits while avoiding numerical instability near the extremes.
+
+The logistic function can be written explicitly as:
+
+\begin{equation}
+\sigma(z) = \frac{1}{1 + e^{-z}}
+\end{equation}
+
+Substituting the definition of the logistic function, the water-cut model can be written explicitly as:
+
+\begin{equation}
+wc = wc_{min} + (wc_{max} - wc_{min}) \cdot 
+\frac{1}{1 + \exp\left(-\sum_{i=1}^{n} X_{wc,i} A_i\right)}
+\end{equation}
+
+The logistic formulation provides a smooth and nonlinear mapping between operational conditions and phase behavior, enabling the model to capture transitions between oil-dominated and water-dominated flow regimes. The inclusion of operational variables allows the model to account for the influence of pressure drawdown, thermal conditions, and choke regulation on phase distribution.
+
 Oil and water production rates are then computed as:
 
 \begin{equation}
-q_w = wc \cdot q_L, \qquad q_o = (1 - wc) \cdot q_L.
+q_w = wc \cdot q_L, \qquad q_o = (1 - wc) \cdot q_L,
 \end{equation}
 
-This formulation enforces mass balance consistency between oil, water, and total liquid production.
+which enforces consistency with the total liquid rate:
+
+\begin{equation}
+q_L = q_o + q_w.
+\end{equation}
+
+The parameters $\mathbf{A}$ are estimated during model calibration as part of the overall nonlinear least squares optimization using well-test measurements of oil and water rates. Consequently, water cut is not directly fitted but is implicitly inferred through the coupled phase-splitting relationships.
 
 \subsection{Gas Flow Modelling}
 \label{subsec:gas_rate}
