@@ -1,4 +1,5 @@
-# Physics-Based Calibration in MultiphasePhysicsModel
+
+# Physics-Based Calibration (MultiphasePhysicsModel)
 
 ## Overview
 
@@ -172,3 +173,102 @@ pooling 9. Store parameters
 
 This ensures: - Physical interpretability - Robust performance -
 Compatibility with hybrid ML models
+
+
+# Physics-Informed Hybrid Model for Virtual Flow Metering
+
+## Overview
+
+This model combines physics-based predictions with machine learning
+residual correction.
+
+Final Prediction: Physics Model + ML Residual
+
+------------------------------------------------------------------------
+
+## Step 1: Physics Model Calibration
+
+-   Calibrate per well
+-   Generate qo_phys, qw_phys, qg_phys
+
+------------------------------------------------------------------------
+
+## Step 2: Lag Features
+
+-   dhp_lag, whp_lag
+-   Capture temporal effects
+
+------------------------------------------------------------------------
+
+## Step 3: ML Features
+
+-   Physics predictions
+-   Operating conditions
+-   Lagged variables
+
+------------------------------------------------------------------------
+
+## Step 4: Residual Targets (Log Space)
+
+Δ = log(1 + y_true) − log(1 + y_phys)
+
+Targets: - qo - WGR - qg
+
+------------------------------------------------------------------------
+
+## Step 5: Regime Assignment
+
+ΔP = dhp − whp
+
+Regimes: - below_normal - normal - above_normal
+
+------------------------------------------------------------------------
+
+## Step 6: Train ML Models
+
+-   One model per regime
+-   Gradient boosting regressors
+
+------------------------------------------------------------------------
+
+## Step 7: Feature Processing
+
+-   Standard scaling
+-   Polynomial features
+
+------------------------------------------------------------------------
+
+## Step 8: Per-Well Bias
+
+-   Mean residual per well
+-   Applied in log space
+
+------------------------------------------------------------------------
+
+## Prediction Pipeline
+
+### Physics Prediction
+
+Compute baseline rates
+
+### ML Residual Prediction
+
+Apply regime-based model
+
+### Apply Bias
+
+Add well-specific correction
+
+### Final Outputs
+
+-   Gas: corrected with constraints
+-   Oil: direct correction
+-   Water: reconstructed via WGR
+
+------------------------------------------------------------------------
+
+## Summary
+
+-   Physics ensures consistency
+-   ML improves accuracy
+-   Hybrid approach balances both
