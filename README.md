@@ -17,22 +17,36 @@
   - [Step 9: Store Calibrated Parameters](#step-9-store-calibrated-parameters)
   - [Role in Physics-Informed Residual Learning](#role-in-physics-informed-residual-learning)
   - [Summary](#summary)
-- [Residual Learning Hybrid Model (PhysicsInformedHybridModel)](#residual-learning-hybrid-model-physicsinformedhybridmodel)
-  - [Overview](#overview-1)
-  - [Step 1: Physics Model Calibration](#step-1-physics-model-calibration)
-  - [Step 2: Lag Features](#step-2-lag-features)
-  - [Step 3: ML Features](#step-3-ml-features)
-  - [Step 4: Residual Targets (Log Space)](#step-4-residual-targets-log-space)
-  - [Step 5: Regime Assignment](#step-5-regime-assignment)
-  - [Step 6: Train ML Models](#step-6-train-ml-models)
-  - [Step 7: Feature Processing](#step-7-feature-processing)
-  - [Step 8: Per-Well Bias](#step-8-per-well-bias)
-  - [Prediction Pipeline](#prediction-pipeline)
-    - [Physics Prediction](#physics-prediction)
-    - [ML Residual Prediction](#ml-residual-prediction)
-    - [Apply Bias](#apply-bias)
-    - [Final Outputs](#final-outputs)
-  - [Summary](#summary-1)
+- [Physics-Informed Residual Learning Hybrid Model](#physics-informed-residual-learning-hybrid-model)
+  - [1. Overview](#1-overview)
+    - [Core Idea](#core-idea)
+  - [2. Architecture](#2-architecture)
+  - [3. Training Pipeline](#3-training-pipeline)
+    - [3.1 Physics Model Calibration](#31-physics-model-calibration)
+    - [3.2 Lag Feature Engineering](#32-lag-feature-engineering)
+    - [3.3 Feature Engineering](#33-feature-engineering)
+      - [Physics Features](#physics-features)
+      - [Operating Conditions](#operating-conditions)
+      - [Lag Features](#lag-features)
+    - [3.4 Residual Target Construction](#34-residual-target-construction)
+    - [3.5 Regime Assignment](#35-regime-assignment)
+    - [3.6 ML Model Training](#36-ml-model-training)
+    - [3.7 Per-Well Bias Calibration](#37-per-well-bias-calibration)
+  - [4. Prediction Pipeline](#4-prediction-pipeline)
+    - [4.1 Physics Prediction](#41-physics-prediction)
+    - [4.2 ML Residual Prediction](#42-ml-residual-prediction)
+    - [4.3 Apply Bias](#43-apply-bias)
+    - [4.4 Residual Clipping](#44-residual-clipping)
+    - [4.5 Final Rate Reconstruction](#45-final-rate-reconstruction)
+      - [Gas](#gas)
+      - [Oil](#oil)
+      - [Water (WGR-based)](#water-wgr-based)
+    - [4.6 Liquid Consistency](#46-liquid-consistency)
+    - [4.7 Optional Calibration](#47-optional-calibration)
+  - [5. Evaluation](#5-evaluation)
+  - [6. Design Principles](#6-design-principles)
+  - [7. Advantages](#7-advantages)
+  - [8. Summary](#8-summary)
 
 
 
@@ -212,48 +226,88 @@ This ensures: - Physical interpretability - Robust performance -
 Compatibility with hybrid ML models
 
 
-# Residual Learning Hybrid Model (PhysicsInformedHybridModel)
+# Physics-Informed Residual Learning Hybrid Model
 
-## Overview
+## 1. Overview
 
-This model combines physics-based predictions with machine learning
-residual correction.
+This model implements a **Physics-Informed Residual Learning
+Architecture** for multiphase flow prediction.
 
-Final Prediction: Physics Model + ML Residual
+### Core Idea
 
-------------------------------------------------------------------------
+Final Prediction = Physics Model + Machine Learning Residual
 
-## Step 1: Physics Model Calibration
-
--   Calibrate per well
--   Generate qo_phys, qw_phys, qg_phys
+Where: - Physics model captures first-order flow behavior - ML model
+learns systematic errors
 
 ------------------------------------------------------------------------
 
-## Step 2: Lag Features
+## 2. Architecture
 
--   dhp_lag, whp_lag
--   Capture temporal effects
+The system consists of:
 
-------------------------------------------------------------------------
-
-## Step 3: ML Features
-
--   Physics predictions
--   Operating conditions
--   Lagged variables
+1.  Per-well Physics Models
+2.  Regime-aware ML Residual Models
+3.  Per-well Bias Calibration
 
 ------------------------------------------------------------------------
 
-## Step 4: Residual Targets (Log Space)
+## 3. Training Pipeline
+
+### 3.1 Physics Model Calibration
+
+-   Fit `MultiphasePhysicsModel` per well
+-   Inputs: pressure, choke, temperature
+-   Outputs:
+    -   qo_phys
+    -   qw_phys
+    -   qg_phys
+
+------------------------------------------------------------------------
+
+### 3.2 Lag Feature Engineering
+
+-   Create lagged variables:
+    -   dhp_lag1, dhp_lag2, ...
+    -   whp_lag1, whp_lag2, ...
+-   Drop unsafe rows with missing lags
+
+------------------------------------------------------------------------
+
+### 3.3 Feature Engineering
+
+#### Physics Features
+
+-   qo_phys, qw_phys, qg_phys
+
+#### Operating Conditions
+
+-   dhp, whp, choke, dcp
+-   wht, dht
+
+#### Lag Features
+
+-   dhp_lag*, whp_lag*
+
+Constraints: - No target leakage - No well ID
+
+------------------------------------------------------------------------
+
+### 3.4 Residual Target Construction
+
+Residuals computed in log-space:
 
 Δ = log(1 + y_true) − log(1 + y_phys)
 
-Targets: - qo - WGR - qg
+Targets: - Δlog(qo) - Δlog(WGR) - Δlog(qg)
+
+WGR = qw / qg
 
 ------------------------------------------------------------------------
 
-## Step 5: Regime Assignment
+### 3.5 Regime Assignment
+
+Based on pressure drawdown:
 
 ΔP = dhp − whp
 
@@ -261,51 +315,130 @@ Regimes: - below_normal - normal - above_normal
 
 ------------------------------------------------------------------------
 
-## Step 6: Train ML Models
+### 3.6 ML Model Training
 
 -   One model per regime
--   Gradient boosting regressors
+-   Algorithm: HistGradientBoostingRegressor
+-   Multi-output: qo, WGR, qg residuals
+
+Steps: 1. Scale features 2. Apply polynomial expansion 3. Train per
+regime
 
 ------------------------------------------------------------------------
 
-## Step 7: Feature Processing
+### 3.7 Per-Well Bias Calibration
 
--   Standard scaling
--   Polynomial features
+Compute mean residual:
 
-------------------------------------------------------------------------
+bias = mean(Y_true − Y_pred)
 
-## Step 8: Per-Well Bias
-
--   Mean residual per well
--   Applied in log space
+Stored per well: - \[b_qo, b_wgr, b_qg\]
 
 ------------------------------------------------------------------------
 
-## Prediction Pipeline
+## 4. Prediction Pipeline
 
-### Physics Prediction
+### 4.1 Physics Prediction
 
-Compute baseline rates
-
-### ML Residual Prediction
-
-Apply regime-based model
-
-### Apply Bias
-
-Add well-specific correction
-
-### Final Outputs
-
--   Gas: corrected with constraints
--   Oil: direct correction
--   Water: reconstructed via WGR
+-   Compute qo_phys, qw_phys, qg_phys
 
 ------------------------------------------------------------------------
 
-## Summary
+### 4.2 ML Residual Prediction
 
--   Physics ensures consistency
--   ML improves accuracy
--   Hybrid approach balances both
+-   Build features
+-   Assign regime
+-   Predict residuals
+
+------------------------------------------------------------------------
+
+### 4.3 Apply Bias
+
+-   Add per-well bias in log-space
+
+------------------------------------------------------------------------
+
+### 4.4 Residual Clipping
+
+-   Limit residual magnitude for stability
+
+------------------------------------------------------------------------
+
+### 4.5 Final Rate Reconstruction
+
+#### Gas
+
+qg = exp(log(1 + qg_phys) + res_qg) − 1
+
+Constraint: 0.6 × qg_phys ≤ qg ≤ 1.8 × qg_phys
+
+------------------------------------------------------------------------
+
+#### Oil
+
+qo = exp(log(1 + qo_phys) + res_qo) − 1
+
+------------------------------------------------------------------------
+
+#### Water (WGR-based)
+
+1.  Compute WGR_phys
+2.  Apply residual
+3.  Reconstruct:
+
+qw = qg × WGR_hybrid
+
+Gating: - Only if physics predicts water
+
+------------------------------------------------------------------------
+
+### 4.6 Liquid Consistency
+
+-   Ensure qw ≤ total liquid
+-   Maintain qo + qw consistency
+
+------------------------------------------------------------------------
+
+### 4.7 Optional Calibration
+
+-   Blend predictions with true data (if available)
+
+------------------------------------------------------------------------
+
+## 5. Evaluation
+
+Metrics: - RMSE - MAE - R²
+
+Evaluated for: - qo, qw, qg - WGR, GOR
+
+Supports: - Physics-only evaluation - Hybrid evaluation - MPFM
+comparison
+
+------------------------------------------------------------------------
+
+## 6. Design Principles
+
+-   Physics-first modeling
+-   Residual learning
+-   Log-space stability
+-   Regime awareness
+-   Per-well adaptation
+-   Strong constraints
+
+------------------------------------------------------------------------
+
+## 7. Advantages
+
+-   Physically interpretable
+-   Robust to sparse data
+-   Handles multiphase complexity
+-   Suitable for real-time VFM
+
+------------------------------------------------------------------------
+
+## 8. Summary
+
+The model: 1. Learns physics per well 2. Learns residuals globally 3.
+Adapts to regimes 4. Applies well-specific corrections
+
+Result: - High accuracy - Strong physical consistency
