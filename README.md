@@ -17,7 +17,7 @@
   - [Step 9: Store Calibrated Parameters](#step-9-store-calibrated-parameters)
   - [Role in Physics-Informed Residual Learning](#role-in-physics-informed-residual-learning)
   - [Summary](#summary)
-- [Physics-Informed Hybrid Model for Virtual Flow Metering](#physics-informed-hybrid-model-for-virtual-flow-metering)
+- [Residual Learning Hybrid Model (PhysicsInformedHybridModel)](#residual-learning-hybrid-model-physicsinformedhybridmodel)
   - [Overview](#overview-1)
   - [Step 1: Physics Model Calibration](#step-1-physics-model-calibration)
   - [Step 2: Lag Features](#step-2-lag-features)
@@ -212,7 +212,7 @@ This ensures: - Physical interpretability - Robust performance -
 Compatibility with hybrid ML models
 
 
-# Physics-Informed Hybrid Model for Virtual Flow Metering
+# Residual Learning Hybrid Model (PhysicsInformedHybridModel)
 
 ## Overview
 
