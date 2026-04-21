@@ -34,14 +34,13 @@
   - [4. Prediction Pipeline](#4-prediction-pipeline)
     - [4.1 Physics Prediction](#41-physics-prediction)
     - [4.2 ML Residual Prediction](#42-ml-residual-prediction)
-    - [4.3 Apply Bias](#43-apply-bias)
-    - [4.4 Residual Clipping](#44-residual-clipping)
-    - [4.5 Final Rate Reconstruction](#45-final-rate-reconstruction)
+    - [4.3 Residual Clipping](#43-residual-clipping)
+    - [4.4 Final Rate Reconstruction](#44-final-rate-reconstruction)
       - [Gas](#gas)
       - [Oil](#oil)
       - [Water (WGR-based)](#water-wgr-based)
-    - [4.6 Liquid Consistency](#46-liquid-consistency)
-    - [4.7 Optional Calibration](#47-optional-calibration)
+    - [4.5 Liquid Consistency](#45-liquid-consistency)
+    - [4.6 Optional Calibration](#46-optional-calibration)
   - [5. Evaluation](#5-evaluation)
   - [6. Design Principles](#6-design-principles)
   - [7. Advantages](#7-advantages)
@@ -322,6 +321,8 @@ Regimes: - below_normal - normal - above_normal
 Steps: 1. Scale features 2. Apply polynomial expansion 3. Train per
 regime
 
+HistGradientBoostingRegressor was selected for residual learning due to its ability to efficiently model nonlinear relationships in structured tabular data, its robustness to noise and measurement uncertainty, and its computational efficiency via histogram-based binning. The algorithm is particularly well-suited for physics-informed residual learning, as it iteratively refines prediction errors from the physics model, enabling accurate capture of unmodeled multiphase flow effects. Additionally, its support for early stopping, scalability to large datasets, and compatibility with regime-based modeling make it an appropriate choice for real-time virtual flow metering applications.
+
 ------------------------------------------------------------------------
 
 ## 4. Prediction Pipeline
@@ -340,19 +341,13 @@ regime
 
 ------------------------------------------------------------------------
 
-### 4.3 Apply Bias
-
--   Add per-well bias in log-space
-
-------------------------------------------------------------------------
-
-### 4.4 Residual Clipping
+### 4.3 Residual Clipping
 
 -   Limit residual magnitude for stability
 
 ------------------------------------------------------------------------
 
-### 4.5 Final Rate Reconstruction
+### 4.4 Final Rate Reconstruction
 
 #### Gas
 
@@ -380,14 +375,14 @@ Gating: - Only if physics predicts water
 
 ------------------------------------------------------------------------
 
-### 4.6 Liquid Consistency
+### 4.5 Liquid Consistency
 
 -   Ensure qw ≤ total liquid
 -   Maintain qo + qw consistency
 
 ------------------------------------------------------------------------
 
-### 4.7 Optional Calibration
+### 4.6 Optional Calibration
 
 -   Blend predictions with true data (if available)
 
