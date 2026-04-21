@@ -31,6 +31,7 @@
     - [3.4 Residual Target Construction](#34-residual-target-construction)
     - [3.5 Regime Assignment](#35-regime-assignment)
     - [3.6 ML Model Training](#36-ml-model-training)
+    - [Justification for Using HistGradientBoostingRegressor for Residual Learning](#justification-for-using-histgradientboostingregressor-for-residual-learning)
   - [4. Prediction Pipeline](#4-prediction-pipeline)
     - [4.1 Physics Prediction](#41-physics-prediction)
     - [4.2 ML Residual Prediction](#42-ml-residual-prediction)
@@ -321,7 +322,39 @@ Regimes: - below_normal - normal - above_normal
 Steps: 1. Scale features 2. Apply polynomial expansion 3. Train per
 regime
 
-HistGradientBoostingRegressor was selected for residual learning due to its ability to efficiently model nonlinear relationships in structured tabular data, its robustness to noise and measurement uncertainty, and its computational efficiency via histogram-based binning. The algorithm is particularly well-suited for physics-informed residual learning, as it iteratively refines prediction errors from the physics model, enabling accurate capture of unmodeled multiphase flow effects. Additionally, its support for early stopping, scalability to large datasets, and compatibility with regime-based modeling make it an appropriate choice for real-time virtual flow metering applications.
+### Justification for Using HistGradientBoostingRegressor for Residual Learning
+
+The residual learning component in the proposed physics-informed hybrid framework requires a model capable of capturing complex, nonlinear deviations between physics-based predictions and observed multiphase flow rates. These residuals arise from unmodeled physical phenomena, sensor noise, and operational variability, and therefore exhibit structured but nontrivial patterns.
+
+Selected **HistGradientBoostingRegressor (HGBR)** as the residual learner for the following reasons:
+
+1. **Suitability for Structured Tabular Data**
+   The input space consists of engineered features derived from physics predictions, operating conditions (pressure, choke, temperature), and lagged variables. Tree-based gradient boosting methods are well-established as state-of-the-art for such tabular datasets, outperforming neural networks in many practical scenarios where data is heterogeneous and moderately sized.
+
+2. **Ability to Model Nonlinear and Interaction Effects**
+   Residuals in multiphase flow systems are inherently nonlinear and involve complex interactions (e.g., pressure–choke coupling, thermal effects). HGBR captures such interactions implicitly through hierarchical tree splits, eliminating the need for extensive manual feature engineering.
+
+3. **Consistency with Residual Learning Paradigm**
+   Gradient boosting is inherently an additive error-correction method, where successive trees iteratively minimize residuals. This aligns naturally with the proposed architecture, in which the physics model provides a first-order approximation and the ML component refines the remaining error.
+
+4. **Computational Efficiency and Scalability**
+   The histogram-based implementation significantly reduces computational complexity by binning continuous features, enabling efficient training on large, high-frequency time-series datasets. This is particularly important for multi-well deployment scenarios and near-real-time applications such as virtual flow metering.
+
+5. **Robustness to Noise and Measurement Uncertainty**
+   Oilfield data sources (e.g., MPFM, SCADA sensors) are subject to noise and bias. Ensemble methods like HGBR mitigate overfitting through aggregation and regularization (e.g., learning rate, early stopping), making them well-suited for noisy industrial datasets.
+
+6. **Stability Under Log-Transformed Targets**
+   Residuals are modeled in log-space to stabilize variance and handle wide dynamic ranges in flow rates. HGBR does not assume linearity or Gaussianity of targets, and empirically performs well under such transformations.
+
+7. **Compatibility with Regime-Based Modeling**
+   The model is trained separately across operating regimes defined by pressure drawdown. HGBR performs effectively even with moderately sized subsets, allowing regime-specific specialization without excessive hyperparameter tuning.
+
+8. **Practical Considerations and Reproducibility**
+   HGBR is part of the standard scikit-learn library, ensuring ease of integration, reproducibility, and maintainability without reliance on external dependencies. This is advantageous for industrial deployment and long-term support.
+
+
+In summary, HistGradientBoostingRegressor provides an effective balance between model expressiveness, computational efficiency, and robustness. Its alignment with the residual learning paradigm and its strong empirical performance on structured engineering datasets make it a suitable choice for the proposed physics-informed hybrid modeling framework.
+
 
 ------------------------------------------------------------------------
 
