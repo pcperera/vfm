@@ -31,7 +31,6 @@
     - [3.4 Residual Target Construction](#34-residual-target-construction)
     - [3.5 Regime Assignment](#35-regime-assignment)
     - [3.6 ML Model Training](#36-ml-model-training)
-    - [Justification for Using HistGradientBoostingRegressor for Residual Learning](#justification-for-using-histgradientboostingregressor-for-residual-learning)
   - [4. Prediction Pipeline](#4-prediction-pipeline)
     - [4.1 Physics Prediction](#41-physics-prediction)
     - [4.2 ML Residual Prediction](#42-ml-residual-prediction)
@@ -321,8 +320,6 @@ Regimes: - below_normal - normal - above_normal
 
 Steps: 1. Scale features 2. Apply polynomial expansion 3. Train per
 regime
-
-### Justification for Using HistGradientBoostingRegressor for Residual Learning
 
 The residual learning component in the proposed physics-informed hybrid framework requires a model capable of capturing complex, nonlinear deviations between physics-based predictions and observed multiphase flow rates. These residuals arise from unmodeled physical phenomena, sensor noise, and operational variability, and therefore exhibit structured but nontrivial patterns.
 
