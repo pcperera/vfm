@@ -31,7 +31,6 @@
     - [3.4 Residual Target Construction](#34-residual-target-construction)
     - [3.5 Regime Assignment](#35-regime-assignment)
     - [3.6 ML Model Training](#36-ml-model-training)
-    - [3.7 Per-Well Bias Calibration](#37-per-well-bias-calibration)
   - [4. Prediction Pipeline](#4-prediction-pipeline)
     - [4.1 Physics Prediction](#41-physics-prediction)
     - [4.2 ML Residual Prediction](#42-ml-residual-prediction)
@@ -248,7 +247,6 @@ The system consists of:
 
 1.  Per-well Physics Models
 2.  Regime-aware ML Residual Models
-3.  Per-well Bias Calibration
 
 ------------------------------------------------------------------------
 
@@ -323,16 +321,6 @@ Regimes: - below_normal - normal - above_normal
 
 Steps: 1. Scale features 2. Apply polynomial expansion 3. Train per
 regime
-
-------------------------------------------------------------------------
-
-### 3.7 Per-Well Bias Calibration
-
-Compute mean residual:
-
-bias = mean(Y_true − Y_pred)
-
-Stored per well: - \[b_qo, b_wgr, b_qg\]
 
 ------------------------------------------------------------------------
 
