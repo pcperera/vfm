@@ -62,12 +62,12 @@
   - [1. Why use a hybrid Physics + ML model?](#1-why-use-a-hybrid-physics--ml-model)
   - [2. Why residual learning instead of direct prediction?](#2-why-residual-learning-instead-of-direct-prediction)
   - [3. Why are residuals computed in log space?](#3-why-are-residuals-computed-in-log-space)
-  - [💧 4. Why model WGR instead of water rate directly?](#-4-why-model-wgr-instead-of-water-rate-directly)
+  - [4. Why model WGR instead of water rate directly?](#4-why-model-wgr-instead-of-water-rate-directly)
   - [5. How are zero water rates handled?](#5-how-are-zero-water-rates-handled)
   - [6. How is water breakthrough handled?](#6-how-is-water-breakthrough-handled)
   - [7. Does the physics model allow zero water?](#7-does-the-physics-model-allow-zero-water)
   - [8. Why is water prediction gated by physics?](#8-why-is-water-prediction-gated-by-physics)
-  - [🛢️ 9. How is gas lift handled?](#️-9-how-is-gas-lift-handled)
+  - [9. How is gas lift handled?](#9-how-is-gas-lift-handled)
   - [10. What is gas flow coefficient (Cg)?](#10-what-is-gas-flow-coefficient-cg)
   - [11. What is the Jacobian?](#11-what-is-the-jacobian)
   - [12. Is calibration done per data point?](#12-is-calibration-done-per-data-point)
@@ -789,7 +789,7 @@ Model learns **relative (percentage) errors**, improving stability.
 
 ---
 
-## 💧 4. Why model WGR instead of water rate directly?
+## 4. Why model WGR instead of water rate directly?
 
 
 
@@ -865,7 +865,7 @@ Prevents ML from predicting unphysical water.
 
 ---
 
-## 🛢️ 9. How is gas lift handled?
+## 9. How is gas lift handled?
 
 
 
