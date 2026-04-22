@@ -19,15 +19,15 @@
   - [Example: Numerical Example: Physics-Based Calibration for a Single Well](#example-numerical-example-physics-based-calibration-for-a-single-well)
     - [0: Given Data](#0-given-data)
     - [1: Estimate Reservoir Pressure](#1-estimate-reservoir-pressure)
-    - [2: Compute Pressure Ratio](#2-compute-pressure-ratio)
-    - [3: Liquid Model (Initial Guess)](#3-liquid-model-initial-guess)
-    - [4: Water Cut](#4-water-cut)
-    - [5: Gas Model](#5-gas-model)
-    - [6: Build Residual Vector](#6-build-residual-vector)
-    - [7: Optimization](#7-optimization)
-    - [8: Iteration](#8-iteration)
-    - [9: Final Calibrated Parameters](#9-final-calibrated-parameters)
-    - [Final Model Usage](#final-model-usage)
+    - [2: Initialize Parameters](#2-initialize-parameters)
+    - [3: Compute Pressure Ratio](#3-compute-pressure-ratio)
+    - [4: Liquid Rate Prediction](#4-liquid-rate-prediction)
+    - [5: Water Cut and Phase Split](#5-water-cut-and-phase-split)
+    - [6: Gas Rate Prediction](#6-gas-rate-prediction)
+    - [Step 7: Residual Vector](#step-7-residual-vector)
+    - [Step 8: Optimization Iteration](#step-8-optimization-iteration)
+    - [Step 9: Final Calibrated Parameters](#step-9-final-calibrated-parameters)
+    - [Model Usage](#model-usage)
   - [Summary](#summary)
 - [Physics-Informed Residual Learning Hybrid Model](#physics-informed-residual-learning-hybrid-model)
   - [1. Overview](#1-overview)
@@ -232,18 +232,18 @@ Final model: Final = Physics + Residual
 
 ### 0: Given Data
 
-Assume the following data for one well:
+| dhp (bar) | choke | qo (Sm³/h) | qw (Sm³/h) | qg (Sm³/h) | qL (Sm³/h) |
+| --------- | ----- | ---------- | ---------- | ---------- | ---------- |
+| 180       | 0.6   | 100        | 20         | 500        | 120        |
+| 170       | 0.7   | 120        | 25         | 550        | 145        |
+| 160       | 0.8   | 140        | 30         | 600        | 170        |
+| 150       | 0.9   | 160        | 35         | 650        | 195        |
+| 140       | 1.0   | 180        | 40         | 700        | 220        |
 
-| dhp (bar) | choke | qo (Sm³/h) | qw (Sm³/h) | qg (Sm³/h) |
-| --------- | ----- | ---------- | ---------- | ---------- |
-| 180       | 0.6   | 100        | 20         | 500        |
-| 170       | 0.7   | 120        | 25         | 550        |
-| 160       | 0.8   | 140        | 30         | 600        |
-| 150       | 0.9   | 160        | 35         | 650        |
-| 140       | 1.0   | 180        | 40         | 700        |
-
-Total liquid rate:
-qL = qo + qw
+Where:
+[
+q_L = qo + qw
+]
 
 ---
 
@@ -251,147 +251,177 @@ qL = qo + qw
 
 Given:
 
-* dhp_max = 180 bar
-* bh_tvd = 2000 m
-* ρ = 850 kg/m³
+* ( dhp_{max} = 180 , bar )
+* ( bh_tvd = 2000 , m )
+* ( \rho = 850 , kg/m^3 )
 
-Hydrostatic pressure:
-P = ρgh = 850 × 9.81 × 2000 / 10⁵ = 166.77 bar
+[
+P = \rho g h = 850 × 9.81 × 2000 / 10^5 = 166.77 , bar
+]
 
 Initial estimate:
-P_res = 180 + 166.77 ≈ 346.77 bar
+[
+P_{res} = 180 + 166.77 = 346.77 , bar
+]
 
 Bounds:
 
-* Lower = 180 + 0.7 × 166.77 ≈ 296.7 bar
-* Upper = 180 + 1.3 × 166.77 ≈ 396.8 bar
+* Lower ≈ 296.7 bar
+* Upper ≈ 396.8 bar
 
 ---
 
-### 2: Compute Pressure Ratio
+### 2: Initialize Parameters
 
-pr = Pwf / P_res
-
-Example:
-pr = 180 / 346.77 ≈ 0.52
-
----
-
-### 3: Liquid Model (Initial Guess)
+[
+qL_{max} = mean(q_L) = 170
+]
 
 Assume:
 
-* qL_max = 200
-* a = 0.2
-* b = 0.5
-
-qL = qL_max (1 − a·pr − b·pr²)
-
-qL = 200 (1 − 0.2×0.52 − 0.5×0.52²)
-qL = 200 × 0.761 ≈ 152.2
-
-Actual:
-qL = 100 + 20 = 120
-
-Error:
-152.2 − 120 = +32.2
+* ( a = 0.2 )
+* ( b = 0.5 )
+* ( Cg = 50 )
 
 ---
 
-### 4: Water Cut
+### 3: Compute Pressure Ratio
+
+For first row:
+[
+pr = \frac{180}{346.77} ≈ 0.52
+]
+
+---
+
+### 4: Liquid Rate Prediction
+
+[
+q_L = 170 (1 - 0.2×0.52 - 0.5×0.52^2)
+]
+
+[
+= 170 (1 - 0.104 - 0.135)
+= 170 × 0.761
+= 129.37
+]
 
 Actual:
+[
+q_L = 120
+]
+
+Error:
+[
++9.37
+]
+
+---
+
+### 5: Water Cut and Phase Split
+
+Actual:
+[
 wc = 20 / 120 = 0.167
+]
 
 Assume model:
-wc ≈ 0.20
+[
+wc ≈ 0.18
+]
 
 Predicted:
-qw = 0.20 × 152.2 = 30.4
-qo = 121.8
+[
+qw = 0.18 × 129.37 = 23.29
+]
+[
+qo = 106.08
+]
 
 Errors:
 
-* qw error = +10.4
-* qo error = +21.8
+* qw error ≈ +3.29
+* qo error ≈ +6.08
 
 ---
 
-### 5: Gas Model
+### 6: Gas Rate Prediction
 
-Assume:
-Cg = 50
-
-dp = √(P_res − Pwf) = √(346.77 − 180) ≈ 12.9
+[
+dp = \sqrt{346.77 - 180} = \sqrt{166.77} ≈ 12.91
+]
 
 Assume choke_eff ≈ 0.7
 
-qg = 50 × 12.9 × 0.7 ≈ 451
+[
+qg = 50 × 12.91 × 0.7 ≈ 451.85
+]
 
 Actual:
+[
 qg = 500
+]
 
 Error:
-−49
+[
+-48.15
+]
 
 ---
 
-### 6: Build Residual Vector
+### Step 7: Residual Vector
 
-Residuals are computed for all data points:
+For this point:
 
-Residual = [qo_error, qw_error, qg_error]
+* qo error ≈ +6.08
+* qw error ≈ +3.29
+* qg error ≈ −48.15
 
-Each residual is normalized:
-error / std
+All residuals (for all rows) are:
 
-This forms the objective function input.
-
----
-
-### 7: Optimization
-
-Parameters to estimate:
-θ = {P_res, qL_max, a, b, Cg, k_ch, ch0, C_gl, A_wc}
-
-Objective:
-Minimize sum of squared residuals:
-Σ(y_pred − y_actual)²
+* Combined
+* Normalized
+* Passed to optimizer
 
 ---
 
-### 8: Iteration
+### Step 8: Optimization Iteration
 
-New parameter guess:
+Try new parameters:
 
-* qL_max = 170
-* a = 0.3
-* b = 0.4
+* ( qL_{max} = 180 )
+* ( a = 0.25 )
+* ( b = 0.45 )
 
-qL = 170 (1 − 0.3×0.52 − 0.4×0.52²)
-qL ≈ 125.8
+[
+q_L = 180 (1 - 0.25×0.52 - 0.45×0.52^2)
+]
 
-Now closer to actual (120)
+[
+= 180 × 0.748 ≈ 134.64
+]
 
-Optimizer continues updating parameters iteratively.
+Closer to actual (120)
 
----
-
-### 9: Final Calibrated Parameters
-
-Example final values:
-
-| Parameter | Value   |
-| --------- | ------- |
-| P_res     | 335 bar |
-| qL_max    | 165     |
-| a         | 0.28    |
-| b         | 0.42    |
-| Cg        | 55      |
+👉 Errors reduce → optimizer keeps updating
 
 ---
 
-### Final Model Usage
+### Step 9: Final Calibrated Parameters
+
+After convergence (example):
+
+| Parameter  | Value   |
+| ---------- | ------- |
+| (P_{res})  | 335 bar |
+| (qL_{max}) | 165     |
+| (a)        | 0.28    |
+| (b)        | 0.42    |
+| (Cg)       | 55      |
+
+---
+
+### Model Usage
 
 For any new input (dhp, choke, etc.):
 
