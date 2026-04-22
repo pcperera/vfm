@@ -17,16 +17,16 @@
   - [Step 9: Store Calibrated Parameters](#step-9-store-calibrated-parameters)
   - [Role in Physics-Informed Residual Learning](#role-in-physics-informed-residual-learning)
   - [Example: Numerical Example: Physics-Based Calibration for a Single Well](#example-numerical-example-physics-based-calibration-for-a-single-well)
-    - [0: Given Data](#0-given-data)
+  - [🛢️ Step 0: Given Data](#️-step-0-given-data)
     - [1: Estimate Reservoir Pressure](#1-estimate-reservoir-pressure)
     - [2: Initialize Parameters](#2-initialize-parameters)
     - [3: Compute Pressure Ratio](#3-compute-pressure-ratio)
     - [4: Liquid Rate Prediction](#4-liquid-rate-prediction)
     - [5: Water Cut and Phase Split](#5-water-cut-and-phase-split)
     - [6: Gas Rate Prediction](#6-gas-rate-prediction)
-    - [Step 7: Residual Vector](#step-7-residual-vector)
-    - [Step 8: Optimization Iteration](#step-8-optimization-iteration)
-    - [Step 9: Final Calibrated Parameters](#step-9-final-calibrated-parameters)
+    - [7: Residual Vector](#7-residual-vector)
+    - [8: Optimization Iteration](#8-optimization-iteration)
+    - [9: Final Calibrated Parameters](#9-final-calibrated-parameters)
     - [Model Usage](#model-usage)
   - [Summary](#summary)
 - [Physics-Informed Residual Learning Hybrid Model](#physics-informed-residual-learning-hybrid-model)
@@ -230,7 +230,7 @@ Final model: Final = Physics + Residual
 
 ---
 
-### 0: Given Data
+## 🛢️ Step 0: Given Data
 
 | dhp (bar) | choke | qo (Sm³/h) | qw (Sm³/h) | qg (Sm³/h) | qL (Sm³/h) |
 | --------- | ----- | ---------- | ---------- | ---------- | ---------- |
@@ -240,10 +240,8 @@ Final model: Final = Physics + Residual
 | 150       | 0.9   | 160        | 35         | 650        | 195        |
 | 140       | 1.0   | 180        | 40         | 700        | 220        |
 
-Where:
-[
-q_L = qo + qw
-]
+**Note:**
+qL = qo + qw
 
 ---
 
@@ -251,92 +249,109 @@ q_L = qo + qw
 
 Given:
 
-* ( dhp_{max} = 180 , bar )
-* ( bh_tvd = 2000 , m )
-* ( \rho = 850 , kg/m^3 )
+* dhp_max = 180 bar
+* bh_tvd = 2000 m
+* ρ = 850 kg/m³
 
-[
-P = \rho g h = 850 × 9.81 × 2000 / 10^5 = 166.77 , bar
-]
+Hydrostatic pressure:
+
+```
+P = ρ g h
+  = 850 × 9.81 × 2000 / 10^5
+  = 166.77 bar
+```
 
 Initial estimate:
-[
-P_{res} = 180 + 166.77 = 346.77 , bar
-]
+
+```
+P_res = dhp_max + hydro
+      = 180 + 166.77
+      = 346.77 bar
+```
 
 Bounds:
 
-* Lower ≈ 296.7 bar
-* Upper ≈ 396.8 bar
+```
+Lower = 180 + 0.7 × 166.77 ≈ 296.7 bar
+Upper = 180 + 1.3 × 166.77 ≈ 396.8 bar
+```
 
 ---
 
 ### 2: Initialize Parameters
 
-[
-qL_{max} = mean(q_L) = 170
-]
+```
+qL_max = mean(qL)
+       = (120 + 145 + 170 + 195 + 220) / 5
+       = 170
+```
 
-Assume:
+Initial guesses:
 
-* ( a = 0.2 )
-* ( b = 0.5 )
-* ( Cg = 50 )
+* a = 0.2
+* b = 0.5
+* Cg = 50
 
 ---
 
 ### 3: Compute Pressure Ratio
 
 For first row:
-[
-pr = \frac{180}{346.77} ≈ 0.52
-]
+
+```
+pr = Pwf / P_res
+   = 180 / 346.77
+   ≈ 0.52
+```
 
 ---
 
 ### 4: Liquid Rate Prediction
 
-[
-q_L = 170 (1 - 0.2×0.52 - 0.5×0.52^2)
-]
-
-[
-= 170 (1 - 0.104 - 0.135)
-= 170 × 0.761
-= 129.37
-]
+```
+qL = qL_max × (1 − a·pr − b·pr²)
+   = 170 × (1 − 0.2×0.52 − 0.5×0.52²)
+   = 170 × (1 − 0.104 − 0.135)
+   = 170 × 0.761
+   = 129.37
+```
 
 Actual:
-[
-q_L = 120
-]
+
+```
+qL = 120
+```
 
 Error:
-[
+
+```
 +9.37
-]
+```
 
 ---
 
 ### 5: Water Cut and Phase Split
 
 Actual:
-[
-wc = 20 / 120 = 0.167
-]
+
+```
+wc = qw / qL
+   = 20 / 120
+   = 0.167
+```
 
 Assume model:
-[
+
+```
 wc ≈ 0.18
-]
+```
 
 Predicted:
-[
+
+```
 qw = 0.18 × 129.37 = 23.29
-]
-[
-qo = 106.08
-]
+qo = 129.37 − 23.29 = 106.08
+```
 
 Errors:
 
@@ -347,77 +362,86 @@ Errors:
 
 ### 6: Gas Rate Prediction
 
-[
-dp = \sqrt{346.77 - 180} = \sqrt{166.77} ≈ 12.91
-]
+```
+dp = sqrt(P_res − Pwf)
+   = sqrt(346.77 − 180)
+   = sqrt(166.77)
+   ≈ 12.91
+```
 
-Assume choke_eff ≈ 0.7
+Assume:
 
-[
-qg = 50 × 12.91 × 0.7 ≈ 451.85
-]
+```
+choke_eff ≈ 0.7
+```
+
+```
+qg = Cg × dp × choke_eff
+   = 50 × 12.91 × 0.7
+   ≈ 451.85
+```
 
 Actual:
-[
+
+```
 qg = 500
-]
+```
 
 Error:
-[
--48.15
-]
+
+```
+−48.15
+```
 
 ---
 
-### Step 7: Residual Vector
+### 7: Residual Vector
 
 For this point:
 
-* qo error ≈ +6.08
-* qw error ≈ +3.29
-* qg error ≈ −48.15
+```
+qo error ≈ +6.08
+qw error ≈ +3.29
+qg error ≈ −48.15
+```
 
-All residuals (for all rows) are:
+Across all data points:
 
-* Combined
+* Residuals are combined
 * Normalized
 * Passed to optimizer
 
 ---
 
-### Step 8: Optimization Iteration
+### 8: Optimization Iteration
 
 Try new parameters:
 
-* ( qL_{max} = 180 )
-* ( a = 0.25 )
-* ( b = 0.45 )
+* qL_max = 180
+* a = 0.25
+* b = 0.45
 
-[
-q_L = 180 (1 - 0.25×0.52 - 0.45×0.52^2)
-]
-
-[
-= 180 × 0.748 ≈ 134.64
-]
+```
+qL = 180 × (1 − 0.25×0.52 − 0.45×0.52²)
+   = 180 × 0.748
+   ≈ 134.64
+```
 
 Closer to actual (120)
 
-👉 Errors reduce → optimizer keeps updating
+Optimizer keeps updating parameters to reduce error
 
 ---
 
-### Step 9: Final Calibrated Parameters
+### 9: Final Calibrated Parameters
 
-After convergence (example):
-
-| Parameter  | Value   |
-| ---------- | ------- |
-| (P_{res})  | 335 bar |
-| (qL_{max}) | 165     |
-| (a)        | 0.28    |
-| (b)        | 0.42    |
-| (Cg)       | 55      |
+| Parameter | Value   |
+| --------- | ------- |
+| P_res     | 335 bar |
+| qL_max    | 165     |
+| a         | 0.28    |
+| b         | 0.42    |
+| Cg        | 55      |
 
 ---
 
@@ -433,10 +457,15 @@ Using calibrated physics equations.
 
 ------------------------------------------------------------------------
 
-
 ## Summary
 
 Physics calibration tunes model parameters so that physics-based predictions of oil, water, and gas rates match real well data as closely as possible.
+
+For any new input:
+
+* Compute qL from pressure
+* Split into qo and qw using water cut
+* Compute qg from pressure drawdown
 
 Calibration process:
 
