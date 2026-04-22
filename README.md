@@ -60,11 +60,11 @@
   - [8. Summary](#8-summary)
 - [FAQ](#faq)
   - [1. Why use a hybrid Physics + ML model?](#1-why-use-a-hybrid-physics--ml-model)
-  - [⚙️ 2. Why residual learning instead of direct prediction?](#️-2-why-residual-learning-instead-of-direct-prediction)
-  - [📊 3. Why are residuals computed in log space?](#-3-why-are-residuals-computed-in-log-space)
+  - [2. Why residual learning instead of direct prediction?](#2-why-residual-learning-instead-of-direct-prediction)
+  - [3. Why are residuals computed in log space?](#3-why-are-residuals-computed-in-log-space)
   - [💧 4. Why model WGR instead of water rate directly?](#-4-why-model-wgr-instead-of-water-rate-directly)
-  - [💧 5. How are zero water rates handled?](#-5-how-are-zero-water-rates-handled)
-  - [🌊 6. How is water breakthrough handled?](#-6-how-is-water-breakthrough-handled)
+  - [5. How are zero water rates handled?](#5-how-are-zero-water-rates-handled)
+  - [6. How is water breakthrough handled?](#6-how-is-water-breakthrough-handled)
   - [7. Does the physics model allow zero water?](#7-does-the-physics-model-allow-zero-water)
   - [8. Why is water prediction gated by physics?](#8-why-is-water-prediction-gated-by-physics)
   - [🛢️ 9. How is gas lift handled?](#️-9-how-is-gas-lift-handled)
@@ -763,7 +763,7 @@ Result: **accuracy + physical consistency + generalization**
 
 ---
 
-## ⚙️ 2. Why residual learning instead of direct prediction?
+## 2. Why residual learning instead of direct prediction?
 
 
 The ML model learns corrections:
@@ -776,7 +776,7 @@ This simplifies learning and preserves physics structure.
 
 ---
 
-## 📊 3. Why are residuals computed in log space?
+## 3. Why are residuals computed in log space?
 
 
 
@@ -802,7 +802,7 @@ Ensures stable and physically consistent water prediction.
 
 ---
 
-## 💧 5. How are zero water rates handled?
+## 5. How are zero water rates handled?
 
 
 
@@ -818,7 +818,7 @@ Ensures numerical stability + reliable learning.
 
 ---
 
-## 🌊 6. How is water breakthrough handled?
+## 6. How is water breakthrough handled?
 
 
 
