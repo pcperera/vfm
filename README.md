@@ -17,7 +17,7 @@
   - [Step 9: Store Calibrated Parameters](#step-9-store-calibrated-parameters)
   - [Role in Physics-Informed Residual Learning](#role-in-physics-informed-residual-learning)
   - [Example: Numerical Example: Physics-Based Calibration for a Single Well](#example-numerical-example-physics-based-calibration-for-a-single-well)
-  - [🛢️ Step 0: Given Data](#️-step-0-given-data)
+  - [Step 0: Given Data](#step-0-given-data)
     - [1: Estimate Reservoir Pressure](#1-estimate-reservoir-pressure)
     - [2: Initialize Parameters](#2-initialize-parameters)
     - [3: Compute Pressure Ratio](#3-compute-pressure-ratio)
@@ -230,7 +230,7 @@ Final model: Final = Physics + Residual
 
 ---
 
-## 🛢️ Step 0: Given Data
+## Step 0: Given Data
 
 | dhp (bar) | choke | qo (Sm³/h) | qw (Sm³/h) | qg (Sm³/h) | qL (Sm³/h) |
 | --------- | ----- | ---------- | ---------- | ---------- | ---------- |
