@@ -82,7 +82,6 @@
   - [21. What are the limitations?](#21-what-are-the-limitations)
   - [22. Possible improvements?](#22-possible-improvements)
   - [23. Key contribution](#23-key-contribution)
-  - [24. One-line summary](#24-one-line-summary)
 
 
 
@@ -1039,10 +1038,6 @@ y_final = exp(log(1 + y_phys) + Δ_ML) - 1
 ```
 
 Combines physics + ML effectively.
-
----
-
-## 24. One-line summary
 
 > Physics defines structure; ML corrects errors for accurate virtual flow metering.
 
