@@ -17,18 +17,17 @@
   - [Step 9: Store Calibrated Parameters](#step-9-store-calibrated-parameters)
   - [Role in Physics-Informed Residual Learning](#role-in-physics-informed-residual-learning)
   - [Example: Numerical Example: Physics-Based Calibration for a Single Well](#example-numerical-example-physics-based-calibration-for-a-single-well)
-    - [Step 0: Given Data](#step-0-given-data)
-    - [Step 1: Estimate Reservoir Pressure](#step-1-estimate-reservoir-pressure)
-    - [Step 2: Compute Pressure Ratio](#step-2-compute-pressure-ratio)
-    - [Step 3: Liquid Model (Initial Guess)](#step-3-liquid-model-initial-guess)
-    - [Step 4: Water Cut](#step-4-water-cut)
-    - [Step 5: Gas Model](#step-5-gas-model)
-    - [Step 6: Build Residual Vector](#step-6-build-residual-vector)
-    - [Step 7: Optimization](#step-7-optimization)
-    - [Step 8: Iteration Example](#step-8-iteration-example)
-    - [Step 9: Final Calibrated Parameters](#step-9-final-calibrated-parameters)
+    - [0: Given Data](#0-given-data)
+    - [1: Estimate Reservoir Pressure](#1-estimate-reservoir-pressure)
+    - [2: Compute Pressure Ratio](#2-compute-pressure-ratio)
+    - [3: Liquid Model (Initial Guess)](#3-liquid-model-initial-guess)
+    - [4: Water Cut](#4-water-cut)
+    - [5: Gas Model](#5-gas-model)
+    - [6: Build Residual Vector](#6-build-residual-vector)
+    - [7: Optimization](#7-optimization)
+    - [8: Iteration](#8-iteration)
+    - [9: Final Calibrated Parameters](#9-final-calibrated-parameters)
     - [Final Model Usage](#final-model-usage)
-    - [Key Insight](#key-insight)
   - [Summary](#summary)
 - [Physics-Informed Residual Learning Hybrid Model](#physics-informed-residual-learning-hybrid-model)
   - [1. Overview](#1-overview)
@@ -231,7 +230,7 @@ Final model: Final = Physics + Residual
 
 ---
 
-### Step 0: Given Data
+### 0: Given Data
 
 Assume the following data for one well:
 
@@ -248,7 +247,7 @@ qL = qo + qw
 
 ---
 
-### Step 1: Estimate Reservoir Pressure
+### 1: Estimate Reservoir Pressure
 
 Given:
 
@@ -269,7 +268,7 @@ Bounds:
 
 ---
 
-### Step 2: Compute Pressure Ratio
+### 2: Compute Pressure Ratio
 
 pr = Pwf / P_res
 
@@ -278,7 +277,7 @@ pr = 180 / 346.77 ≈ 0.52
 
 ---
 
-### Step 3: Liquid Model (Initial Guess)
+### 3: Liquid Model (Initial Guess)
 
 Assume:
 
@@ -299,7 +298,7 @@ Error:
 
 ---
 
-### Step 4: Water Cut
+### 4: Water Cut
 
 Actual:
 wc = 20 / 120 = 0.167
@@ -318,7 +317,7 @@ Errors:
 
 ---
 
-### Step 5: Gas Model
+### 5: Gas Model
 
 Assume:
 Cg = 50
@@ -337,7 +336,7 @@ Error:
 
 ---
 
-### Step 6: Build Residual Vector
+### 6: Build Residual Vector
 
 Residuals are computed for all data points:
 
@@ -350,7 +349,7 @@ This forms the objective function input.
 
 ---
 
-### Step 7: Optimization
+### 7: Optimization
 
 Parameters to estimate:
 θ = {P_res, qL_max, a, b, Cg, k_ch, ch0, C_gl, A_wc}
@@ -361,7 +360,7 @@ Minimize sum of squared residuals:
 
 ---
 
-### Step 8: Iteration Example
+### 8: Iteration
 
 New parameter guess:
 
@@ -378,7 +377,7 @@ Optimizer continues updating parameters iteratively.
 
 ---
 
-### Step 9: Final Calibrated Parameters
+### 9: Final Calibrated Parameters
 
 Example final values:
 
@@ -402,9 +401,12 @@ For any new input (dhp, choke, etc.):
 
 Using calibrated physics equations.
 
----
+------------------------------------------------------------------------
 
-### Key Insight
+
+## Summary
+
+Physics calibration tunes model parameters so that physics-based predictions of oil, water, and gas rates match real well data as closely as possible.
 
 Calibration process:
 
@@ -413,21 +415,6 @@ Calibration process:
 3. Compute residual errors
 4. Adjust parameters iteratively
 5. Converge to best-fit physical model
-
----
-
-
-------------------------------------------------------------------------
-
-
-## Summary
-
-Physics calibration tunes model parameters so that physics-based predictions of oil, water, and gas rates match real well data as closely as possible.
-
-Physics-based calibration process: 1. Clean data 2. Initialize
-parameters 3. Define physics equations 4. Compute residuals 5. Optimize
-parameters 6. Apply constraints 7. Use geometry bounds 8. Apply partial
-pooling 9. Store parameters
 
 
 # Physics-Informed Residual Learning Hybrid Model
