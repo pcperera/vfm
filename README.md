@@ -806,15 +806,12 @@ Ensures stable and physically consistent water prediction.
 
 
 
-* Step 1: Replace zeros with small epsilon
+* Replace zeros with small epsilon
 
 ```
 qw = ε  (where ε = min_nonzero_qw / 1000)
 ```
 
-* Step 2: Remove zero-water rows during training
-
-Ensures numerical stability + reliable learning.
 
 ---
 
