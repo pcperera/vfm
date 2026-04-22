@@ -58,6 +58,31 @@
   - [6. Design Principles](#6-design-principles)
   - [7. Advantages](#7-advantages)
   - [8. Summary](#8-summary)
+- [FAQ](#faq)
+  - [1. Why use a hybrid Physics + ML model?](#1-why-use-a-hybrid-physics--ml-model)
+  - [⚙️ 2. Why residual learning instead of direct prediction?](#️-2-why-residual-learning-instead-of-direct-prediction)
+  - [📊 3. Why are residuals computed in log space?](#-3-why-are-residuals-computed-in-log-space)
+  - [💧 4. Why model WGR instead of water rate directly?](#-4-why-model-wgr-instead-of-water-rate-directly)
+  - [💧 5. How are zero water rates handled?](#-5-how-are-zero-water-rates-handled)
+  - [🌊 6. How is water breakthrough handled?](#-6-how-is-water-breakthrough-handled)
+  - [7. Does the physics model allow zero water?](#7-does-the-physics-model-allow-zero-water)
+  - [8. Why is water prediction gated by physics?](#8-why-is-water-prediction-gated-by-physics)
+  - [🛢️ 9. How is gas lift handled?](#️-9-how-is-gas-lift-handled)
+  - [10. What is gas flow coefficient (Cg)?](#10-what-is-gas-flow-coefficient-cg)
+  - [11. What is the Jacobian?](#11-what-is-the-jacobian)
+  - [12. Is calibration done per data point?](#12-is-calibration-done-per-data-point)
+  - [13. How does optimization work?](#13-how-does-optimization-work)
+  - [14. When does optimization stop?](#14-when-does-optimization-stop)
+  - [15. How do you prevent overfitting?](#15-how-do-you-prevent-overfitting)
+  - [16. Why regime-aware ML models?](#16-why-regime-aware-ml-models)
+  - [17. Why global ML model instead of per-well?](#17-why-global-ml-model-instead-of-per-well)
+  - [18. What is per-well bias?](#18-what-is-per-well-bias)
+  - [19. How are unseen wells handled?](#19-how-are-unseen-wells-handled)
+  - [20. How is data quality ensured?](#20-how-is-data-quality-ensured)
+  - [21. What are the limitations?](#21-what-are-the-limitations)
+  - [22. Possible improvements?](#22-possible-improvements)
+  - [23. Key contribution](#23-key-contribution)
+  - [24. One-line summary](#24-one-line-summary)
 
 
 
@@ -717,3 +742,308 @@ The model: 1. Learns physics per well 2. Learns residuals globally 3.
 Adapts to regimes 4. Applies well-specific corrections
 
 Result: - High accuracy - Strong physical consistency
+
+
+------------------------------------------------------------------------
+
+
+# FAQ
+
+---
+
+## 1. Why use a hybrid Physics + ML model?
+
+
+Pure physics models are interpretable but simplified, while ML models require large data and may violate physics.
+This work combines both:
+
+* Physics model → captures governing relationships
+* ML residual model → corrects systematic errors
+
+Result: **accuracy + physical consistency + generalization**
+
+---
+
+## ⚙️ 2. Why residual learning instead of direct prediction?
+
+
+The ML model learns corrections:
+
+```
+Δ = log(1 + y_true) - log(1 + y_phys)
+```
+
+This simplifies learning and preserves physics structure.
+
+---
+
+## 📊 3. Why are residuals computed in log space?
+
+
+
+```
+Δ = log(1 + y_true) - log(1 + y_phys)
+  = log((1 + y_true) / (1 + y_phys))
+```
+
+Model learns **relative (percentage) errors**, improving stability.
+
+---
+
+## 💧 4. Why model WGR instead of water rate directly?
+
+
+
+```
+WGR = qw / qg
+qw = qg * WGR
+```
+
+Ensures stable and physically consistent water prediction.
+
+---
+
+## 💧 5. How are zero water rates handled?
+
+
+
+* Step 1: Replace zeros with small epsilon
+
+```
+qw = ε  (where ε = min_nonzero_qw / 1000)
+```
+
+* Step 2: Remove zero-water rows during training
+
+Ensures numerical stability + reliable learning.
+
+---
+
+## 🌊 6. How is water breakthrough handled?
+
+
+
+* Physics model:
+
+```
+qw = wc * qL
+```
+
+* ML model:
+
+```
+Δ_WGR = log(1 + WGR_true) - log(1 + WGR_phys)
+```
+
+Breakthrough is **implicitly learned via WGR residuals**
+
+---
+
+## 7. Does the physics model allow zero water?
+
+
+
+```
+wc = 0.02 + 0.96 * sigmoid(X · A)
+```
+
+Minimum water cut exists → true dry conditions approximated.
+
+---
+
+## 8. Why is water prediction gated by physics?
+
+
+
+```
+if qw_phys > threshold:
+    qw = qg * WGR
+else:
+    qw = 0
+```
+
+Prevents ML from predicting unphysical water.
+
+---
+
+## 🛢️ 9. How is gas lift handled?
+
+
+
+```
+qg = qg_res + qg_lift
+
+qg_res  = Cg * sqrt(P_res - P_wf) * sigmoid(...)
+qg_lift = C_gl * (GL_mass / conversion) * open_ratio
+```
+
+---
+
+## 10. What is gas flow coefficient (Cg)?
+
+
+
+```
+qg ∝ Cg * sqrt(P_res - P_wf)
+```
+
+Represents gas productivity of the well.
+
+---
+
+## 11. What is the Jacobian?
+
+
+
+```
+J = ∂(errors) / ∂(parameters)
+```
+
+Computed automatically by optimizer.
+
+---
+
+## 12. Is calibration done per data point?
+
+
+
+```
+Loss = Σ (y_pred_i - y_true_i)^2
+```
+
+One parameter set fitted to **all data points**
+
+---
+
+## 13. How does optimization work?
+
+
+
+```
+θ_new = θ - α * ∇Loss
+```
+
+Uses nonlinear least squares to minimize total error.
+
+---
+
+## 14. When does optimization stop?
+
+
+
+* Small loss change
+* Small parameter updates
+* Small gradient
+
+---
+
+## 15. How do you prevent overfitting?
+
+
+
+* Physics constraints
+* Residual learning
+* Log-space modeling
+* Regime-aware ML
+
+---
+
+## 16. Why regime-aware ML models?
+
+
+
+Different regimes:
+
+```
+ΔP = dhp - whp
+```
+
+Separate ML models per regime improve accuracy.
+
+---
+
+## 17. Why global ML model instead of per-well?
+
+
+
+* Uses all wells’ data
+* Better generalization
+
+Adaptation via bias.
+
+---
+
+## 18. What is per-well bias?
+
+
+
+```
+bias = mean(Δ_true - Δ_pred)
+Δ_final = Δ_ML + bias
+```
+
+Corrects systematic well-specific errors.
+
+---
+
+## 19. How are unseen wells handled?
+
+
+
+```
+Δ_final = Δ_ML   (initially, no bias)
+```
+
+Bias added later when data is available.
+
+---
+
+## 20. How is data quality ensured?
+
+
+
+* Remove non-physical data
+* Enforce choke-flow consistency
+* Filter extreme values
+
+---
+
+## 21. What are the limitations?
+
+
+
+* No explicit breakthrough model
+* Minimum water cut enforced
+* Simplified gas-lift coupling
+
+---
+
+## 22. Possible improvements?
+
+
+
+* Explicit breakthrough modeling
+* Better multiphase coupling
+* Online adaptation
+
+---
+
+## 23. Key contribution
+
+
+
+Physics-informed residual learning:
+
+```
+y_final = exp(log(1 + y_phys) + Δ_ML) - 1
+```
+
+Combines physics + ML effectively.
+
+---
+
+## 24. One-line summary
+
+> Physics defines structure; ML corrects errors for accurate virtual flow metering.
+
+---
