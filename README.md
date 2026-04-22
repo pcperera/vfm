@@ -16,6 +16,19 @@
   - [Step 8: Partial Pooling (Regularization)](#step-8-partial-pooling-regularization)
   - [Step 9: Store Calibrated Parameters](#step-9-store-calibrated-parameters)
   - [Role in Physics-Informed Residual Learning](#role-in-physics-informed-residual-learning)
+  - [Example: Numerical Example: Physics-Based Calibration for a Single Well](#example-numerical-example-physics-based-calibration-for-a-single-well)
+    - [Step 0: Given Data](#step-0-given-data)
+    - [Step 1: Estimate Reservoir Pressure](#step-1-estimate-reservoir-pressure)
+    - [Step 2: Compute Pressure Ratio](#step-2-compute-pressure-ratio)
+    - [Step 3: Liquid Model (Initial Guess)](#step-3-liquid-model-initial-guess)
+    - [Step 4: Water Cut](#step-4-water-cut)
+    - [Step 5: Gas Model](#step-5-gas-model)
+    - [Step 6: Build Residual Vector](#step-6-build-residual-vector)
+    - [Step 7: Optimization](#step-7-optimization)
+    - [Step 8: Iteration Example](#step-8-iteration-example)
+    - [Step 9: Final Calibrated Parameters](#step-9-final-calibrated-parameters)
+    - [Final Model Usage](#final-model-usage)
+    - [Key Insight](#key-insight)
   - [Summary](#summary)
 - [Physics-Informed Residual Learning Hybrid Model](#physics-informed-residual-learning-hybrid-model)
   - [1. Overview](#1-overview)
@@ -214,15 +227,207 @@ Final model: Final = Physics + Residual
 
 ------------------------------------------------------------------------
 
+## Example: Numerical Example: Physics-Based Calibration for a Single Well
+
+---
+
+### Step 0: Given Data
+
+Assume the following data for one well:
+
+| dhp (bar) | choke | qo (Sm³/h) | qw (Sm³/h) | qg (Sm³/h) |
+| --------- | ----- | ---------- | ---------- | ---------- |
+| 180       | 0.6   | 100        | 20         | 500        |
+| 170       | 0.7   | 120        | 25         | 550        |
+| 160       | 0.8   | 140        | 30         | 600        |
+| 150       | 0.9   | 160        | 35         | 650        |
+| 140       | 1.0   | 180        | 40         | 700        |
+
+Total liquid rate:
+qL = qo + qw
+
+---
+
+### Step 1: Estimate Reservoir Pressure
+
+Given:
+
+* dhp_max = 180 bar
+* bh_tvd = 2000 m
+* ρ = 850 kg/m³
+
+Hydrostatic pressure:
+P = ρgh = 850 × 9.81 × 2000 / 10⁵ = 166.77 bar
+
+Initial estimate:
+P_res = 180 + 166.77 ≈ 346.77 bar
+
+Bounds:
+
+* Lower = 180 + 0.7 × 166.77 ≈ 296.7 bar
+* Upper = 180 + 1.3 × 166.77 ≈ 396.8 bar
+
+---
+
+### Step 2: Compute Pressure Ratio
+
+pr = Pwf / P_res
+
+Example:
+pr = 180 / 346.77 ≈ 0.52
+
+---
+
+### Step 3: Liquid Model (Initial Guess)
+
+Assume:
+
+* qL_max = 200
+* a = 0.2
+* b = 0.5
+
+qL = qL_max (1 − a·pr − b·pr²)
+
+qL = 200 (1 − 0.2×0.52 − 0.5×0.52²)
+qL = 200 × 0.761 ≈ 152.2
+
+Actual:
+qL = 100 + 20 = 120
+
+Error:
+152.2 − 120 = +32.2
+
+---
+
+### Step 4: Water Cut
+
+Actual:
+wc = 20 / 120 = 0.167
+
+Assume model:
+wc ≈ 0.20
+
+Predicted:
+qw = 0.20 × 152.2 = 30.4
+qo = 121.8
+
+Errors:
+
+* qw error = +10.4
+* qo error = +21.8
+
+---
+
+### Step 5: Gas Model
+
+Assume:
+Cg = 50
+
+dp = √(P_res − Pwf) = √(346.77 − 180) ≈ 12.9
+
+Assume choke_eff ≈ 0.7
+
+qg = 50 × 12.9 × 0.7 ≈ 451
+
+Actual:
+qg = 500
+
+Error:
+−49
+
+---
+
+### Step 6: Build Residual Vector
+
+Residuals are computed for all data points:
+
+Residual = [qo_error, qw_error, qg_error]
+
+Each residual is normalized:
+error / std
+
+This forms the objective function input.
+
+---
+
+### Step 7: Optimization
+
+Parameters to estimate:
+θ = {P_res, qL_max, a, b, Cg, k_ch, ch0, C_gl, A_wc}
+
+Objective:
+Minimize sum of squared residuals:
+Σ(y_pred − y_actual)²
+
+---
+
+### Step 8: Iteration Example
+
+New parameter guess:
+
+* qL_max = 170
+* a = 0.3
+* b = 0.4
+
+qL = 170 (1 − 0.3×0.52 − 0.4×0.52²)
+qL ≈ 125.8
+
+Now closer to actual (120)
+
+Optimizer continues updating parameters iteratively.
+
+---
+
+### Step 9: Final Calibrated Parameters
+
+Example final values:
+
+| Parameter | Value   |
+| --------- | ------- |
+| P_res     | 335 bar |
+| qL_max    | 165     |
+| a         | 0.28    |
+| b         | 0.42    |
+| Cg        | 55      |
+
+---
+
+### Final Model Usage
+
+For any new input (dhp, choke, etc.):
+
+* Predict qo
+* Predict qw
+* Predict qg
+
+Using calibrated physics equations.
+
+---
+
+### Key Insight
+
+Calibration process:
+
+1. Start with physics-based estimates
+2. Compare predictions with real data
+3. Compute residual errors
+4. Adjust parameters iteratively
+5. Converge to best-fit physical model
+
+---
+
+
+------------------------------------------------------------------------
+
+
 ## Summary
+
+Physics calibration tunes model parameters so that physics-based predictions of oil, water, and gas rates match real well data as closely as possible.
 
 Physics-based calibration process: 1. Clean data 2. Initialize
 parameters 3. Define physics equations 4. Compute residuals 5. Optimize
 parameters 6. Apply constraints 7. Use geometry bounds 8. Apply partial
 pooling 9. Store parameters
-
-This ensures: - Physical interpretability - Robust performance -
-Compatibility with hybrid ML models
 
 
 # Physics-Informed Residual Learning Hybrid Model
