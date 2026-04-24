@@ -41,6 +41,8 @@ urlcolor    =  blue
 \usepackage{amsfonts}
 \usepackage{booktabs}
 \usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta}
 
 \begin{document}
 % Update the following variables. Doing so will auto-generate the first three pages:
@@ -637,8 +639,75 @@ The overall architecture consists of three main components:
 A schematic representation of the architecture is conceptually illustrated in Figure~\ref{fig:component_architecture}.
 
 \begin{figure}[!htb]
-\uomFig{Component-level architecture of the proposed hybrid physics-informed residual learning framework}{fig:component_architecture}{\includegraphics[width=1.0\textwidth]{images/component_architecture.png}}{}
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tikzpicture}[
+    node distance=2.5cm and 3.5cm,
+    every node/.style={draw, rounded corners, align=center, font=\small, minimum width=4.2cm, minimum height=2.2cm},
+    arrow/.style={->, thick}
+]
+
+% Top row
+\node (data) { \textbf{Well Data} \\ 
+    $\bullet$ Operational data \\ 
+    $\bullet$ Geometrical data \\ 
+    $\bullet$ Sparse well test data };
+
+\node (pre) [right=of data] { \textbf{Data Preprocessor} \\ 
+    $\bullet$ Unit conversions \\ 
+    $\bullet$ Feature enrichment \\ 
+    $\bullet$ Data sanitization };
+
+\node (phys) [right=of pre] { \textbf{Physics-Based Inflow Model (Per Well)} \\ 
+    $\bullet$ Liquid inflow \\ 
+    $\bullet$ Logistic water-cut \\ 
+    $\bullet$ Gas rate equation };
+
+% Middle row
+\node (feat) [below=of phys] { \textbf{Feature Construction for Residual ML} \\ 
+    $\bullet$ Measured variables \\ 
+    $\bullet$ Lagged variables \\ 
+    $\bullet$ Physics outputs ($q_o^{phys}, q_w^{phys}, q_g^{phys}$) };
+
+\node (ml) [left=of feat] { \textbf{ML Residual Learning Model (Global)} \\ 
+    $\bullet$ Oil residuals \\ 
+    $\bullet$ Gas residuals \\ 
+    $\bullet$ WGR residuals \\ 
+    $\bullet$ Regime-aware };
+
+\node (bias) [left=of ml] { \textbf{Per-Well Bias Calibration} \\ 
+    $\bullet$ Mean log-space residual \\ 
+    $\bullet$ Separate bias (oil, gas, WGR) \\ 
+    $\bullet$ Applied before constraints \\ 
+    $\bullet$ No bias for unseen wells };
+
+% Bottom row
+\node (hyb) [below=of ml] { \textbf{Hybrid Combination \& Gating Logic} \\ 
+    $\bullet$ Oil: always corrected \\ 
+    $\bullet$ Water: gated by physics \\ 
+    $\bullet$ Gas: always corrected \\ 
+    $\bullet$ Residual clipping \\ 
+    $\bullet$ Physical constraints };
+
+\node (out) [right=of hyb] { \textbf{Hybrid Physics--ML Output} \\ 
+    $\bullet$ Final rates ($q_o, q_w, q_g$) \\ 
+    $\bullet$ Bias + constraint enforced };
+
+% Arrows
+\draw[arrow] (data) -- (pre);
+\draw[arrow] (pre) -- (phys);
+\draw[arrow] (phys) -- (feat);
+\draw[arrow] (feat) -- (ml);
+\draw[arrow] (ml) -- (bias);
+\draw[arrow] (bias) -- (hyb);
+\draw[arrow] (hyb) -- (out);
+
+\end{tikzpicture}
+}
+\caption{Hybrid Physics-Informed Residual Learning Architecture for Virtual Flow Metering}
+\label{fig:component_architecture}
 \end{figure}
+
 
 \subsection{Baseline Physics-Based Inflow Modeling}
 
@@ -752,6 +821,17 @@ dh\_md & Downhole measured depth & m \\
 dh\_tvd & Downhole true vertical depth & m \\
 wh\_md & Wellhead measured depth & m \\
 wh\_tvd & Wellhead true vertical depth & m \\
+\hline
+\end{tabularx}}{}
+\end{table}
+
+\begin{table}[!htb]
+\uomTable{Gas Lift Variables}{tab:gaslift_vars}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
+\hline
+Variable & Description & Unit \\
+\hline
+gl\_mass\_rate & Gas lift injection mass rate & kg/h \\
+gl\_open\_ratio & Fraction of active gas lift valves & unitless (ratio) \\
 \hline
 \end{tabularx}}{}
 \end{table}

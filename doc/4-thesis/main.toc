@@ -57,10 +57,10 @@
 \contentsline {subsection}{\numberline {3.1.5}Key Advantages of the Proposed Architecture}{34}{subsection.3.1.5}%
 \contentsline {section}{\numberline {3.2}Dataset Description and Preprocessing}{34}{section.3.2}%
 \contentsline {subsection}{\numberline {3.2.1}Independent and Reference Variables}{35}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}Well-Level Preprocessing}{38}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.2}Well-Level Preprocessing}{39}{subsection.3.2.2}%
 \contentsline {subsection}{\numberline {3.2.3}Derivation of Multiphase Flow Variables}{40}{subsection.3.2.3}%
 \contentsline {subsection}{\numberline {3.2.4}Temporal Index Construction}{40}{subsection.3.2.4}%
-\contentsline {subsection}{\numberline {3.2.5}Cross-Well Consolidation and Encoding}{40}{subsection.3.2.5}%
+\contentsline {subsection}{\numberline {3.2.5}Cross-Well Consolidation and Encoding}{41}{subsection.3.2.5}%
 \contentsline {section}{\numberline {3.3}Physics-Based Inflow Modelling}{41}{section.3.3}%
 \contentsline {subsection}{\numberline {3.3.1}Modeling Philosophy}{41}{subsection.3.3.1}%
 \contentsline {subsection}{\numberline {3.3.2}Model Assumptions and Physical Basis}{42}{subsection.3.3.2}%
@@ -85,22 +85,22 @@
 \contentsline {subsection}{\numberline {3.4.7}Consistency Constraints}{52}{subsection.3.4.7}%
 \contentsline {section}{\numberline {3.5}Hybrid Physics-ML Rate Synthesis}{52}{section.3.5}%
 \contentsline {subsection}{\numberline {3.5.1}Sequential Inference Structure}{52}{subsection.3.5.1}%
-\contentsline {subsection}{\numberline {3.5.2}Log-Space Residual Application}{52}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.2}Log-Space Residual Application}{53}{subsection.3.5.2}%
 \contentsline {subsection}{\numberline {3.5.3}Phase-Specific Synthesis Rules}{53}{subsection.3.5.3}%
 \contentsline {subsubsection}{\numberline {3.5.3.1}Oil Rate Synthesis}{53}{subsubsection.3.5.3.1}%
 \contentsline {subsubsection}{\numberline {3.5.3.2}Gas Rate Synthesis}{53}{subsubsection.3.5.3.2}%
-\contentsline {subsubsection}{\numberline {3.5.3.3}Water Rate Synthesis}{53}{subsubsection.3.5.3.3}%
+\contentsline {subsubsection}{\numberline {3.5.3.3}Water Rate Synthesis}{54}{subsubsection.3.5.3.3}%
 \contentsline {subsection}{\numberline {3.5.4}Physical Consistency Enforcement}{54}{subsection.3.5.4}%
 \contentsline {subsection}{\numberline {3.5.5}Role of Gating and Safety Mechanisms}{54}{subsection.3.5.5}%
 \contentsline {subsection}{\numberline {3.5.6}Summary of Hybrid Rate Assembly}{54}{subsection.3.5.6}%
-\contentsline {section}{\numberline {3.6}Model Integration}{54}{section.3.6}%
-\contentsline {subsection}{\numberline {3.6.1}Step-by-Step Pipeline Summary}{54}{subsection.3.6.1}%
+\contentsline {section}{\numberline {3.6}Model Integration}{55}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Step-by-Step Pipeline Summary}{55}{subsection.3.6.1}%
 \contentsline {subsection}{\numberline {3.6.2}Computational Considerations}{56}{subsection.3.6.2}%
 \contentsline {subsubsection}{\numberline {3.6.2.1}Model Decomposition and Computational Load}{56}{subsubsection.3.6.2.1}%
 \contentsline {subsubsection}{\numberline {3.6.2.2}Parameter Calibration and Training Efficiency}{57}{subsubsection.3.6.2.2}%
 \contentsline {subsubsection}{\numberline {3.6.2.3}Scalability Across Multiple Wells}{57}{subsubsection.3.6.2.3}%
 \contentsline {subsubsection}{\numberline {3.6.2.4}Numerical Stability and Robustness}{57}{subsubsection.3.6.2.4}%
-\contentsline {subsubsection}{\numberline {3.6.2.5}Inference Time and Deployment Considerations}{57}{subsubsection.3.6.2.5}%
+\contentsline {subsubsection}{\numberline {3.6.2.5}Inference Time and Deployment Considerations}{58}{subsubsection.3.6.2.5}%
 \contentsline {chapter}{\numberline {4}Experimentation}{60}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Experimental Objectives}{60}{section.4.1}%
 \contentsline {section}{\numberline {4.2}Production-Mimicking Experimental Workflow}{61}{section.4.2}%
@@ -137,4 +137,4 @@
 \contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{85}{section.7.3}%
 \contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{85}{section.7.4}%
 \contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{85}{section.7.5}%
-\contentsline {chapter}{References}{86}{chapter*.33}%
+\contentsline {chapter}{References}{86}{chapter*.34}%
