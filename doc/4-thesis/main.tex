@@ -207,10 +207,6 @@ Oil wells primarily produce liquid hydrocarbons, often accompanied by associated
 \begin{itemize}
 \item Flow is governed by pressure drawdown and inflow performance relationships.
 \item Multiphase interactions between oil, gas, and water lead to complex flow regimes \citep{brill1999multiphase}.
-\item Water cut ($wc$) is a key parameter describing liquid composition:
-\[
-wc = \frac{q_w}{q_L}, \quad q_L = q_o + q_w
-\]
 \item Increasing water cut impacts production efficiency and measurement accuracy \citep{falcone2009multiphase}.
 \end{itemize}
 
@@ -234,10 +230,7 @@ Gas wells primarily produce natural gas, with relatively small amounts of conden
 
 \subsubsection{Flow Behavior}
 \begin{itemize}
-\item Gas flow is commonly modeled as a pressure-driven process:
-\[
-q_g \propto \sqrt{P_{res} - P_{wf}}
-\]
+\item Gas flow is commonly modeled as a pressure-driven process.
 \item Strong dependence on reservoir pressure and surface conditions.
 \item Liquid loading can occur when gas velocity is insufficient to transport liquids, reducing production efficiency \citep{brill1999multiphase}.
 \end{itemize}
@@ -249,20 +242,39 @@ q_g \propto \sqrt{P_{res} - P_{wf}}
 \item Indirect measurement techniques such as virtual flow metering are often required for continuous estimation.
 \end{itemize}
 
-\subsection{Relevance to Virtual Flow Metering}
-
-Multiphase flow measurement remains a major challenge due to the simultaneous presence of oil, gas, and water phases. Traditional approaches such as test separators provide accurate but infrequent measurements, motivating the development of virtual flow metering (VFM) techniques \citep{falcone2009multiphase}.
-
-Hybrid approaches that combine physics-based modeling with data-driven techniques have shown improved performance in handling complex multiphase systems, as they leverage both physical understanding and data-driven adaptability \citep{kolev2016multiphase}.
-
-
 \section{Producer and Injector Wells}
 \begin{itemize}
     \item \textbf{Production Wells}: Production wells are the primary pathways through which hydrocarbons - oil, gas, and associated formation water, are extracted from a reservoir and transported to surface processing facilities. Their core function is to withdraw fluids from subsurface formations in a controlled manner that optimizes recovery while maintaining well integrity and reservoir performance. The performance of a production well is driven by the pressure differential between the reservoir and the wellbore \citep{ahmed2010reservoir}. Early in a field's life, natural energy such as solution gas drive, water drive, gas cap expansion, or aquifer support pushes fluids toward the wellbore. As reservoir pressure declines over time, production wells may transition to artificial lift systems such as gas lift, \abbr{Electric Submersible Pumps}{ESP}, \abbr{Progressive Cavity Pumps}{PCP}, or \abbr{Rod Pumps}{RP} to sustain flow rates and overcome the hydrostatic and frictional losses in the wellbore \citep{brown1984artificial}. The choice of artificial lift depends on fluid properties, well depth, deviation, GOR, water cut, and economic considerations.
     \item \textbf{Injection Wells}: Injection wells are specialized wellbores designed to introduce fluids - such as water, gas, or chemical mixtures into subsurface formations for the purposes of reservoir pressure maintenance, \abbr{Enhanced Oil Recovery}{EOR} \citep{lake2014enhanced}, or safe disposal of produced water. Unlike production wells, which are engineered to withdraw hydrocarbons, injection wells primarily function as input conduits, pushing fluids into the reservoir to support long-term field productivity. Their role is essential in secondary and tertiary recovery processes, as they improve sweep efficiency and maintain reservoir pressure, thereby enhancing the deliverability of adjacent production wells.
 \end{itemize}
 
-\section{Well Downhole and Surface Instrumentation}
+\section{Production Variables and Ratios}
+
+Accurate characterization of multiphase production is fundamental to oil well performance analysis, reservoir management, and virtual flow metering (VFM). Production from oil wells typically consists of three primary phases: oil, water, and gas, each contributing to the overall flow behavior in the wellbore and surface facilities.
+To describe and quantify this multiphase production, a set of key variables and derived ratios are commonly used. These include phase flow rates such as oil rate ($q_o$), water rate ($q_w$), gas rate ($q_g$), and total liquid rate ($q_L$), as well as diagnostic ratios such as water cut (WC), gas--oil ratio (GOR), and water--gas ratio (WGR).
+\ref{tab:production-variables} lists the common production variables and ratios used.
+
+\begin{table}[!htb]
+\uomTable{Production Variables and Ratios}{tab:production-variables}{
+\begin{tabularx}{0.9\textwidth}{p{3cm} X p{1.5cm} p{1.5cm}} 
+\hline
+\textbf{Variable} & \textbf{Description} & \textbf{SI Unit} & \textbf{Field Unit} \\
+\hline
+Oil Rate ($q_o$) & Volumetric flow rate of liquid hydrocarbons produced from the well. & Sm$^3$/day & STB/day \\
+Water Rate ($q_w$) & Volumetric flow rate of produced water. & Sm$^3$/day & STB/day \\
+Gas Rate ($q_g$) & Volumetric flow rate of produced gas at standard conditions. & Sm$^3$/day & SCF/day \\
+Liquid Rate ($q_L$) & $q_L = q_o + q_w$, governed by inflow performance and pressure drawdown. & Sm$^3$/day & STB/day \\
+Water Cut ($wc$) & $wc = \dfrac{q_w}{q_L} = \dfrac{q_w}{q_o + q_w}$, representing the fraction of water in the liquid stream. & -- & -- \\
+Gas Oil Ratio (GOR) & $GOR = \dfrac{q_g}{q_o}$ & Sm$^3$/Sm$^3$ & SCF/STB \\
+Water Oil Ratio (WOR) & $WOR = \dfrac{q_w}{q_o}$ & Sm$^3$/Sm$^3$ & bbl/bbl \\
+Water Gas Ratio (WGR) & $WGR = \dfrac{q_w}{q_g}$, useful in gas-dominated or gas-lifted systems. & Sm$^3$/Sm$^3$ & bbl/MMscf \\
+Gas Volume Fraction (GVF) & $GVF = \dfrac{q_g}{q_g + q_L}$, indicating the proportion of gas in the total produced stream. & -- & -- \\
+\hline
+\end{tabularx}}{}
+\end{table}
+
+
+\section{Well Instrumentation}
 
 The configuration of instrumentation in an oil well varies depending on the operational objectives and reservoir characteristics. In general, sensors are strategically installed along the wellbore and surface facilities to monitor drilling, production, and safety-related parameters. The wellbore, often referred to as the borehole, is the cylindrical hole drilled from the surface into subsurface formations during the development of oil, gas, water, or geothermal wells. Figure~\ref{fig:well-instrumentation} illustrates the typical placement of instrumentation across different locations of a producing well.
 
@@ -286,74 +298,74 @@ Instrumentation associated with the choke includes the \abbr{Downstream Choke Va
 
 \subsection{Role of Instrumentation in Virtual Flow Metering}
 
-All or a subset of the aforementioned sensors are used as independent variables in machine learning (ML)-based Virtual Flow Metering (VFM) models. Measurements from downhole, wellhead, and choke locations collectively capture the pressure–temperature–flow relationships governing multiphase production. The integration of these sensor signals enables data-driven models to infer oil, gas, and water flow rates in the absence of direct physical flow meters, thereby supporting real-time production monitoring and optimization.
+All or a subset of the aforementioned sensors are used as independent variables in machine learning (ML)-based Virtual Flow Metering (VFM) models. Measurements from downhole, wellhead, and choke locations collectively capture the pressure-temperature flow relationships governing multiphase production. The integration of these sensor signals enables data-driven models to infer oil, gas, and water flow rates in the absence of direct physical flow meters, thereby supporting real-time production monitoring and optimization.
 
-\begin{figure}[!htb]
+\begin{figure}[!htb] 
 \centering
 \begin{tikzpicture}[
     every node/.style={font=\small},
     arrow/.style={->, thick}
 ]
 
-% Ground level
+% Ground level (aligned with wellhead)
 \draw[dashed] (-3,0) -- (5,0);
 \node[left] at (-3,0) {Ground Level};
 
-% Wellhead vertical pipe
+% Wellhead (at ground level)
 \draw[thick] (0,0) -- (0,1.2);
 \node[above] at (0,1.2) {Wellhead};
 
-% Surface sensors
-\node[left] at (-0.2,1.0) {WHT};
-\node[above left] at (-0.2,1.2) {WHP};
+% Surface sensors (clean separation)
+\node[left] at (-0.5,0.8) {WHT};
+\node[above left] at (-0.5,1.2) {WHP};
 
-% Flowline
-\draw[thick] (0,1.2) -- (3,1.2);
+% Flowline (on ground level)
+\draw[thick] (0,0) -- (3,0);
 
-% Choke (DCR)
-\draw (2,1.2) -- (2.3,1.5);
-\draw (2,1.2) -- (2.3,0.9);
-\node[below] at (2.2,1.0) {choke};
+% Choke (on flowline)
+\draw (2,0) -- (2.3,0.3);
+\draw (2,0) -- (2.3,-0.3);
+\node[below] at (2.2,-0.5) {Choke};
 
 % Downstream pressure
-\node[above] at (2.2,1.5) {DCP};
+\node[above] at (2.2,0.4) {DCP};
 
 % Production arrow
-\draw[arrow] (3,1.2) -- (4.5,1.2);
-\node[right] at (4.5,1.2) {To Separator};
+\draw[arrow] (3,0) -- (4.5,0);
+\node[right] at (4.5,0) {To Separator};
 
-% Wellbore (smooth curve)
-\draw[thick] (0,0) .. controls (-0.3,-1.5) and (-1.5,-2.5) .. (-2,-3.5);
-\node at (-1.0,-1.8) {Wellbore};
+% Wellbore (starts from ground level)
+\draw[thick] (0,0) .. controls (-0.3,-1.2) and (-1.5,-2.5) .. (-1.6,-2.6);
+\node at (-0.5,-2.0) {Wellbore};
 
 % Reservoir
-\draw[thick] (-3,-4) ellipse (2cm and 1cm);
-\node at (-3,-4) {Well Downhole};
+\draw[thick] (-3.2,-4.3) ellipse (4.2cm and 2.1cm);
+\node at (-3.2,-4.3) {Reservoir};
 
-% Downhole sensors
-\node[right] at (-1.3,-3.8) {DHP};
-\node[right] at (-1.3,-4.2) {DHT};
+% Downhole sensors (spaced properly)
+\node[right] at (-1.6,-3.9) {DHP};
+\node[right] at (-1.6,-4.3) {DHT};
 
-\draw (-1.8,-3.8) circle (0.08);
-\draw (-1.8,-4.2) circle (0.08);
+\draw (-2.2,-3.9) circle (0.08);
+\draw (-2.2,-4.3) circle (0.08);
 
 \end{tikzpicture}
-\caption{Well Downhole and Surface Instrumentation}
+\caption{Well Flow Measurement Instrumentation Setup}
 \label{fig:well-instrumentation}
 \end{figure}
 
-
 \begin{table}[!htb]
-\uomTable{Well downhole and surface instrumentation}{tab:well-instrumentation}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
+\uomTable{Well  Instrumentation}{tab:well-instrumentation}{
+\begin{tabularx}{0.9\textwidth}{p{1cm} X p{1.5cm} p{1.5cm}} 
 \hline
-Sensor & Description & Unit \\
+\textbf{Sensor} & \textbf{Description} & \textbf{Unit} & \textbf{Field Unit} \\
 \hline
-dhp & downhole pressure & bara \\
-dht & downhole temperature & \textdegree C \\
-whp & wellhead pressure & bara \\
-wht & wellhead temperature & \textdegree C \\
-dcp & Downstream choke pressure & bara \\
-choke & Downstream choke regulation & \% \\
+dhp & Downhole pressure & bara & psi \\
+dht & Downhole temperature & \textdegree C & \textdegree F \\
+whp & Wellhead pressure & bara & psi \\
+wht & Wellhead temperature & \textdegree C & \textdegree F \\
+dcp & Downstream choke pressure & bara & psi \\
+choke & Downstream choke regulation & \% & \% \\
 \hline
 \end{tabularx}}{}
 \end{table}
