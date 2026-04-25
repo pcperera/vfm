@@ -73,7 +73,7 @@ Box, G. E.~P. and Cox, D.~R. (1964).
 
 \bibitem[Brown, 1984]{brown1984artificial}
 Brown, K.~E. (1984).
-\newblock {\em Artificial Lift Methods}.
+\newblock {\em The Technology of Artificial Lift Methods}.
 \newblock PennWell Books, Tulsa, OK.
 
 \bibitem[Corneliussen et~al., 2005]{corneliussen2005handbook}
@@ -82,10 +82,11 @@ Corneliussen, S., for Oil, N.~S., Measurement, G., and (Organization), T.
 \newblock {\em Handbook of Multiphase Flow Metering}.
 \newblock Norwegian Society for Oil and Gas Measurement.
 
-\bibitem[Dake and Dake, 1978]{dake1978developments}
-Dake, L.~P. and Dake, L. (1978).
-\newblock {\em Developments in petroleum science}.
-\newblock Elsevier Publishing Company.
+\bibitem[Dake, 1978]{dake1978fundamentals}
+Dake, L.~P. (1978).
+\newblock {\em Fundamentals of Reservoir Engineering}, volume~8 of {\em
+  Developments in Petroleum Science}.
+\newblock Elsevier.
 
 \bibitem[Dutta and Kumar, 2018]{dutta2018modeling}
 Dutta, P. and Kumar, A. (2018).
