@@ -312,12 +312,10 @@ All or a subset of the aforementioned sensors are used as independent variables 
 \node[left] at (-3,0) {Ground Level};
 
 % Wellhead (at ground level)
-\draw[thick] (0,0) -- (0,1.2);
-\node[above] at (0,1.2) {Wellhead};
+\draw[thick] (0,0) -- (0,0.3);
 
 % Surface sensors (clean separation)
-\node[left] at (-0.5,0.8) {WHT};
-\node[above left] at (-0.5,1.2) {WHP};
+\node[right] at (-3.0,0.8) {Wellhead (WHP / WHT)};
 
 % Flowline (on ground level)
 \draw[thick] (0,0) -- (3,0);
@@ -335,19 +333,18 @@ All or a subset of the aforementioned sensors are used as independent variables 
 \node[right] at (4.5,0) {To Separator};
 
 % Wellbore (starts from ground level)
-\draw[thick] (0,0) .. controls (-0.3,-1.2) and (-1.5,-2.5) .. (-1.6,-2.6);
-\node at (-0.5,-2.0) {Wellbore};
+\draw[thick] (0,0) .. controls (-0.3,-1.2) and (-1.5,-2.5) .. (-3.0,-6.4);
+\node at (-0.2,-3.0) {Wellbore};
 
 % Reservoir
-\draw[thick] (-3.2,-4.3) ellipse (4.2cm and 2.1cm);
-\node at (-3.2,-4.3) {Reservoir};
+\draw[thick] (-3.2,-8.3) ellipse (4.2cm and 2.1cm);
+\node at (-3.2,-8.3) {Reservoir};
 
 % Downhole sensors (spaced properly)
-\node[right] at (-1.6,-3.9) {DHP};
-\node[right] at (-1.6,-4.3) {DHT};
+\node[right] at (-2.6,-6.0) {Downhole (DHP / DHT)};
 
-\draw (-2.2,-3.9) circle (0.08);
-\draw (-2.2,-4.3) circle (0.08);
+\draw (0,0) circle (0.08);
+\draw (-3.0,-6.4) circle (0.08);
 
 \end{tikzpicture}
 \caption{Well Flow Measurement Instrumentation Setup}
