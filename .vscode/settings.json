@@ -1,4 +1,22 @@
 {
     "python-envs.defaultEnvManager": "ms-python.python:poetry",
     "python-envs.defaultPackageManager": "ms-python.python:poetry",
+"latex-workshop.latex.tools": [
+  {
+    "name": "latexmk",
+    "command": "latexmk",
+    "args": [
+      "-pdf",
+      "-interaction=nonstopmode",
+      "-synctex=1",
+      "%DOC%"
+    ]
+  }
+],
+"latex-workshop.latex.recipes": [
+  {
+    "name": "latexmk",
+    "tools": ["latexmk"]
+  }
+]
 }

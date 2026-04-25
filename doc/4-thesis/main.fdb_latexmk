@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex main"] 1777128385.6273 "main.aux" "main.bbl" "main" 1777128980.80986 0
+["bibtex main"] 1777138284.1708 "main.aux" "main.bbl" "main" 1777138473.19497 0
   "./references.bib" 1777105072 15587 2ba13b62325c751d99211118a7133115 ""
   "C:/Users/perer/AppData/Local/Programs/MiKTeX/bibtex/bst/bibtex/apalike.bst" 1291972791 24635 604dafcc79f521a11ea73e506e1fbd98 ""
-  "main.aux" 1777128979 45567 68309da71cd29511c4638d3ecf3a614b "pdflatex"
+  "main.aux" 1777138472 45533 2f94dcd671451f4cd8b91418dc2458c5 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1777128973.0966 "c:/Users/perer/Documents/Code/pcperera/vfm/doc/4-thesis/main.tex" "main.pdf" "main" 1777128980.81054 0
+["pdflatex"] 1777138464.98788 "c:/Users/perer/Documents/Code/pcperera/vfm/doc/4-thesis/main.tex" "main.pdf" "main" 1777138473.19567 0
   "C:/Users/perer/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1765729905 82507 a9eef8696c92627b87e9975edea03b2a ""
   "C:/Users/perer/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1764967986 24225046 6cf61b8aca76475ec2f647e364a33b7c ""
   "C:/Users/perer/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc" 1458473887 4993 80dc9bab7f31fb78a000ccfed0e27cab ""
@@ -256,7 +256,7 @@
   "C:/Users/perer/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1700127522 55487 80a65caedd3722f4c20a14a69e785d8f ""
   "C:/Users/perer/AppData/Local/Programs/MiKTeX/tex/latex/xfor/xfor.sty" 1233849756 2689 44855b72da58344b1c1d9b3087bce6ca ""
   "C:/Users/perer/AppData/Local/Programs/MiKTeX/tex/latex/xkeyval/xkeyval.sty" 1656236919 4937 4ce600ce9bd4ec84d0250eb6892fcf4f ""
-  "c:/Users/perer/Documents/Code/pcperera/vfm/doc/4-thesis/main.tex" 1777128966 212771 146d68f6d787a2c414d7bdd0db95698e ""
+  "c:/Users/perer/Documents/Code/pcperera/vfm/doc/4-thesis/main.tex" 1777138464 212955 ca4c2e5073ef9e15321af31d60474cab ""
   "images/W10_choke.png" 1773550858 26909 cff41279899fb451086697ce92a5ceba ""
   "images/W10_dcp.png" 1773550858 26320 e847fabc8517e225f924093629785f96 ""
   "images/W10_dhp.png" 1773550857 27240 b0701c8971865874d520544dd594c553 ""
@@ -285,14 +285,14 @@
   "images/finalized_results/W19_qo_hybrid.png" 1774102910 187378 1311f852aa0529a33e844e3d04490796 ""
   "images/finalized_results/W19_qw_hybrid.png" 1774102911 170324 4ac93611594a567c053f4ba2a7c3defe ""
   "main.acr" 0 -1 0 ""
-  "main.aux" 1777128979 45567 68309da71cd29511c4638d3ecf3a614b "pdflatex"
-  "main.bbl" 1777128385 11037 7ccfc1f1223809a79569d6585231d9ab "bibtex main"
-  "main.glsdefs" 1777128979 13460 de205e291307244037e9179296b92f0f "pdflatex"
-  "main.lof" 1777128979 2719 a93c4f1d04e922c0f4080f447491e9d3 "pdflatex"
-  "main.lot" 1777128979 2133 5d6893ea4c591dbf2f088280eec8e02d "pdflatex"
-  "main.out" 1777128979 26401 f518c87172877cd63af184054a0ea043 "pdflatex"
-  "main.tex" 1777128966 212771 146d68f6d787a2c414d7bdd0db95698e ""
-  "main.toc" 1777128979 14278 ca2ab069476082fdf39bcd6e24b62a24 "pdflatex"
+  "main.aux" 1777138472 45533 2f94dcd671451f4cd8b91418dc2458c5 "pdflatex"
+  "main.bbl" 1777138284 11037 7ccfc1f1223809a79569d6585231d9ab "bibtex main"
+  "main.glsdefs" 1777138472 13484 5f09f2cec8fdeeaf007710e6b1e93ff5 "pdflatex"
+  "main.lof" 1777138472 2702 21d1226c2138df9350338932a13c5583 "pdflatex"
+  "main.lot" 1777138472 2133 5d6893ea4c591dbf2f088280eec8e02d "pdflatex"
+  "main.out" 1777138472 26401 f518c87172877cd63af184054a0ea043 "pdflatex"
+  "main.tex" 1777138464 212955 ca4c2e5073ef9e15321af31d60474cab ""
+  "main.toc" 1777138472 14278 ca2ab069476082fdf39bcd6e24b62a24 "pdflatex"
   "packages/lgrind.sty" 1764967620 7434 ea74beead1aa2b711ec2669ba60562c3 ""
   "uomthesis.cls" 1764967620 27326 617c3103fb937d84d71fc69e020cc8a5 ""
   (generated)

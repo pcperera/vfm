@@ -1,7 +1,8 @@
 %% Default is IEEE. Add "APA" as an option to use APA
-% add twoside for final
-% singlespace
-% UoMdraft
+% add twoside for the final version so bookbinding can be done
+% singlespace can override other spacing commands
+% UoMdraft can be used for the draft version
+% When you are using IEEE, you can add IEEEdoi if you want the DOI to be listed in your references
 \documentclass[12pt,APA]{uomthesis}
 \usepackage{packages/lgrind}
 %\usepackage{lgrind}
@@ -132,7 +133,7 @@ The oil and gas industry is a global sector focused on the exploration, extracti
 
 The Upstream sector encompasses all activities related to the exploration and production of hydrocarbons. This includes geological and geophysical surveys, exploration drilling, reservoir characterization, well planning, drilling operations, completions, and production of oil, gas, and condensate. It is the segment where subsurface engineering, reservoir management, and field development strategies are applied. Central to these operations are fields and reservoirs, which define the spatial and geological context for upstream activities. A field is a geographically or geologically defined area that contains one or more hydrocarbon reservoirs. Fields represent the primary operational units for planning drilling programs, designing production facilities, and managing overall hydrocarbon recovery. They are delineated based on subsurface geology, reservoir continuity, hydrocarbon presence, and operational or administrative considerations. 
 
-An oil well is a borehole drilled from the surface into a hydrocarbon-bearing reservoir to access and produce oil, gas, and associated fluids. Wells are designed to provide a controlled pathway for hydrocarbons to flow from the reservoir to the surface, and their design depends on reservoir properties, depth, pressure, and fluid composition. The fluid mixture flowing out of the well consists of oil, natural gas and water. This mixture of flow is called the multi-phase flow. The flow rates of oil, gas, and water reflect the performance of the well. The Petroleum Engineers need to make informed decisions regarding the production strategies based on the performance of the wells. Through accurate predictions of flow rates, petroleum Engineers can diagnose production inefficiencies and constraints, and implement solutions to optimize production and project future investments. Physical flow meters and \abbr{Virtual Flow Meter}{VFM} are used to predict flow rates in oil wells. Physical flow meters are often very expensive, require regular maintenance, and are prone to failure under harsh operating conditions. Physical flow meters use in-built sensor data and physics based mathematical equations to predict the real-time flow rates. Virtual flow meters, in contrast, can use mathematical models based on physics, models based on machine learning, or hybrid models to predict flow rates \citep{bikmukhametov2020first}. 
+An oil well is a borehole drilled from the surface into a hydrocarbon-bearing reservoir to access and produce oil, gas, and associated fluids. Wells are designed to provide a controlled pathway for hydrocarbons to flow from the reservoir to the surface, and their design depends on reservoir properties, depth, pressure, and fluid composition. The fluid mixture flowing out of the well consists of oil, natural gas and water. This mixture of flow is called the multi-phase flow. The flow rates of oil, gas, and water reflect the performance of the well. The Petroleum Engineers need to make informed decisions regarding the production strategies based on the performance of the wells. Through accurate predictions of flow rates, petroleum Engineers can diagnose production inefficiencies and constraints, and implement solutions to optimize production and project future investments. Physical flow meters and \abbr{Virtual Flow Meters}{VFM} are used to predict flow rates in oil wells. Physical flow meters are often very expensive, require regular maintenance, and are prone to failure under harsh operating conditions. Physical flow meters use in-built sensor data and physics based mathematical equations to predict the real-time flow rates. Virtual flow meters, in contrast, can use mathematical models based on physics, models based on machine learning, or hybrid models to predict flow rates \citep{bikmukhametov2020first}. 
 
 \section{Asset Hierarchy}
 In upstream oil and gas operations, the management and organization of hydrocarbon resources are structured through a hierarchical framework known as the asset hierarchy \ref{fig:asset_hierarchy}, which provides clarity for both subsurface and surface operational planning.
@@ -244,7 +245,7 @@ Gas wells primarily produce natural gas, with relatively small amounts of conden
 
 \section{Producer and Injector Wells}
 \begin{itemize}
-    \item \textbf{Production Wells}: Production wells are the primary pathways through which hydrocarbons - oil, gas, and associated formation water, are extracted from a reservoir and transported to surface processing facilities. Their core function is to withdraw fluids from subsurface formations in a controlled manner that optimizes recovery while maintaining well integrity and reservoir performance. The performance of a production well is driven by the pressure differential between the reservoir and the wellbore \citep{ahmed2010reservoir}. Early in a field's life, natural energy such as solution gas drive, water drive, gas cap expansion, or aquifer support pushes fluids toward the wellbore. As reservoir pressure declines over time, production wells may transition to artificial lift systems such as gas lift, \abbr{Electric Submersible Pumps}{ESP}, \abbr{Progressive Cavity Pumps}{PCP}, or \abbr{Rod Pumps}{RP} to sustain flow rates and overcome the hydrostatic and frictional losses in the wellbore \citep{brown1984artificial}. The choice of artificial lift depends on fluid properties, well depth, deviation, GOR, water cut, and economic considerations.
+    \item \textbf{Production Wells}: Production wells are the primary pathways through which hydrocarbons - oil, gas, and associated formation water, are extracted from a reservoir and transported to surface processing facilities. Their core function is to withdraw fluids from subsurface formations in a controlled manner that optimizes recovery while maintaining well integrity and reservoir performance. The performance of a production well is driven by the pressure differential between the reservoir and the wellbore \citep{ahmed2010reservoir}. Early in a field's life, natural energy such as solution gas drive, water drive, gas cap expansion, or aquifer support pushes fluids toward the wellbore. As reservoir pressure declines over time, production wells may transition to artificial lift systems such as gas lift, ESP, \abbr{Progressive Cavity Pumps}{PCP}, or \abbr{Rod Pumps}{RP} to sustain flow rates and overcome the hydrostatic and frictional losses in the wellbore \citep{brown1984artificial}. The choice of artificial lift depends on fluid properties, well depth, deviation, GOR, water cut, and economic considerations.
     \item \textbf{Injection Wells}: Injection wells are specialized wellbores designed to introduce fluids - such as water, gas, or chemical mixtures into subsurface formations for the purposes of reservoir pressure maintenance, \abbr{Enhanced Oil Recovery}{EOR} \citep{lake2014enhanced}, or safe disposal of produced water. Unlike production wells, which are engineered to withdraw hydrocarbons, injection wells primarily function as input conduits, pushing fluids into the reservoir to support long-term field productivity. Their role is essential in secondary and tertiary recovery processes, as they improve sweep efficiency and maintain reservoir pressure, thereby enhancing the deliverability of adjacent production wells.
 \end{itemize}
 
@@ -294,7 +295,7 @@ Typical wellhead measurements include pressure and temperature, obtained using t
 
 The choke system is located downstream of the wellhead and is used to regulate the flow of produced fluids from the well. Choke valves control the flow rate by introducing a pressure drop, thereby enabling operators to manage reservoir drawdown, prevent sand production, and maintain well integrity.
 
-Instrumentation associated with the choke includes the \abbr{Downstream Choke Valve}{DCR}, which represents the choke opening or valve position, and the \abbr{Downstream Choke Pressure}{DCP}, which measures the pressure downstream of the choke. Choke valves may be manually operated or automatically controlled as part of a production control system. Their placement downstream of the wellhead provides flexibility in regulating flow while maintaining safe operating conditions.
+Instrumentation associated with the choke includes the \abbr{Downstream Choke Regulation}{DCR}, which represents the choke opening or valve position, and the \abbr{Downstream Choke Pressure}{DCP}, which measures the pressure downstream of the choke. Choke valves may be manually operated or automatically controlled as part of a production control system. Their placement downstream of the wellhead provides flexibility in regulating flow while maintaining safe operating conditions.
 
 \subsection{Role of Instrumentation in Virtual Flow Metering}
 
@@ -308,7 +309,7 @@ All or a subset of the aforementioned sensors are used as independent variables 
 ]
 
 % Ground level (aligned with wellhead)
-\draw[dashed] (-3,0) -- (5,0);
+\draw[dashed] (-3,0) -- (0,0);
 \node[left] at (-3,0) {Ground Level};
 
 % Wellhead (at ground level)
@@ -347,7 +348,7 @@ All or a subset of the aforementioned sensors are used as independent variables 
 \draw (-3.0,-6.4) circle (0.08);
 
 \end{tikzpicture}
-\caption{Well Flow Measurement Instrumentation Setup}
+\caption{Well Instrumentation Setup}
 \label{fig:well-instrumentation}
 \end{figure}
 
@@ -419,7 +420,7 @@ Physics based VFM are also known as first principles VFM systems. Physics-based 
 
 Physics based VFM dominate the industry as they've undergone significant development over half a century to comprehensively outline each facet of this approach. This extensive effort has yielded a strong grasp of mechanistic modeling within production systems, fluid properties, and optimization methods. Consequently, physics based VFM stands as a dependable method to depict overall production system behavior and especially multi-phase flow phenomena \citep{bikmukhametov2020first}. Physics based VFM are generally considered expensive due to licensing costs of the simulator and slow in prediction due to processing of high complexity mathematical models. Physics based VFM require very accurate descriptions of the well, fluids, trajectory, production choke and installation parameters for modeling the simulator based on the theories of physics. 
 
-Physics-based VFMs can be directly compared across several important technical dimensions that determine their suitability for different production environments. One of the most important aspects is the complexity of the model, which varies significantly between vendors. Some VFMs, such as SLB's OLGA VM and Aker's LiveVFM, use transient multiphase flow simulations, which allow them to capture dynamic behaviors such as slugging, gas breakthrough, and changing \abbr{Gas-Oil Ratio}{GOR}. These tools are preferred for deepwater subsea wells, long tiebacks, and high-rate gas condensate production systems. Others, such as Petex PROSPER/GAP, Tieto Energy Components VFM, and BGS VMS, use steady-state mechanistic models, which are far simpler, computationally efficient, and suitable for most onshore wells or stable offshore production.
+Physics-based VFMs can be directly compared across several important technical dimensions that determine their suitability for different production environments. One of the most important aspects is the complexity of the model, which varies significantly between vendors. Some VFMs, such as SLB's OLGA VM and Aker's LiveVFM, use transient multiphase flow simulations, which allow them to capture dynamic behaviors such as slugging, gas breakthrough, and changing \abbr{Gas Oil Ratio}{GOR}. These tools are preferred for deepwater subsea wells, long tiebacks, and high-rate gas condensate production systems. Others, such as Petex PROSPER/GAP, Tieto Energy Components VFM, and BGS VMS, use steady-state mechanistic models, which are far simpler, computationally efficient, and suitable for most onshore wells or stable offshore production.
 
 \subsection{Machine Learning VFM or Data Driven VFM}
 \abbr{Machine Learning}{ML} based modeling involves analyzing system data to uncover connections between input and output variables without precise knowledge of the system's physical behavior. ML based VFM are purely data driven. This method proves advantageous in bypassing intricate physical modeling, especially for systems like multi-phase flows in pipes, where exact numerical solutions can be challenging. It relies on experimental or industrial data to grasp the system's behavior directly and attempts to learn the underlying relationships from this data. ML based VFM modeling involves collecting data such as downhole and wellhead pressures and temperatures, choke regulation levels and corresponding oil, gas, and water flow-rate measurements \citep{agwu2022modelling}. These measurements can originate from various sources in the form of well-test data or MPFM. The ML based model can serve as a backup metering system for individual wells if MPFM are installed for each wellhead. The ML based model functions as a standalone VFM system.
@@ -2078,7 +2079,7 @@ In this study, temporal generalization is assessed by training the models on ear
 The performance of three approaches is compared: the physics-based model, the proposed hybrid physics-machine learning model, and the MPFM baseline. Metrics including $R^2$, MAE, RMSE, and MAPE are used to quantify predictive accuracy and reliability across wells.
 
 
-\subsection{Gas Rate ($q_g$)}
+\subsection{Gas Rate (\texorpdfstring{$q_g$}{qg})}
 
 Table~\ref{tab:temporal_gas_rate_comparison} reports gas rate prediction performance under lag-safe temporal extrapolation.
 
