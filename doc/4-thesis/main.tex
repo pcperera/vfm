@@ -135,7 +135,7 @@ The Upstream sector encompasses all activities related to the exploration and pr
 An oil well is a borehole drilled from the surface into a hydrocarbon-bearing reservoir to access and produce oil, gas, and associated fluids. Wells are designed to provide a controlled pathway for hydrocarbons to flow from the reservoir to the surface, and their design depends on reservoir properties, depth, pressure, and fluid composition. The fluid mixture flowing out of the well consists of oil, natural gas and water. This mixture of flow is called the multi-phase flow. The flow rates of oil, gas, and water reflect the performance of the well. The Petroleum Engineers need to make informed decisions regarding the production strategies based on the performance of the wells. Through accurate predictions of flow rates, petroleum Engineers can diagnose production inefficiencies and constraints, and implement solutions to optimize production and project future investments. Physical flow meters and \abbr{Virtual Flow Meter}{VFM} are used to predict flow rates in oil wells. Physical flow meters are often very expensive, require regular maintenance, and are prone to failure under harsh operating conditions. Physical flow meters use in-built sensor data and physics based mathematical equations to predict the real-time flow rates. Virtual flow meters, in contrast, can use mathematical models based on physics, models based on machine learning, or hybrid models to predict flow rates \citep{bikmukhametov2020first}. 
 
 \section{Asset Hierarchy}
-In upstream oil and gas operations, the management and organization of hydrocarbon resources are structured through a hierarchical framework known as the asset hierarchy, which provides clarity for both subsurface and surface operational planning.
+In upstream oil and gas operations, the management and organization of hydrocarbon resources are structured through a hierarchical framework known as the asset hierarchy \ref{fig:asset_hierarchy}, which provides clarity for both subsurface and surface operational planning.
 
 \begin{itemize}
     \item \textbf{Asset}: An Asset is the highest-level operational and resource unit in upstream oil and gas management, encompassing multiple geographically or geologically defined oil and gas fields. It serves as a consolidated management entity under which exploration, development, production, and economic evaluation of the associated fields are coordinated. The asset framework enables integrated planning of drilling campaigns, reservoir development, production optimization, and infrastructure utilization across all fields it contains. By grouping multiple fields under a single asset, operators can streamline decision-making, allocate resources efficiently, and evaluate overall performance, reserves, and recovery potential at a portfolio level. In essence, the asset represents the top-level resource that aligns subsurface resources, surface facilities, and economic objectives for strategic management.
@@ -148,7 +148,115 @@ In upstream oil and gas operations, the management and organization of hydrocarb
     \item \textbf{Wellbore / Well String}: A Wellbore, often referred to as a well string, represents the drilled path of a well, including all installed casing, tubing, completions, and downhole equipment. A single well may contain multiple wellbore strings targeting different zones, formations, or reservoirs, allowing for separate production streams, reservoir compartment management, or enhanced recovery strategies. Wellbore design directly influences flow capacity, pressure profiles, and production efficiency, and it provides the physical framework for subsurface monitoring, artificial lift installation, and advanced reservoir management techniques.
 \end{itemize}
 
-\section{Well Types}
+\begin{figure}[!htb]
+\centering
+\begin{tikzpicture}[
+    node distance=1.8cm,
+    every node/.style={
+        draw,
+        rounded corners,
+        align=center,
+        font=\small,
+        minimum width=4.5cm,
+        minimum height=1cm
+    },
+    arrow/.style={->, thick},
+    labelstyle/.style={midway, right, font=\scriptsize, draw=none}
+]
+
+\node (asset) {Top Level Asset \\ \scriptsize (Business)};
+\node (field) [below=of asset] {Field \\ \scriptsize (Geographical)};
+\node (reservoir) [below=of field] {Reservoir \\ \scriptsize (Subsurface)};
+\node (sector) [below=of reservoir] {Sector \\ \scriptsize (Subsurface)};
+\node (cluster) [below=of sector] {Cluster \\ \scriptsize (Operational)};
+\node (wellpad) [below=of cluster] {Wellpad \\ \scriptsize (Operational)};
+\node (well) [below=of wellpad] {Well \\ \scriptsize (Operational)};
+\node (wellbore) [below=of well] {Wellbore \\ (Well String) \\ \scriptsize (Physical / Operational)};
+
+% Arrows with relationship labels
+\draw[arrow] (asset) -- node[labelstyle] {1:N} (field);
+\draw[arrow] (field) -- node[labelstyle] {1:N} (reservoir);
+\draw[arrow] (reservoir) -- node[labelstyle] {1:N} (sector);
+\draw[arrow] (sector) -- node[labelstyle] {1:N} (cluster);
+\draw[arrow] (cluster) -- node[labelstyle] {1:N} (wellpad);
+\draw[arrow] (wellpad) -- node[labelstyle] {1:N} (well);
+\draw[arrow] (well) -- node[labelstyle] {1:1} (wellbore);
+
+\end{tikzpicture}
+\caption{Oil and Gas Field Asset Hierarchy}
+\label{fig:asset_hierarchy}
+\end{figure}
+
+\section{Oil and Gas Wells}
+
+Hydrocarbon production wells are broadly classified into oil wells and gas wells based on the dominant produced phase. In practice, both types involve multiphase flow consisting of oil, gas, and water, which introduces significant complexity in modeling and measurement. Accurate estimation of phase flow rates is essential for reservoir management, production optimization, and allocation \citep{falcone2009multiphase, kolev2016multiphase}.
+
+\subsection{Oil Wells}
+
+Oil wells primarily produce liquid hydrocarbons, often accompanied by associated gas and water. Their behavior is typically governed by multiphase liquid-dominated flow.
+
+\subsubsection{Characteristics}
+\begin{itemize}
+\item Oil is the dominant phase, with gas present as associated or dissolved gas.
+\item Water production increases over time due to reservoir depletion and water breakthrough.
+\item Flow is multiphase and generally liquid-dominated.
+\item Artificial lift methods such as gas lift or \abbr{Electric Submersible Pumps}{ESP} are often required.
+\end{itemize}
+
+\subsubsection{Flow Behavior}
+\begin{itemize}
+\item Flow is governed by pressure drawdown and inflow performance relationships.
+\item Multiphase interactions between oil, gas, and water lead to complex flow regimes \citep{brill1999multiphase}.
+\item Water cut ($wc$) is a key parameter describing liquid composition:
+\[
+wc = \frac{q_w}{q_L}, \quad q_L = q_o + q_w
+\]
+\item Increasing water cut impacts production efficiency and measurement accuracy \citep{falcone2009multiphase}.
+\end{itemize}
+
+\subsubsection{Measurement Challenges}
+\begin{itemize}
+\item Accurate phase separation is difficult, particularly at high water cut.
+\item \abbr{Multiphase Flow Meters}{MPFM} exhibit varying accuracy depending on flow regime \citep{falcone2009multiphase}.
+\item Well test data is reliable but sparse, whereas continuous sensor data is indirect and requires modeling.
+\end{itemize}
+
+\subsection{Gas Wells}
+
+Gas wells primarily produce natural gas, with relatively small amounts of condensate and water. Their behavior is typically gas-dominated and strongly influenced by pressure conditions.
+
+\subsubsection{Characteristics}
+\begin{itemize}
+\item Gas is the dominant phase, often produced at high velocities.
+\item Liquid phases are typically minor but can significantly affect flow behavior.
+\item Flow rates are highly sensitive to pressure differences between reservoir and wellbore.
+\end{itemize}
+
+\subsubsection{Flow Behavior}
+\begin{itemize}
+\item Gas flow is commonly modeled as a pressure-driven process:
+\[
+q_g \propto \sqrt{P_{res} - P_{wf}}
+\]
+\item Strong dependence on reservoir pressure and surface conditions.
+\item Liquid loading can occur when gas velocity is insufficient to transport liquids, reducing production efficiency \citep{brill1999multiphase}.
+\end{itemize}
+
+\subsubsection{Measurement Challenges}
+\begin{itemize}
+\item Gas flow measurements are sensitive to pressure and temperature variations.
+\item Small amounts of liquid can significantly impact measurement accuracy.
+\item Indirect measurement techniques such as virtual flow metering are often required for continuous estimation.
+\end{itemize}
+
+\subsection{Relevance to Virtual Flow Metering}
+
+Multiphase flow measurement remains a major challenge due to the simultaneous presence of oil, gas, and water phases. Traditional approaches such as test separators provide accurate but infrequent measurements, motivating the development of virtual flow metering (VFM) techniques \citep{falcone2009multiphase}.
+
+Hybrid approaches that combine physics-based modeling with data-driven techniques have shown improved performance in handling complex multiphase systems, as they leverage both physical understanding and data-driven adaptability \citep{kolev2016multiphase}.
+
+
+\section{Producer and Injector Wells}
 \begin{itemize}
     \item \textbf{Production Wells}: Production wells are the primary pathways through which hydrocarbons - oil, gas, and associated formation water, are extracted from a reservoir and transported to surface processing facilities. Their core function is to withdraw fluids from subsurface formations in a controlled manner that optimizes recovery while maintaining well integrity and reservoir performance. The performance of a production well is driven by the pressure differential between the reservoir and the wellbore \citep{ahmed2010reservoir}. Early in a field's life, natural energy such as solution gas drive, water drive, gas cap expansion, or aquifer support pushes fluids toward the wellbore. As reservoir pressure declines over time, production wells may transition to artificial lift systems such as gas lift, \abbr{Electric Submersible Pumps}{ESP}, \abbr{Progressive Cavity Pumps}{PCP}, or \abbr{Rod Pumps}{RP} to sustain flow rates and overcome the hydrostatic and frictional losses in the wellbore \citep{brown1984artificial}. The choice of artificial lift depends on fluid properties, well depth, deviation, GOR, water cut, and economic considerations.
     \item \textbf{Injection Wells}: Injection wells are specialized wellbores designed to introduce fluids - such as water, gas, or chemical mixtures into subsurface formations for the purposes of reservoir pressure maintenance, \abbr{Enhanced Oil Recovery}{EOR} \citep{lake2014enhanced}, or safe disposal of produced water. Unlike production wells, which are engineered to withdraw hydrocarbons, injection wells primarily function as input conduits, pushing fluids into the reservoir to support long-term field productivity. Their role is essential in secondary and tertiary recovery processes, as they improve sweep efficiency and maintain reservoir pressure, thereby enhancing the deliverability of adjacent production wells.
@@ -156,7 +264,7 @@ In upstream oil and gas operations, the management and organization of hydrocarb
 
 \section{Well Downhole and Surface Instrumentation}
 
-The configuration of instrumentation in an oil well varies depending on the operational objectives and reservoir characteristics. In general, sensors are strategically installed along the wellbore and surface facilities to monitor drilling, production, and safety-related parameters. The wellbore, often referred to as the borehole, is the cylindrical hole drilled from the surface into subsurface formations during the development of oil, gas, water, or geothermal wells. Figure~\ref{fig:well-sensors} illustrates the typical placement of instrumentation across different locations of a producing well.
+The configuration of instrumentation in an oil well varies depending on the operational objectives and reservoir characteristics. In general, sensors are strategically installed along the wellbore and surface facilities to monitor drilling, production, and safety-related parameters. The wellbore, often referred to as the borehole, is the cylindrical hole drilled from the surface into subsurface formations during the development of oil, gas, water, or geothermal wells. Figure~\ref{fig:well-instrumentation} illustrates the typical placement of instrumentation across different locations of a producing well.
 
 \subsection{Downhole Instrumentation}
 
@@ -180,13 +288,63 @@ Instrumentation associated with the choke includes the \abbr{Downstream Choke Va
 
 All or a subset of the aforementioned sensors are used as independent variables in machine learning (ML)-based Virtual Flow Metering (VFM) models. Measurements from downhole, wellhead, and choke locations collectively capture the pressure–temperature–flow relationships governing multiphase production. The integration of these sensor signals enables data-driven models to infer oil, gas, and water flow rates in the absence of direct physical flow meters, thereby supporting real-time production monitoring and optimization.
 
-
 \begin{figure}[!htb]
-\uomFig{Well downhole and surface instrumentation}{fig:well-sensors}{\includegraphics[width=0.9\textwidth]{images/well-sensors.png}}{}
+\centering
+\begin{tikzpicture}[
+    every node/.style={font=\small},
+    arrow/.style={->, thick}
+]
+
+% Ground level
+\draw[dashed] (-3,0) -- (5,0);
+\node[left] at (-3,0) {Ground Level};
+
+% Wellhead vertical pipe
+\draw[thick] (0,0) -- (0,1.2);
+\node[above] at (0,1.2) {Wellhead};
+
+% Surface sensors
+\node[left] at (-0.2,1.0) {WHT};
+\node[above left] at (-0.2,1.2) {WHP};
+
+% Flowline
+\draw[thick] (0,1.2) -- (3,1.2);
+
+% Choke (DCR)
+\draw (2,1.2) -- (2.3,1.5);
+\draw (2,1.2) -- (2.3,0.9);
+\node[below] at (2.2,1.0) {choke};
+
+% Downstream pressure
+\node[above] at (2.2,1.5) {DCP};
+
+% Production arrow
+\draw[arrow] (3,1.2) -- (4.5,1.2);
+\node[right] at (4.5,1.2) {To Separator};
+
+% Wellbore (smooth curve)
+\draw[thick] (0,0) .. controls (-0.3,-1.5) and (-1.5,-2.5) .. (-2,-3.5);
+\node at (-1.0,-1.8) {Wellbore};
+
+% Reservoir
+\draw[thick] (-3,-4) ellipse (2cm and 1cm);
+\node at (-3,-4) {Well Downhole};
+
+% Downhole sensors
+\node[right] at (-1.3,-3.8) {DHP};
+\node[right] at (-1.3,-4.2) {DHT};
+
+\draw (-1.8,-3.8) circle (0.08);
+\draw (-1.8,-4.2) circle (0.08);
+
+\end{tikzpicture}
+\caption{Well Downhole and Surface Instrumentation}
+\label{fig:well-instrumentation}
 \end{figure}
 
+
 \begin{table}[!htb]
-\uomTable{Well downhole and surface instrumentation}{tab:well-sensor}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
+\uomTable{Well downhole and surface instrumentation}{tab:well-instrumentation}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
 \hline
 Sensor & Description & Unit \\
 \hline
@@ -199,6 +357,7 @@ choke & Downstream choke regulation & \% \\
 \hline
 \end{tabularx}}{}
 \end{table}
+
 
 \section{Flow States}
 
@@ -225,7 +384,7 @@ Physical flow meters encompass a diverse range of instruments designed to measur
 Traditional \abbr{Single Phase Flow Meter}{SPFM} systems necessitate the complete separation of the phases within the well streams before the measurement. In production metering, this separation typically occurs naturally at the exit of a conventional processing facility. These plants are designed to amalgamate various well streams at one end and deliver stabilized individual phases for transport at the other end. Typically, single-phase metering systems offer top-notch accuracy in measuring hydrocarbon production \citep{corneliussen2005handbook}. In production system a \abbr{Well Test}{WT} separator is used to physically separate the individual phases of the produced fluid so that each phase can be accurately measured and analyzed. Once the phases are separated, dedicated SPFM are employed to measure the flow rates of each individual phase of oil, gas and water. Although not as advanced as multi-phase counter parts, the SPFM are also considered expensive and its usage is extremely costly due to production deferment. This is because the well has to be disconnected from the production and needs to be connected with the separator prior to feeding the SPFM. Single phase flow measurement is often called a well test. It's possible that some wells cannot be measured from a well test because the distance from the well to the separator can be very long. Oilfields are required to perform well-tests at some point based on regulatory requirements of the jurisdictions. It is however not economically feasible to run regular well-tests as they cause production deferment.
  
 \subsection{Multi Phase Flow Meter}
-\abbr{Multi Phase Flow Meters}{MPFM} in the oil industry is a specialized device designed to measure the flow rates of oil, gas, and water as they are produced from a well. MPFM measure the flow rates of different phases simultaneously without separation. MPFM can provide continuous measurement of flow rates at sensor locations with decent accuracy but they are considered extremely expensive and requires regular calibration. Multi-phase flow measurement technology may be an attractive alternative since it enables measurement of unprocessed well streams very close to the well. The use of MPFM may lead to cost savings in the initial installation. However, due to increased measurement uncertainty, a cost-benefit analysis should be performed over the life cycle of the project to justify its application. It operates by determining the individual oil, gas and water phase fractions and their flow rates within a single pipeline or wellbore. MPFM also considered less accurate outside the normal operational range. SPFM are considered more accurate than MPFM since the phases are measured after separation in SPFM \citep{meribout2020multiphase}. 
+MPFM is a specialized device designed to measure the flow rates of oil, gas, and water as they are produced from a well. MPFM measure the flow rates of different phases simultaneously without separation. MPFM can provide continuous measurement of flow rates at sensor locations with decent accuracy but they are considered extremely expensive and requires regular calibration. Multi-phase flow measurement technology may be an attractive alternative since it enables measurement of unprocessed well streams very close to the well. The use of MPFM may lead to cost savings in the initial installation. However, due to increased measurement uncertainty, a cost-benefit analysis should be performed over the life cycle of the project to justify its application. It operates by determining the individual oil, gas and water phase fractions and their flow rates within a single pipeline or wellbore. MPFM also considered less accurate outside the normal operational range. SPFM are considered more accurate than MPFM since the phases are measured after separation in SPFM \citep{meribout2020multiphase}. 
 
 \section{Virtual Flow Meters}
 VFM are virtual model for predicting flow rates. Unlike the physical flow meters, VFM doesn't require deployment of dedicated hardware for flow rate measurement. Both VFM and physical flow meters measure the flow rates indirectly. Physical flow meters bring their own set of sensors whereas VFM use the existing sensors in the well. Over the past two decades, the evolution of VFM has led to the creation of diverse techniques for estimating multi-phase flow rates using field data. This progress has seen the emergence of commercial VFM systems from various companies, widely adopted by oil and gas companies globally. Physical flow meters use physics based mathematical equations to calculate the flow rates whereas VFM can use physics equations and/or ML based models for prediction. VFM, therefore can be categorized into 3 types; physics based, ML based and hybrid flow meters.
@@ -722,7 +881,7 @@ The physics model incorporates:
 
 Model parameters are calibrated on a per-well basis using nonlinear least-squares optimization against available multiphase flow meter measurements. This calibration step ensures that the physics model remains interpretable, physically consistent, and tailored to individual well characteristics while avoiding excessive model complexity.
 
-\subsection{Residual Learning via Machine Learning}
+\subsection{Residual Learning using Machine Learning}
 
 While the physics-based model captures the dominant flow mechanisms, it is inherently limited by simplifying assumptions, parameter uncertainty, and unmodeled multiphase flow effects. To address these deficiencies, a data-driven residual learning component is introduced.
 

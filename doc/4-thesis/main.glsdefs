@@ -54,6 +54,34 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{MPFM}%
+{%
+name={\acronymfont {\glsentryshort {MPFM}}},%
+sort={MPFM},%
+type={acronym},%
+first={MPFM},%
+firstplural={MPFMs},%
+text={MPFM},%
+plural={MPFMs},%
+description={Multiphase Flow Meters},%
+descriptionplural={Multiphase Flow Meters},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Multiphase Flow Meters},%
+longplural={Multiphase Flow Meterss},%
+short={MPFM},%
+shortplural={MPFMs},%
+counter={page},%
+parent={},%
+%
+}%
+
 \glsdefs@newdocentry{PCP}%
 {%
 name={\acronymfont {\glsentryshort {PCP}}},%
@@ -413,34 +441,6 @@ long={Well Test},%
 longplural={Well Tests},%
 short={WT},%
 shortplural={WTs},%
-counter={page},%
-parent={},%
-%
-}%
-
-\glsdefs@newdocentry{MPFM}%
-{%
-name={\acronymfont {\glsentryshort {MPFM}}},%
-sort={MPFM},%
-type={acronym},%
-first={MPFM},%
-firstplural={MPFMs},%
-text={MPFM},%
-plural={MPFMs},%
-description={Multi Phase Flow Meters},%
-descriptionplural={Multi Phase Flow Meters},%
-symbol={\relax },%
-symbolplural={\relax },%
-user1={},%
-user2={},%
-user3={},%
-user4={},%
-user5={},%
-user6={},%
-long={Multi Phase Flow Meters},%
-longplural={Multi Phase Flow Meterss},%
-short={MPFM},%
-shortplural={MPFMs},%
 counter={page},%
 parent={},%
 %

@@ -93,6 +93,11 @@ Dutta, P. and Kumar, A. (2018).
   artificial neural network-based flower pollination algorithm.
 \newblock {\em Journal of Intelligent Systems}, 29(1):787--798.
 
+\bibitem[Falcone et~al., 2009]{falcone2009multiphase}
+Falcone, G., Hewitt, G.~F., and Alimonti, C. (2009).
+\newblock {\em Multiphase Flow Metering: Principles and Applications}.
+\newblock Elsevier.
+
 \bibitem[Franklin et~al., 2022]{franklin2022physics}
 Franklin, T.~S., Souza, L.~S., Fontes, R.~M., and Martins, M.~A. (2022).
 \newblock A physics-informed neural networks (pinn) oriented approach to flow
@@ -154,6 +159,11 @@ Karniadakis, G.~E., Kevrekidis, I.~G., Lu, L., Perdikaris, P., Wang, S., and
   Yang, L. (2021).
 \newblock Physics-informed machine learning.
 \newblock {\em Nature Reviews Physics}, 3(6):422--440.
+
+\bibitem[Kolev, 2016]{kolev2016multiphase}
+Kolev, N.~I. (2016).
+\newblock {\em Multiphase Flow Dynamics}.
+\newblock Springer.
 
 \bibitem[Lake, 2006]{spe_petroleum_engineering_handbook}
 Lake, L.~W., editor (2006).
