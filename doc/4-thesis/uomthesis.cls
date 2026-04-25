@@ -203,6 +203,9 @@
 \newif\if@UoMdraft \@UoMdraftfalse
 \DeclareOption{UoMdraft}{\@UoMdrafttrue}
 
+\newif\if@IEEEdoi \@IEEEdoifalse
+\newif\ifIEEEdoiT \IEEEdoiTfalse
+\DeclareOption{IEEEdoi}{\@IEEEdoitrue \IEEEdoiTtrue}
 
 % IEEE uses Times Roman font, so we'll default to Times.
 % These three commands make up the entire times.sty package.
@@ -227,7 +230,7 @@
 % If the user wants single spacing, set baselinestretch=1.
 
 \usepackage{setspace}
-\usepackage[a4paper,total={170mm,257mm},top=25mm,includehead,right=25mm,left=40mm,bottom=25mm]{geometry}
+\usepackage[a4paper,total={170mm,257mm},top=25mm,right=25mm,left=40mm,bottom=25mm]{geometry}
 %\usepackage[a4paper,total={210mm,297mm},top=15mm,includeheadfoot,right=25mm,left=40mm,bottom=40mm,headsep=5.5mm,footskip=10mm]{geometry}
  
 
@@ -283,6 +286,9 @@
 
 \if@UoMdraft  
     \def\mystretch{1.3}   % one-and-a-half spacing
+    \usepackage{draftwatermark}
+    \SetWatermarkLightness{0.8}
+    \SetWatermarkScale{1.2}
 \else 
     \def\mystretch{1.15} % Final Submission Spacing of UoM
 \fi
@@ -333,6 +339,11 @@
 %  \def\ps@headings.
 %
 
+\usepackage{hyperref}
+
+
+
+
 \if@twoside					% If two-sided printing.
 \def\ps@headings{\let\@mkboth\markboth
     \def\@oddfoot{}
@@ -344,6 +355,7 @@
     \def\sectionmark##1{\markright {\uppercase{\ifnum \c@secnumdepth >\z@
 	\thesection. \ \fi ##1}}}
     \pulldownheader				% Bring header down from edge
+
 }
 \else						% If one-sided printing.
 \def\ps@headings{\let\@mkboth\markboth
@@ -353,12 +365,18 @@
     \def\chaptermark##1{\markright {\uppercase{\ifnum \c@secnumdepth >\m@ne
 	\@chapapp\ \thechapter. \ \fi ##1}}}
     \pulldownheader				% Bring header down from edge
+
+}
+\hypersetup{
+    colorlinks   = true,
+    citecolor    = blue,
+    urlcolor    =  blue
 }
 \fi
 
 
 
-
+\usepackage{url}
 
 
 % Redefinition of 'myheadings' page style.  
@@ -518,7 +536,7 @@
 % Title Page
 \begin{titlepage}
 \setUpPage{
-\@type{} submitted in partial fulfillment of the requirements for the degree\\ \@degree{}
+\@type{} submitted in partial fulfilment of the requirements for the degree\\ \@degree{}
 }{12pt}
 \end{titlepage}
 
@@ -542,7 +560,7 @@
 \chapter*{{\raggedright DECLARATION}\hfill}
 \addcontentsline{toc}{chapter}{Declaration of the Candidate \& Supervisor}
 
-\studentNoun{} declare that this is \studentPosessive{} own work and this \@type{} does not incorporate without acknowledgement any material previously submitted for a Degree or Diploma in any other University or Institute of higher learning and to the best of \studentPosessive{} knowledge and belief it does not contain any material previously published or written by another person except where the acknowledgement is made in the text. \studentNoun{} retain the right to use this content in whole or part in future works (such as articles or books).
+\studentNoun{} declare that this is \studentPosessive{} own work and this \@type{} does not incorporate without acknowledgment any material previously submitted for a Degree or Diploma in any other University or Institute of higher learning and to the best of \studentPosessive{} knowledge and belief it does not contain any material previously published or written by another person except where the acknowledgment is made in the text. \studentNoun{} retain the right to use this content in whole or part in future works (such as articles or books).
 
 %\vspace{2em}
 %\noindent Signature: \hspace{20em} Date:
@@ -851,6 +869,18 @@
     %\bibliographystyle{unsrtnat}
     \bibliographystyle{apalike}
 \else % IEEE
-    \bibliographystyle{IEEEtranN}
+    
+    \ifIEEEdoiT % IEEE with DOI
+        \bibliographystyle{IEEEtranNdoi}
+    \else % IEEE without DOI
+        \bibliographystyle{IEEEtranN}   
+    \fi
 \fi
+
+
+
+
 }{}
+
+
+%IEEEdoi

@@ -184,7 +184,7 @@ In upstream oil and gas operations, the management and organization of hydrocarb
 \draw[arrow] (well) -- node[labelstyle] {1:1} (wellbore);
 
 \end{tikzpicture}
-\caption{Oil and Gas Field Asset Hierarchy}
+\caption{Oil and gas field asset hierarchy}
 \label{fig:asset_hierarchy}
 \end{figure}
 
@@ -316,21 +316,25 @@ All or a subset of the aforementioned sensors are used as independent variables 
 \draw[thick] (0,0) -- (0,0.3);
 
 % Surface sensors (clean separation)
-\node[right] at (-3.0,0.8) {Wellhead (WHP / WHT)};
+\node[right] at (-3.0,0.8) {Wellhead (whp / wht)};
 
 % Flowline (on ground level)
-\draw[thick] (0,0) -- (3,0);
+\draw[thick] (0,0) -- (2,0);
 
 % Choke (on flowline)
-\draw (2,0) -- (2.3,0.3);
-\draw (2,0) -- (2.3,-0.3);
-\node[below] at (2.2,-0.5) {Choke};
+\draw (2,0) -- (2,0.2);
+\draw (2,0) -- (2,-0.2);
+\draw (2.4,0) -- (2.4,0.2);
+\draw (2.4,0) -- (2.4,-0.2);
+\draw (2.0,-0.2) -- (2.4,0.2);
+\draw (2.0,0.2) -- (2.4,-0.2);
+\node[below] at (2.2,-0.5) {dcr (choke)};
 
 % Downstream pressure
-\node[above] at (2.2,0.4) {DCP};
+\node[above] at (2.2,0.4) {dcp};
 
 % Production arrow
-\draw[arrow] (3,0) -- (4.5,0);
+\draw[arrow] (2.4,0) -- (4.5,0);
 \node[right] at (4.5,0) {To Separator};
 
 % Wellbore (starts from ground level)
@@ -342,13 +346,13 @@ All or a subset of the aforementioned sensors are used as independent variables 
 \node at (-3.2,-8.3) {Reservoir};
 
 % Downhole sensors (spaced properly)
-\node[right] at (-2.6,-6.0) {Downhole (DHP / DHT)};
+\node[right] at (-2.6,-6.0) {Downhole (dhp / dht)};
 
 \draw (0,0) circle (0.08);
 \draw (-3.0,-6.4) circle (0.08);
 
 \end{tikzpicture}
-\caption{Well Instrumentation Setup}
+\caption{Well instrumentation setup}
 \label{fig:well-instrumentation}
 \end{figure}
 
