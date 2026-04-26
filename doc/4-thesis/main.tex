@@ -247,10 +247,10 @@ Gas wells primarily produce natural gas, with relatively small amounts of conden
     \item \textbf{Injection Wells}: Injection wells are specialized wellbores designed to introduce fluids - such as water, gas, or chemical mixtures into subsurface formations for the purposes of reservoir pressure maintenance, \abbr{Enhanced Oil Recovery}{EOR} \citep{lake2014enhanced}, or safe disposal of produced water. Unlike production wells, which are engineered to withdraw hydrocarbons, injection wells primarily function as input conduits, pushing fluids into the reservoir to support long-term field productivity. Their role is essential in secondary and tertiary recovery processes, as they improve sweep efficiency and maintain reservoir pressure, thereby enhancing the deliverability of adjacent production wells.
 \end{itemize}
 
-\section{Production Variables and Ratios}
+\section{Production variables and ratios}
 Accurate characterization of multiphase production is fundamental to oil well performance analysis, reservoir management, and virtual flow metering (VFM). Production from oil wells typically consists of three primary phases: oil, water, and gas, each contributing to the overall flow behavior in the wellbore and surface facilities.
 To describe and quantify this multiphase production, a set of key variables and derived ratios are commonly used. These include phase flow rates such as oil rate ($q_o$), water rate ($q_w$), gas rate ($q_g$), and total liquid rate ($q_L$), as well as diagnostic ratios such as water cut (WC), gas--oil ratio (GOR), and water--gas ratio (WGR).
-table~\ref{tab:production-variables} lists the common production variables and ratios used.
+Table~\ref{tab:production-variables} lists the common production variables and ratios used.
 
 \begin{table}[!htb]
 \uomTable{Production Variables and Ratios}{tab:production-variables}{
@@ -273,7 +273,7 @@ Gas Volume Fraction (GVF) & $GVF = \dfrac{q_g}{q_g + q_L}$, indicating the propo
 
 
 \section{Well Instrumentation}
-The configuration of instrumentation in an oil well varies depending on the operational objectives and reservoir characteristics. In general, sensors are strategically installed along the wellbore and surface facilities to monitor drilling, production, and safety-related parameters. The wellbore, often referred to as the borehole, is the cylindrical hole drilled from the surface into subsurface formations during the development of oil, gas, water, or geothermal wells. figure~\ref{fig:well-instrumentation} illustrates the typical placement of instrumentation across different locations of a producing well.
+The configuration of instrumentation in an oil well varies depending on the operational objectives and reservoir characteristics. In general, sensors are strategically installed along the wellbore and surface facilities to monitor drilling, production, and safety-related parameters. The wellbore, often referred to as the borehole, is the cylindrical hole drilled from the surface into subsurface formations during the development of oil, gas, water, or geothermal wells. Figure~\ref{fig:well-instrumentation} illustrates the typical placement of instrumentation across different locations of a producing well.
 
 \subsection{Downhole Instrumentation}
 \abbr{Well Down Hole}{WDH} instrumentation refers to sensors installed at or near the bottom of the well, often integrated within downhole tools or permanent monitoring systems. These sensors are designed to capture critical information about the subsurface environment and wellbore conditions. Commonly measured parameters include pressure, temperature, and fluid properties, with some advanced systems also capable of acquiring seismic or acoustic data.
@@ -924,7 +924,7 @@ The independent variables comprise pressure, temperature, and operational parame
 
 The raw dataset for each well contains a combination of wellhead measurements, downhole
 measurements, choke parameters, well test rate estimations and MPFM rate estimations. 
-table~\ref{tab:independent_vars} summarizes the independent operational variables of the dataset, while table~\ref{tab:geometrical_const} lists the geometrical parameters associated with each well.
+Table~\ref{tab:independent_vars} summarizes the independent operational variables of the dataset, while table~\ref{tab:geometrical_const} lists the geometrical parameters associated with each well.
 
 Although geometrical parameters such as tubing diameter, measured depth, and completion geometry play a fundamental role in governing multiphase flow behavior, they are \textbf{not used as independent input variables} in the proposed modeling architecture. This is because the operational measurements - such as pressures, temperatures, and choke settings are themselves physical responses of the well system that inherently embed the effects of the underlying geometry. Consequently, explicitly including geometrical parameters as model inputs would introduce redundancy and may lead to identifiability issues or spurious correlations, particularly under sparse and irregular well test supervision.
 Instead, geometrical data are used exclusively to provide \textbf{initial estimates and constraints during the physics-based model calibration stage}. These parameters inform the initialization of flow equations and serve as fixed structural inputs to the physics model, while the operational variables act as the primary explanatory signals for dynamic rate prediction. This separation ensures physical consistency, reduces model complexity, and improves robustness of the hybrid framework when applied across wells with limited historical data.
@@ -970,7 +970,7 @@ gl\_open\_ratio & Fraction of active gas lift valves & unitless (ratio) \\
 \end{tabularx}}{}
 \end{table}
 
-table~\ref{tab:reference_vars} summarizes the reference ground truth variables of the dataset. 
+Table~\ref{tab:reference_vars} summarizes the reference ground truth variables of the dataset. 
 A key modelling decision is the use of \textbf{well test measurements} ($q_o^{\mathrm{WT}}$,
 $q_g^{\mathrm{WT}}$, $q_w^{\mathrm{WT}}$) as the primary ground-truth supervisory targets,
 rather than MPFM flow rates. This choice is justified as follows:
@@ -1009,7 +1009,7 @@ qw\_mpfm & MPFM measured water rate & Sm$^3$/h & MPFM \\
 \end{tabularx}}{}
 \end{table}
 
-table~\ref{tab:dataset_row_counts} summarizes the availability and temporal coverage of historical well test measurements used in this study. 
+Table~\ref{tab:dataset_row_counts} summarizes the availability and temporal coverage of historical well test measurements used in this study. 
 A total of 834 well test records are available across seven production wells, spanning a period from March 2017 to August 2023. 
 The number of records per well varies substantially, reflecting differences in operational practices, testing frequency, and data availability over the field lifecycle. 
 Such sparsity and irregularity are characteristic of well test data, as production tests are typically conducted intermittently due to operational constraints, cost considerations, and production priorities, rather than being continuously acquired like sensor-based measurements. 
@@ -1446,9 +1446,222 @@ $A_{\mathrm{wc},1\ldots8}$
 The nonlinear least squares formulation naturally accommodates sparse and irregular measurement schedules, as the objective function is evaluated only at timestamps where flow rate measurements are available. No interpolation or artificial densification of measured flow data is performed during calibration, thereby avoiding bias and preserving the integrity of the observed data.
 
 \subsubsection{Calibration Quality Assessment}
-Following optimization, calibration quality is assessed using residual diagnostics and goodness-of-fit metrics computed on the measured data. Visual inspection of predicted versus measured flow rates and residual time series is also performed to identify systematic biases or regime-dependent errors.
-
+Following optimization, calibration quality is assessed using residual diagnostics and goodness-of-fit metrics computed on the measured data.
 Importantly, the calibrated physics-based model is not expected to achieve perfect agreement with measured data. Instead, it is intended to capture dominant flow behavior while leaving systematic discrepancies to be addressed by the subsequent residual learning component.
+
+\subsubsection{Numerical Example: Physics-Based Calibration for Well}
+\subsubsection*{Step 0: Example Data}
+\begin{table}[!htb]
+\uomTable{Well test data (liquid approximated as $q_L = q_o + q_w$)}{tab:sample_well_test_data}{
+\begin{tabularx}{\textwidth}{YYYYYY}
+\hline
+$P_{wf}$ (bar) & Choke & $q_o^{\text{WT}}$ & $q_w^{\text{WT}}$ & $q_g^{\text{WT}}$ & $q_L^{\text{WT}}$ \\
+\hline
+140.80 & 0.528 & 106.56 & 0.01 & 12956.36 & 106.57 \\
+145.24 & 0.444 & 82.95  & 0.02 & 9954.12  & 82.97 \\
+132.61 & 0.817 & 156.55 & 0.05 & 19641.97 & 156.60 \\
+132.58 & 0.814 & 156.54 & 0.04 & 19736.54 & 156.58 \\
+131.86 & 0.840 & 160.34 & 0.07 & 20500.92 & 160.41 \\
+\hline
+\end{tabularx}}{}
+\end{table}
+
+
+\subsubsection*{Step 1: Estimate Reservoir Pressure}
+Given:
+\[
+P_{wf,\max} = 145.24 \text{ bar}, \quad h = 1800.787 \text{ m}, \quad \rho = 850 \text{ kg/m}^3
+\]
+
+Hydrostatic pressure:
+\[
+P_h = \frac{\rho g h}{10^5}
+= \frac{850 \times 9.81 \times 1800.787}{10^5}
+\approx 150.20 \text{ bar}
+\]
+
+Reservoir pressure estimate:
+\[
+P_{\text{res}} = P_{wf,\max} + P_h = 145.24 + 150.20 = 295.44 \text{ bar}
+\]
+
+Bounds:
+\[
+P_{\text{res}}^{\text{lower}} \approx 145.24 + 0.7 \times 150.20 = 250.38
+\]
+\[
+P_{\text{res}}^{\text{upper}} \approx 145.24 + 1.3 \times 150.20 = 340.50
+\]
+
+
+\subsubsection*{Step 2: Initialize Parameters}
+\[
+q_{L,\max} = \frac{106.57 + 82.97 + 156.60 + 156.58 + 160.41}{5}
+= 132.63
+\]
+
+Initial guesses:
+\[
+a = 0.2, \quad b = 0.5, \quad C_g = 50
+\]
+
+
+\subsubsection*{Step 3: Pressure Ratio (First Data Point)}
+\[
+p_r = \frac{P_{wf}}{P_{\text{res}}} = \frac{140.80}{295.44} \approx 0.48
+\]
+
+
+\subsubsection*{Step 4: Liquid Rate Prediction}
+\[
+q_L = q_{L,\max} (1 - a p_r - b p_r^2)
+\]
+
+\[
+q_L = 132.63 \left(1 - 0.2 \times 0.48 - 0.5 \times 0.48^2 \right)
+\]
+
+\[
+= 132.63 \times (1 - 0.096 - 0.115)
+= 132.63 \times 0.789
+= 104.63
+\]
+
+Actual:
+\[
+q_L = 106.57
+\]
+
+Error:
+\[
+-1.94
+\]
+
+\subsubsection*{Step 5: Water Cut and Phase Split}
+In this formulation, water cut is treated as an unknown parameter and initialized using a prior estimate. Assume an initial water cut:
+
+\[
+wc^{(0)} = 0.01
+\]
+
+The phase split is derived from the predicted liquid rate:
+
+\[
+q_w = wc \cdot q_L
+\]
+\[
+q_o = q_L - q_w
+\]
+
+For the current prediction:
+
+\[
+q_w = 0.01 \times 104.63 = 1.046
+\]
+\[
+q_o = 104.63 - 1.046 = 103.58
+\]
+
+Errors relative to well test:
+
+\[
+\epsilon_w = 1.046 - 0.0106 \approx +1.035
+\]
+\[
+\epsilon_o = 103.58 - 106.56 \approx -2.98
+\]
+
+\noindent
+\textbf{Observation:} The assumed water cut overestimates the water phase, indicating that the initial guess requires calibration.
+
+\subsubsection*{Step 6: Gas Rate Prediction}
+\[
+\Delta p = \sqrt{P_{\text{res}} - P_{wf}} = \sqrt{295.44 - 140.80}
+= \sqrt{154.64} \approx 12.43
+\]
+
+\[
+\text{choke}_{\text{eff}} = 0.528
+\]
+
+\[
+q_g = C_g \cdot \Delta p \cdot \text{choke}_{\text{eff}}
+= 50 \times 12.43 \times 0.528 \approx 327.9
+\]
+
+Actual well test:
+
+\[
+q_g^{\text{WT}} = 12956.36
+\]
+
+\[
+\epsilon_g \approx -12628.46
+\]
+
+
+\subsubsection*{Step 7: Residual Vector}
+For this data point:
+
+\[
+\epsilon_o \approx -2.98, \quad
+\epsilon_w \approx +1.035, \quad
+\epsilon_g \approx -12628.46
+\]
+
+Residuals across all data points are:
+
+\begin{itemize}
+\item Aggregated into a residual vector
+\item Normalized to account for scale differences
+\item Used to update model parameters, including water cut
+\end{itemize}
+
+\subsubsection*{Step 8: Optimization Iteration}
+Water cut is updated during calibration:
+
+\[
+wc^{(1)} = 0.002
+\]
+
+Updated phase split:
+
+\[
+q_w = 0.002 \times 104.63 = 0.209
+\]
+\[
+q_o = 104.63 - 0.209 = 104.42
+\]
+
+Improved agreement with observed data indicates convergence toward the true phase fraction. Simultaneously, model parameters are updated:
+
+\[
+q_{L,\max} = 140, \quad a = 0.25, \quad b = 0.45
+\]
+
+\[
+q_L = 140 \left(1 - 0.25 \cdot 0.48 - 0.45 \cdot 0.48^2 \right)
+= 108.64
+\]
+
+
+\subsubsection*{Step 9: Final Calibrated Parameters}
+\begin{table}[!htb]
+\centering
+\begin{tabular}{cc}
+\hline
+Parameter & Value \\
+\hline
+$P_{\text{res}}$ & 290 bar \\
+$q_{L,\max}$ & 135 \\
+$a$ & 0.27 \\
+$b$ & 0.43 \\
+$C_g$ & scaled to match gas flow \\
+$wc$ & $< 0.001$ \\
+\hline
+\end{tabular}
+\caption{Final calibrated parameters including water cut}
+\end{table}
 
 \subsubsection{Role in the Hybrid Modeling Architecture}
 The independently calibrated physics-based model serves as a physically grounded baseline within the hybrid architecture. By constraining the solution space through first-principles relationships and calibrated parameters, the nonlinear least squares estimation stage enables the residual learning model to focus on compensating for unmodeled dynamics, thereby improving overall prediction accuracy, robustness, and data efficiency.
@@ -1995,7 +2208,7 @@ The performance of three approaches is compared: the physics-based model, the pr
 
 
 \subsection{Gas Rate (\texorpdfstring{$q_g$}{qg})}
-table~\ref{tab:temporal_gas_rate_comparison} reports gas rate prediction performance under lag-safe temporal extrapolation.
+Table~\ref{tab:temporal_gas_rate_comparison} reports gas rate prediction performance under lag-safe temporal extrapolation.
 
 The physics-based model exhibits highly variable performance for gas rate prediction across wells. While moderate accuracy is achieved for wells such as W06 ($R^2 = 0.77$) and W11 ($R^2 = 0.59$), the model fails significantly for several others, including W08, W15, and W19, where strongly negative $R^2$ values are observed. These results indicate that the physics formulation struggles to capture the complex gas flow behavior under varying operating conditions, particularly in wells with dynamic pressure drawdown and multiphase interactions. The consistently high MAE and RMSE values further highlight the limited predictive capability of the standalone physics model for temporal extrapolation.
 
@@ -2024,7 +2237,7 @@ MAPE (\%) & 13.67 & 78.41 & 24.47 & 21.01 & 50.32 & 55.01 & 89.95 \\
 
 \multicolumn{8}{c}{Hybrid Model} \\
 \hline
-$R^2$ & 0.99 & 0.44 & 0.97 & 0.99 & 0.79 & 0.99 & 0.85 \\
+$R^2$ & 0.99 & 0.44 & 0.94 & 0.97 & 0.79 & 0.95 & 0.85 \\
 MAE & 96.74 & 374.89 & 447.92 & 385.44 & 402.05 & 614.78 & 540.34 \\
 RMSE & 119.94 & 378.78 & 640.71 & 444.37 & 686.43 & 749.10 & 549.49 \\
 MAPE (\%) & 0.95 & 9.62 & 3.21 & 5.83 & 6.77 & 4.34 & 7.53 \\
@@ -2041,7 +2254,7 @@ MAPE (\%) & 2.38 & 45.25 & 6.12 & 13.63 & 4.64 & 46.58 & 4.07 \\
 \end{table}
 
 \subsection{Oil Rate ($q_o$)}
-table~\ref{tab:temporal_oil_rate_comparison} summarizes the per-well temporal generalization performance for oil rate prediction.
+Table~\ref{tab:temporal_oil_rate_comparison} summarizes the per-well temporal generalization performance for oil rate prediction.
 
 The physics-based model exhibits highly inconsistent performance across wells. While it achieves moderate accuracy for well W06 ($R^2 = 0.65$), it fails significantly for most other wells, with strongly negative $R^2$ values (e.g., W08, W11, W15, W19). This indicates that the physics formulation alone is unable to capture the complex and evolving dynamics of multiphase flow under changing operating conditions. The large errors in MAE and RMSE further confirm the limited adaptability of the physics model to temporal variations.
 
@@ -2071,7 +2284,7 @@ MAPE (\%) & 25.09 & 86.45 & 61.31 & 108.27 & 138.13 & 217.45 & 173.15 \\
 \hline
 \multicolumn{8}{c}{Hybrid Model} \\
 \hline
-$R^2$ & 0.99 & -1.87 & 0.99 & 0.99 & 0.73 & 0.98 & 0.88 \\
+$R^2$ & 0.99 & -1.87 & 0.98 & 0.98 & 0.73 & 0.98 & 0.85 \\
 MAE & 0.49 & 2.42 & 2.46 & 3.51 & 3.46 & 4.43 & 3.71 \\
 RMSE & 0.67 & 2.43 & 3.85 & 4.46 & 4.65 & 4.93 & 3.94 \\
 MAPE (\%) & 0.61 & 22.04 & 2.69 & 5.01 & 11.46 & 7.89 & 11.40 \\
@@ -2087,7 +2300,7 @@ MAPE (\%) & 1.16 & 35.45 & 2.84 & 20.15 & 7.76 & 61.38 & 6.86 \\
 \end{table}
 
 \subsection{Water Rate ($q_w$)}
-table~\ref{tab:temporal_water_rate_comparison} reports water rate prediction performance under lag-safe temporal extrapolation.
+Table~\ref{tab:temporal_water_rate_comparison} reports water rate prediction performance under lag-safe temporal extrapolation.
 
 The physics-based model performs poorly for water rate prediction across all wells, with consistently negative $R^2$ values. This indicates that the model fails to capture the underlying dynamics of water production, particularly under multiphase flow conditions where water behavior is highly nonlinear and intermittent. Although the absolute errors (MAE and RMSE) are relatively moderate for some wells, the persistently high MAPE values often approaching or exceeding 100\% - highlight the difficulty of accurately modeling water rates using physics alone. These results suggest that the simplified physics formulation is insufficient to represent complex water production mechanisms such as phase interactions, breakthrough events, and low-rate regimes.
 
@@ -2333,7 +2546,7 @@ This section evaluates the ability of the proposed model to generalize across we
 Spatial generalization represents a more challenging task than temporal generalization, as it requires the model to transfer learned relationships across wells with potentially different geological characteristics, flow regimes, and operational conditions. Therefore, strong performance under LOWO evaluation is indicative of a model's robustness and practical applicability in real-world deployment scenarios.
 
 \subsection{LOWO Results}
-table~\ref{tab:lowo} summarizes the spatial generalization performance for the held-out well W10.
+Table~\ref{tab:lowo} summarizes the spatial generalization performance for the held-out well W10.
 
 The physics-based model demonstrates limited generalization capability across all phases. For oil rate prediction, the model achieves a low $R^2$ of 0.07, indicating that it captures only a small fraction of the variance in the unseen well. Similarly, for gas rate prediction, although a moderate $R^2$ of 0.32 is observed, the absolute errors remain high, reflecting poor predictive accuracy. Water rate prediction is particularly poor, with a negative $R^2$ value, confirming the inability of the physics model to generalize across wells with different multiphase flow characteristics. These results highlight the inherent limitations of relying solely on physics-based formulations, which are often calibrated to well-specific conditions and lack adaptability to new wells.
 
@@ -2355,11 +2568,11 @@ Overall, the hybrid model achieves the best balance between accuracy and general
 Quantity & Model & $R^2$ & MAE & RMSE & MAPE (\%) \\
 \hline
 $q_o$ & Physics & 0.07 & 20.39 & 29.67 & 20.36 \\
-      & Hybrid  & 0.99 & 1.60  & 2.14  & 1.53 \\
+      & Hybrid  & 0.96 & 1.60  & 2.14  & 1.53 \\
       & MPFM    & 0.97 & 3.07  & 5.55  & 2.82 \\
 \hline
 $q_g$ & Physics & 0.32 & 2439.63 & 3050.20 & 19.30 \\
-      & Hybrid  & 0.99 & 252.94  & 379.06  & 2.24 \\
+      & Hybrid  & 0.94 & 252.94  & 379.06  & 2.24 \\
       & MPFM    & 0.95 & 499.48  & 867.57  & 3.46 \\
 \hline
 $q_w$ & Physics & -0.25 & 5.39 & 12.15 & 100.00 \\
@@ -2403,8 +2616,7 @@ $q_w$ & Physics & -0.25 & 5.39 & 12.15 & 100.00 \\
 \end{figure}
 
 \section{Performance Comparison with Contemporary Hybrid VFM}
-table~\ref{tab:wgr_comparison} presents a comparison of the proposed hybrid model against the WGR prediction models reported in \citep{nemoto2023cloud}.
-
+Table~\ref{tab:wgr_comparison} presents a comparison of the proposed hybrid model against the WGR prediction models reported in \citep{nemoto2023cloud}.
 It is important to note that while both this study and \citep{nemoto2023cloud} are based on wells from the same offshore gas field, the specific wells used in each study are not necessarily identical. As a result, the comparison reflects performance across similar field conditions rather than an exact well-to-well evaluation. This distinction is important, as variability in well behavior, operating conditions, and flow regimes can influence model performance.
 
 The proposed hybrid model demonstrates superior overall predictive performance compared to the literature models. In particular, it achieves the highest coefficient of determination ($R^2 = 0.90$), indicating a stronger ability to capture the variability in WGR across the dataset. In contrast, the models reported in \citep{nemoto2023cloud} achieve lower $R^2$ values ranging from 0.64 to 0.80, suggesting comparatively weaker predictive capability.
@@ -2427,7 +2639,7 @@ Overall, the results indicate that the proposed hybrid model achieves state-of-t
 \hline
 Model & MRE (\%) & MAPE (\%) & $R^2$ \\
 \hline
-Hybrid (Proposed) & -11.48 & 20.29 & 0.90 \\
+Hybrid (Proposed) & -11.48 & 20.29 & 0.89 \\
 \hline
 No-slip liquid holdup, Colebrook friction factor\textsuperscript{1} & 12.64 & 20.61 & 0.77 \\
 No-slip liquid holdup, tuned friction factor\textsuperscript{1} & 0.43 & 17.43 & 0.80 \\

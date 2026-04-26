@@ -9,9 +9,11 @@
 \contentsline {table}{\numberline {3.5}{\ignorespaces MPFM estimated rates}}{37}{table.caption.19}%
 \contentsline {table}{\numberline {3.6}{\ignorespaces Summary of available historical measurements for each production well}}{38}{table.caption.20}%
 \contentsline {table}{\numberline {3.7}{\ignorespaces Parameters and initial guesses used for nonlinear calibration of the physics-based well flow model}}{48}{table.caption.24}%
-\contentsline {table}{\numberline {4.1}{\ignorespaces Performance metrics used for model evaluation}}{64}{table.caption.25}%
-\contentsline {table}{\numberline {5.1}{\ignorespaces Temporal generalization performance for gas rate ($q_g$)}}{66}{table.caption.26}%
-\contentsline {table}{\numberline {5.2}{\ignorespaces Temporal generalization performance for oil rate ($q_o$)}}{67}{table.caption.27}%
-\contentsline {table}{\numberline {5.3}{\ignorespaces Temporal generalization performance for water rate ($q_w$)}}{69}{table.caption.28}%
-\contentsline {table}{\numberline {5.4}{\ignorespaces Spatial generalization (LOWO) performance for held-out well W10}}{73}{table.caption.35}%
-\contentsline {table}{\numberline {5.5}{\ignorespaces Comparison of global WGR prediction performance with contemporary hybrid VFM}}{75}{table.caption.37}%
+\contentsline {table}{\numberline {3.8}{\ignorespaces Well test data (liquid approximated as $q_L = q_o + q_w$)}}{49}{table.caption.25}%
+\contentsline {table}{\numberline {3.9}{\ignorespaces Final calibrated parameters including water cut}}{52}{table.caption.26}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Performance metrics used for model evaluation}}{67}{table.caption.27}%
+\contentsline {table}{\numberline {5.1}{\ignorespaces Temporal generalization performance for gas rate ($q_g$)}}{69}{table.caption.28}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Temporal generalization performance for oil rate ($q_o$)}}{71}{table.caption.29}%
+\contentsline {table}{\numberline {5.3}{\ignorespaces Temporal generalization performance for water rate ($q_w$)}}{72}{table.caption.30}%
+\contentsline {table}{\numberline {5.4}{\ignorespaces Spatial generalization (LOWO) performance for held-out well W10}}{76}{table.caption.37}%
+\contentsline {table}{\numberline {5.5}{\ignorespaces Comparison of global WGR prediction performance with contemporary hybrid VFM}}{78}{table.caption.39}%
