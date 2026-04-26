@@ -5,7 +5,6 @@
 \contentsline {chapter}{Table of Contents}{v}{chapter*.5}%
 \contentsline {chapter}{List of Figures}{x}{chapter*.6}%
 \contentsline {chapter}{List of Tables}{xi}{chapter*.7}%
-\contentsline {chapter}{List of Abbreviations}{xi}{section*.8}%
 \contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
 \contentsline {section}{\numberline {1.1}Asset Hierarchy}{2}{section.1.1}%
 \contentsline {section}{\numberline {1.2}Oil and Gas Wells}{3}{section.1.2}%
@@ -148,4 +147,4 @@
 \contentsline {section}{\numberline {7.3}Dynamic Regime Detection and Adaptive Gating}{81}{section.7.3}%
 \contentsline {section}{\numberline {7.4}Uncertainty Quantification and Confidence Estimation}{82}{section.7.4}%
 \contentsline {section}{\numberline {7.5}Validation Across Diverse Field Conditions}{82}{section.7.5}%
-\contentsline {chapter}{References}{83}{chapter*.38}%
+\contentsline {chapter}{References}{83}{chapter*.36}%

@@ -1,37 +1,4 @@
 {
     "python-envs.defaultEnvManager": "ms-python.python:poetry",
     "python-envs.defaultPackageManager": "ms-python.python:poetry",
-    // "latex-workshop.latex.tools": [
-    //   {
-    //     "name": "pdflatex",
-    //     "command": "pdflatex",
-    //     "args": [
-    //       "-interaction=nonstopmode",
-    //       "-synctex=1",
-    //       "%DOC%"
-    //     ]
-    //   },
-    //   {
-    //     "name": "bibtex",
-    //     "command": "bibtex",
-    //     "args": ["%DOCFILE%"]
-    //   },
-    //   {
-    //     "name": "makeglossaries",
-    //     "command": "makeglossaries",
-    //     "args": ["%DOCFILE%"]
-    //   }
-    // ],
-    // "latex-workshop.latex.recipes": [
-    //   {
-    //     "name": "full build (bib + glossaries)",
-    //     "tools": [
-    //       "pdflatex",
-    //       "bibtex",
-    //       "makeglossaries",
-    //       "pdflatex",
-    //       "pdflatex"
-    //     ]
-    //   }
-    // ]
 }
