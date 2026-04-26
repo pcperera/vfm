@@ -448,6 +448,9 @@ INPUT C:\Users\perer\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmex10.tf
 INPUT C:\Users\perer\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam10.tfm
 INPUT C:\Users\perer\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
 OUTPUT main.lot
+INPUT .\main.acr
+INPUT .\main.acr
+INPUT main.acr
 OUTPUT main.glsdefs
 INPUT C:\Users\perer\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ts1ptm.fd
 INPUT C:\Users\perer\AppData\Local\Programs\MiKTeX\tex\latex\psnfss\ts1ptm.fd

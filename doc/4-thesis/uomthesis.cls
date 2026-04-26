@@ -742,7 +742,8 @@
 \setglossarystyle{long3colheader}
 \renewcommand*{\entryname}{Abbreviation}
 %\renewcommand*{\descriptionname}{Description}
-\renewcommand*{\pagelistname}{\newline}
+% \renewcommand*{\pagelistname}{\newline} % breaks abbreviation list, so we remove it
+\renewcommand*{\pagelistname}{}
 \makeglossaries
 
 \newcounter{abbrCount}

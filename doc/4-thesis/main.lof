@@ -1,16 +1,16 @@
-\contentsline {figure}{\numberline {1.1}{\ignorespaces Oil and gas field asset hierarchy}}{4}{figure.caption.8}%
-\contentsline {figure}{\numberline {1.2}{\ignorespaces Well instrumentation setup}}{9}{figure.caption.10}%
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Hybrid physics-informed residual learning architecture for virtual flow metering}}{33}{figure.caption.12}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces W10 -- Downhole pressure}}{39}{figure.caption.19}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces W10 -- Downhole temperature}}{39}{figure.caption.19}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces W10 -- Wellhead pressure}}{39}{figure.caption.20}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces W10 -- Wellhead temperature}}{39}{figure.caption.20}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces W10 -- Downstream choke pressure}}{39}{figure.caption.21}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces W10 -- Downstream choke regulation}}{39}{figure.caption.21}%
-\contentsline {figure}{\numberline {5.1}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W06. The plots show predicted and measured gas, oil, and water rates over time.}}{69}{figure.caption.27}%
-\contentsline {figure}{\numberline {5.2}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W08. The plots show predicted and measured gas, oil, and water rates over time.}}{70}{figure.caption.28}%
-\contentsline {figure}{\numberline {5.3}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W10. The plots show predicted and measured gas, oil, and water rates over time.}}{70}{figure.caption.29}%
-\contentsline {figure}{\numberline {5.4}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W11. The plots show predicted and measured gas, oil, and water rates over time.}}{71}{figure.caption.30}%
-\contentsline {figure}{\numberline {5.5}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W18. The plots show predicted and measured gas, oil, and water rates over time.}}{71}{figure.caption.31}%
-\contentsline {figure}{\numberline {5.6}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W19. The plots show predicted and measured gas, oil, and water rates over time.}}{72}{figure.caption.32}%
-\contentsline {figure}{\numberline {5.7}{\ignorespaces Spatial generalization performance of Physics, Hybrid, and MPFM models for W10. The plots show predicted and measured gas, oil, and water rates over time.}}{74}{figure.caption.34}%
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Oil and gas field asset hierarchy}}{4}{figure.caption.10}%
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Well instrumentation setup}}{9}{figure.caption.12}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Hybrid physics-informed residual learning architecture for virtual flow metering}}{33}{figure.caption.14}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces W10 -- Downhole pressure}}{39}{figure.caption.21}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces W10 -- Downhole temperature}}{39}{figure.caption.21}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces W10 -- Wellhead pressure}}{39}{figure.caption.22}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces W10 -- Wellhead temperature}}{39}{figure.caption.22}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces W10 -- Downstream choke pressure}}{39}{figure.caption.23}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces W10 -- Downstream choke regulation}}{39}{figure.caption.23}%
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W06. The plots show predicted and measured gas, oil, and water rates over time.}}{69}{figure.caption.29}%
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W08. The plots show predicted and measured gas, oil, and water rates over time.}}{70}{figure.caption.30}%
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W10. The plots show predicted and measured gas, oil, and water rates over time.}}{70}{figure.caption.31}%
+\contentsline {figure}{\numberline {5.4}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W11. The plots show predicted and measured gas, oil, and water rates over time.}}{71}{figure.caption.32}%
+\contentsline {figure}{\numberline {5.5}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W18. The plots show predicted and measured gas, oil, and water rates over time.}}{71}{figure.caption.33}%
+\contentsline {figure}{\numberline {5.6}{\ignorespaces Temporal generalization performance of Physics, Hybrid, and MPFM models for W19. The plots show predicted and measured gas, oil, and water rates over time.}}{72}{figure.caption.34}%
+\contentsline {figure}{\numberline {5.7}{\ignorespaces Spatial generalization performance of Physics, Hybrid, and MPFM models for W10. The plots show predicted and measured gas, oil, and water rates over time.}}{74}{figure.caption.36}%
