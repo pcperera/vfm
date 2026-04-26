@@ -81,8 +81,8 @@
 \contentsline {subsection}{\numberline {3.3.6}Parameter Calibration via Nonlinear Least Squares}{45}{subsection.3.3.6}%
 \contentsline {subsubsection}{\numberline {3.3.6.1}Problem Formulation}{46}{subsubsection.3.3.6.1}%
 \contentsline {subsubsection}{\numberline {3.3.6.2}Weighted Least Squares Objective Function}{46}{subsubsection.3.3.6.2}%
-\contentsline {subsubsection}{\numberline {3.3.6.3}Nonlinear Least Squares Optimization}{47}{subsubsection.3.3.6.3}%
-\contentsline {subsubsection}{\numberline {3.3.6.4}Initialization and Regularization}{47}{subsubsection.3.3.6.4}%
+\contentsline {subsubsection}{\numberline {3.3.6.3}Initialization and Regularization}{47}{subsubsection.3.3.6.3}%
+\contentsline {subsubsection}{\numberline {3.3.6.4}Nonlinear Least Squares Optimization}{47}{subsubsection.3.3.6.4}%
 \contentsline {subsubsection}{\numberline {3.3.6.5}Handling Sparse and Irregular Measurements}{49}{subsubsection.3.3.6.5}%
 \contentsline {subsubsection}{\numberline {3.3.6.6}Calibration Quality Assessment}{49}{subsubsection.3.3.6.6}%
 \contentsline {subsubsection}{\numberline {3.3.6.7}Role in the Hybrid Modeling Architecture}{49}{subsubsection.3.3.6.7}%
@@ -131,7 +131,7 @@
 \contentsline {section}{\numberline {5.1}Temporal Generalization Performance}{65}{section.5.1}%
 \contentsline {subsection}{\numberline {5.1.1}Gas Rate ($q_g$)}{65}{subsection.5.1.1}%
 \contentsline {subsection}{\numberline {5.1.2}Oil Rate ($q_o$)}{66}{subsection.5.1.2}%
-\contentsline {subsection}{\numberline {5.1.3}Water Rate ($q_w$)}{67}{subsection.5.1.3}%
+\contentsline {subsection}{\numberline {5.1.3}Water Rate ($q_w$)}{68}{subsection.5.1.3}%
 \contentsline {section}{\numberline {5.2}Spatial Generalization Performance}{69}{section.5.2}%
 \contentsline {subsection}{\numberline {5.2.1}LOWO Results}{72}{subsection.5.2.1}%
 \contentsline {section}{\numberline {5.3}Performance Comparison with Contemporary Hybrid VFM}{73}{section.5.3}%

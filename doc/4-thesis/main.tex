@@ -137,7 +137,7 @@ The Upstream sector encompasses all activities related to the exploration and pr
 An oil well is a borehole drilled from the surface into a hydrocarbon-bearing reservoir to access and produce oil, gas, and associated fluids. Wells are designed to provide a controlled pathway for hydrocarbons to flow from the reservoir to the surface, and their design depends on reservoir properties, depth, pressure, and fluid composition. The fluid mixture flowing out of the well consists of oil, natural gas and water. This mixture of flow is called the multi-phase flow. The flow rates of oil, gas, and water reflect the performance of the well. The Petroleum Engineers need to make informed decisions regarding the production strategies based on the performance of the wells. Through accurate predictions of flow rates, petroleum Engineers can diagnose production inefficiencies and constraints, and implement solutions to optimize production and project future investments. Physical flow meters and \abbr{Virtual Flow Meters}{VFM} are used to predict flow rates in oil wells. Physical flow meters are often very expensive, require regular maintenance, and are prone to failure under harsh operating conditions. Physical flow meters use in-built sensor data and physics based mathematical equations to predict the real-time flow rates. Virtual flow meters, in contrast, can use mathematical models based on physics, models based on machine learning, or hybrid models to predict flow rates \citep{bikmukhametov2020first}. 
 
 \section{Asset Hierarchy}
-In upstream oil and gas operations, the management and organization of hydrocarbon resources are structured through a hierarchical framework known as the asset hierarchy Figure~\ref{fig:asset_hierarchy}, which provides clarity for both subsurface and surface operational planning.
+In upstream oil and gas operations, the management and organization of hydrocarbon resources are structured through a hierarchical framework known as the asset hierarchy figure~\ref{fig:asset_hierarchy}, which provides clarity for both subsurface and surface operational planning.
 
 \begin{itemize}
     \item \textbf{Asset}: An Asset is the highest-level operational and resource unit in upstream oil and gas management, encompassing multiple geographically or geologically defined oil and gas fields. It serves as a consolidated management entity under which exploration, development, production, and economic evaluation of the associated fields are coordinated. The asset framework enables integrated planning of drilling campaigns, reservoir development, production optimization, and infrastructure utilization across all fields it contains. By grouping multiple fields under a single asset, operators can streamline decision-making, allocate resources efficiently, and evaluate overall performance, reserves, and recovery potential at a portfolio level. In essence, the asset represents the top-level resource that aligns subsurface resources, surface facilities, and economic objectives for strategic management.
@@ -250,7 +250,7 @@ Gas wells primarily produce natural gas, with relatively small amounts of conden
 \section{Production Variables and Ratios}
 Accurate characterization of multiphase production is fundamental to oil well performance analysis, reservoir management, and virtual flow metering (VFM). Production from oil wells typically consists of three primary phases: oil, water, and gas, each contributing to the overall flow behavior in the wellbore and surface facilities.
 To describe and quantify this multiphase production, a set of key variables and derived ratios are commonly used. These include phase flow rates such as oil rate ($q_o$), water rate ($q_w$), gas rate ($q_g$), and total liquid rate ($q_L$), as well as diagnostic ratios such as water cut (WC), gas--oil ratio (GOR), and water--gas ratio (WGR).
-Table~\ref{tab:production-variables} lists the common production variables and ratios used.
+table~\ref{tab:production-variables} lists the common production variables and ratios used.
 
 \begin{table}[!htb]
 \uomTable{Production Variables and Ratios}{tab:production-variables}{
@@ -273,7 +273,7 @@ Gas Volume Fraction (GVF) & $GVF = \dfrac{q_g}{q_g + q_L}$, indicating the propo
 
 
 \section{Well Instrumentation}
-The configuration of instrumentation in an oil well varies depending on the operational objectives and reservoir characteristics. In general, sensors are strategically installed along the wellbore and surface facilities to monitor drilling, production, and safety-related parameters. The wellbore, often referred to as the borehole, is the cylindrical hole drilled from the surface into subsurface formations during the development of oil, gas, water, or geothermal wells. Figure~\ref{fig:well-instrumentation} illustrates the typical placement of instrumentation across different locations of a producing well.
+The configuration of instrumentation in an oil well varies depending on the operational objectives and reservoir characteristics. In general, sensors are strategically installed along the wellbore and surface facilities to monitor drilling, production, and safety-related parameters. The wellbore, often referred to as the borehole, is the cylindrical hole drilled from the surface into subsurface formations during the development of oil, gas, water, or geothermal wells. figure~\ref{fig:well-instrumentation} illustrates the typical placement of instrumentation across different locations of a producing well.
 
 \subsection{Downhole Instrumentation}
 \abbr{Well Down Hole}{WDH} instrumentation refers to sensors installed at or near the bottom of the well, often integrated within downhole tools or permanent monitoring systems. These sensors are designed to capture critical information about the subsurface environment and wellbore conditions. Commonly measured parameters include pressure, temperature, and fluid properties, with some advanced systems also capable of acquiring seismic or acoustic data.
@@ -774,7 +774,7 @@ The overall architecture consists of three main components:
     \item \textbf{A hybrid inference mechanism}, which combines the physics-based predictions with the learned residual corrections under physically motivated gating rules to ensure robustness, physical plausibility, and stable performance under varying operating conditions.
 \end{enumerate}
 
-A schematic representation of the architecture is conceptually illustrated in Figure~\ref{fig:component_architecture}.
+A schematic representation of the architecture is conceptually illustrated in figure~\ref{fig:component_architecture}.
 
 \begin{figure}[!htb]
 \centering
@@ -924,7 +924,7 @@ The independent variables comprise pressure, temperature, and operational parame
 
 The raw dataset for each well contains a combination of wellhead measurements, downhole
 measurements, choke parameters, well test rate estimations and MPFM rate estimations. 
-Table~\ref{tab:independent_vars} summarizes the independent operational variables of the dataset, while Table~\ref{tab:geometrical_const} lists the geometrical parameters associated with each well.
+table~\ref{tab:independent_vars} summarizes the independent operational variables of the dataset, while table~\ref{tab:geometrical_const} lists the geometrical parameters associated with each well.
 
 Although geometrical parameters such as tubing diameter, measured depth, and completion geometry play a fundamental role in governing multiphase flow behavior, they are \textbf{not used as independent input variables} in the proposed modeling architecture. This is because the operational measurements - such as pressures, temperatures, and choke settings are themselves physical responses of the well system that inherently embed the effects of the underlying geometry. Consequently, explicitly including geometrical parameters as model inputs would introduce redundancy and may lead to identifiability issues or spurious correlations, particularly under sparse and irregular well test supervision.
 Instead, geometrical data are used exclusively to provide \textbf{initial estimates and constraints during the physics-based model calibration stage}. These parameters inform the initialization of flow equations and serve as fixed structural inputs to the physics model, while the operational variables act as the primary explanatory signals for dynamic rate prediction. This separation ensures physical consistency, reduces model complexity, and improves robustness of the hybrid framework when applied across wells with limited historical data.
@@ -970,7 +970,7 @@ gl\_open\_ratio & Fraction of active gas lift valves & unitless (ratio) \\
 \end{tabularx}}{}
 \end{table}
 
-Table~\ref{tab:reference_vars} summarizes the reference ground truth variables of the dataset. 
+table~\ref{tab:reference_vars} summarizes the reference ground truth variables of the dataset. 
 A key modelling decision is the use of \textbf{well test measurements} ($q_o^{\mathrm{WT}}$,
 $q_g^{\mathrm{WT}}$, $q_w^{\mathrm{WT}}$) as the primary ground-truth supervisory targets,
 rather than MPFM flow rates. This choice is justified as follows:
@@ -1009,7 +1009,7 @@ qw\_mpfm & MPFM measured water rate & Sm$^3$/h & MPFM \\
 \end{tabularx}}{}
 \end{table}
 
-Table~\ref{tab:dataset_row_counts} summarizes the availability and temporal coverage of historical well test measurements used in this study. 
+table~\ref{tab:dataset_row_counts} summarizes the availability and temporal coverage of historical well test measurements used in this study. 
 A total of 834 well test records are available across seven production wells, spanning a period from March 2017 to August 2023. 
 The number of records per well varies substantially, reflecting differences in operational practices, testing frequency, and data availability over the field lifecycle. 
 Such sparsity and irregularity are characteristic of well test data, as production tests are typically conducted intermittently due to operational constraints, cost considerations, and production priorities, rather than being continuously acquired like sensor-based measurements. 
@@ -1034,11 +1034,11 @@ W19 & 77 & 2017-09-02 & 2023-07-27 \\
 \end{tabularx}}{}
 \end{table}
 
-Downhole pressure and temperature measurements, shown in Figures~\ref{fig:W10_dhp} and~\ref{fig:W10_dht}, respectively, represent the thermodynamic conditions at the producing interval. These variables are critical for characterizing reservoir drawdown, inflow behavior, and fluid properties, and they directly influence the physics-based inflow and vertical lift formulations employed in the model.
+Downhole pressure and temperature measurements, shown in figures~\ref{fig:W10_dhp} and~\ref{fig:W10_dht}, respectively, represent the thermodynamic conditions at the producing interval. These variables are critical for characterizing reservoir drawdown, inflow behavior, and fluid properties, and they directly influence the physics-based inflow and vertical lift formulations employed in the model.
 Figures~\ref{fig:W10_whp} and~\ref{fig:W10_wht} illustrate the wellhead pressure and temperature measurements. These measurements capture surface operating conditions and reflect the combined effects of reservoir inflow, multiphase flow in the wellbore, and surface choke control. Wellhead measurements are typically more frequently available and are therefore particularly valuable for continuous production monitoring and data-driven model calibration.
-The downstream choke pressure and choke regulation signals are shown in Figures~\ref{fig:W10_dcp} and~\ref{fig:W10_choke}. These variables describe the imposed flow restriction and surface control strategy applied to the well. Variations in choke opening and downstream pressure directly affect the pressure drawdown across the choke and, consequently, the produced flow rates. As such, these measurements play an important role in capturing operational transients and control-induced production variability.
+The downstream choke pressure and choke regulation signals are shown in figures~\ref{fig:W10_dcp} and~\ref{fig:W10_choke}. These variables describe the imposed flow restriction and surface control strategy applied to the well. Variations in choke opening and downstream pressure directly affect the pressure drawdown across the choke and, consequently, the produced flow rates. As such, these measurements play an important role in capturing operational transients and control-induced production variability.
 
-Collectively, the measurements presented in Figures~\ref{fig:W10_dhp}--\ref{fig:W10_choke} constitute the primary operational dataset used for model training, calibration, and validation. Their combined use enables the hybrid modeling framework to exploit both physics-based consistency and data-driven adaptability under varying operating conditions.
+Collectively, the measurements presented in figures~\ref{fig:W10_dhp}--\ref{fig:W10_choke} constitute the primary operational dataset used for model training, calibration, and validation. Their combined use enables the hybrid modeling framework to exploit both physics-based consistency and data-driven adaptability under varying operating conditions.
 
 %------------------------------------------------
 % W10 – Downhole measurements
@@ -1368,8 +1368,20 @@ w_o & 0 & 0 \\
 
 The weights $w_o$, $w_w$, and $w_g$ are selected to balance the contribution of oil, water, and gas residuals, preventing any single phase from dominating the optimization due to scale differences or higher variability.
 
-\subsubsection{Nonlinear Least Squares Optimization}
+\subsubsection{Initialization and Regularization}
+Initial parameter estimates are chosen based on engineering heuristics and prior operational knowledge, such as typical reservoir pressure ranges and expected choke sensitivities. Careful initialization reduces the risk of convergence to non-physical local minima.
+The initial parameters estimates used for the calibration are summarized in table~\ref{tab:physics_calibrated_parameters}.
+To mitigate overfitting under sparse measurement conditions, implicit regularization is achieved through:
 
+\begin{itemize}
+    \item Bounded parameter constraints
+    \item Joint calibration across all available phases
+    \item Smooth functional forms in the physics model
+\end{itemize}
+
+Explicit regularization terms are not introduced to preserve the interpretability of calibrated parameters.
+
+\subsubsection{Nonlinear Least Squares Optimization}
 The parameter estimation problem is posed as a constrained nonlinear least squares optimization \citep{levenberg1944method, nocedal2006numerical}:
 \begin{equation}
 \boldsymbol{\theta}^* = \arg \min_{\boldsymbol{\theta}} J(\boldsymbol{\theta}),
@@ -1383,7 +1395,7 @@ All parameters are estimated via nonlinear least-squares calibration against wel
 These bounds enforce physical plausibility, such as non-negative productivity indices, reasonable reservoir pressures, and monotonic choke response, and improve numerical stability and convergence behavior.
 
 The optimization is solved using a trust-region-based nonlinear least squares algorithm, which iteratively linearizes the residual function around the current parameter estimate and updates the parameters by solving a sequence of local quadratic subproblems \citep{nocedal2006numerical}. This approach is well-suited for moderately nonlinear models and provides robust convergence under noisy and sparse data conditions.
-The set of model parameters calibrated during physics-model fitting, together with their physical interpretation and units, is summarized in Table~\ref{tab:physics_calibrated_parameters}.
+The set of model parameters calibrated during physics-model fitting, together with their physical interpretation and units, is summarized in table~\ref{tab:physics_calibrated_parameters}.
 
 \begin{table}[!htb]
 \uomTable{Parameters and initial guesses used for nonlinear calibration of the physics-based well flow model}{tab:physics_calibrated_parameters}{\begin{tabularx}{1.0\textwidth}{lYYYY} 
@@ -1430,32 +1442,15 @@ $A_{\mathrm{wc},1\ldots8}$
 \end{tabularx}}{}
 \end{table}
 
-
-\subsubsection{Initialization and Regularization}
-
-Initial parameter estimates are chosen based on engineering heuristics and prior operational knowledge, such as typical reservoir pressure ranges and expected choke sensitivities. Careful initialization reduces the risk of convergence to non-physical local minima.
-To mitigate overfitting under sparse measurement conditions, implicit regularization is achieved through:
-
-\begin{itemize}
-    \item Bounded parameter constraints
-    \item Joint calibration across all available phases
-    \item Smooth functional forms in the physics model
-\end{itemize}
-
-Explicit regularization terms are not introduced to preserve the interpretability of calibrated parameters.
-
 \subsubsection{Handling Sparse and Irregular Measurements}
-
 The nonlinear least squares formulation naturally accommodates sparse and irregular measurement schedules, as the objective function is evaluated only at timestamps where flow rate measurements are available. No interpolation or artificial densification of measured flow data is performed during calibration, thereby avoiding bias and preserving the integrity of the observed data.
 
 \subsubsection{Calibration Quality Assessment}
-
 Following optimization, calibration quality is assessed using residual diagnostics and goodness-of-fit metrics computed on the measured data. Visual inspection of predicted versus measured flow rates and residual time series is also performed to identify systematic biases or regime-dependent errors.
 
 Importantly, the calibrated physics-based model is not expected to achieve perfect agreement with measured data. Instead, it is intended to capture dominant flow behavior while leaving systematic discrepancies to be addressed by the subsequent residual learning component.
 
 \subsubsection{Role in the Hybrid Modeling Architecture}
-
 The independently calibrated physics-based model serves as a physically grounded baseline within the hybrid architecture. By constraining the solution space through first-principles relationships and calibrated parameters, the nonlinear least squares estimation stage enables the residual learning model to focus on compensating for unmodeled dynamics, thereby improving overall prediction accuracy, robustness, and data efficiency.
 
 \section{Machine-Learning Residual Modelling}
@@ -1563,7 +1558,7 @@ The residual mapping from feature space to residual corrections is learned using
 \end{equation}
 where $\mathbf{r}(t) = [r_o(t), r_w(t), r_g(t)]^\top$.
 
-The function $f_{\text{ML}}(\cdot)$ is implemented as a \textit{MultiOutputRegressor} with gradient-boosted decision trees as base learners. Specifically, a histogram-based gradient boosting regressor is employed due to its robustness, fast training, and suitability for tabular industrial data \citep{friedman2001greedy}. Key hyperparameters are selected to balance accuracy and computational efficiency, including shallow tree depth, early stopping, and minimum leaf size constraints.
+The function $f_{\text{ML}}(\cdot)$ is implemented as a \textit{MultiOutputRegressor} with gradient-boosted decision trees as base learners. Specifically, \textit{HistGradientBoostingRegressor} a histogram-based gradient boosting regressor is employed due to its robustness, fast training, and suitability for tabular industrial data \citep{friedman2001greedy}. Key hyperparameters are selected to balance accuracy and computational efficiency, including shallow tree depth, early stopping, and minimum leaf size constraints.
 
 A single global residual model is trained using data pooled from all wells, while physics models are calibrated independently for each well. This design enables cross-well learning of common residual patterns while preserving well-specific physical behavior.
 
@@ -2000,11 +1995,11 @@ The performance of three approaches is compared: the physics-based model, the pr
 
 
 \subsection{Gas Rate (\texorpdfstring{$q_g$}{qg})}
-Table~\ref{tab:temporal_gas_rate_comparison} reports gas rate prediction performance under lag-safe temporal extrapolation.
+table~\ref{tab:temporal_gas_rate_comparison} reports gas rate prediction performance under lag-safe temporal extrapolation.
 
 The physics-based model exhibits highly variable performance for gas rate prediction across wells. While moderate accuracy is achieved for wells such as W06 ($R^2 = 0.77$) and W11 ($R^2 = 0.59$), the model fails significantly for several others, including W08, W15, and W19, where strongly negative $R^2$ values are observed. These results indicate that the physics formulation struggles to capture the complex gas flow behavior under varying operating conditions, particularly in wells with dynamic pressure drawdown and multiphase interactions. The consistently high MAE and RMSE values further highlight the limited predictive capability of the standalone physics model for temporal extrapolation.
 
-In contrast, the hybrid model demonstrates consistently strong performance across all wells, as shown in Table~\ref{tab:temporal_gas_rate_comparison}. High predictive accuracy is achieved for most wells, with $R^2$ values exceeding 0.85 and reaching near-perfect levels for W06, W11, and W18. The substantial reduction in MAE and RMSE compared to the physics model confirms the effectiveness of the residual learning framework in correcting systematic biases in gas rate predictions. Notably, even for challenging wells such as W08, where the physics model fails ($R^2 = -30.24$), the hybrid model achieves a positive $R^2$ of 0.44, demonstrating its ability to generalize across difficult operating regimes. The consistently low MAPE values further indicate stable and reliable predictive performance.
+In contrast, the hybrid model demonstrates consistently strong performance across all wells, as shown in table~\ref{tab:temporal_gas_rate_comparison}. High predictive accuracy is achieved for most wells, with $R^2$ values exceeding 0.85 and reaching near-perfect levels for W06, W11, and W18. The substantial reduction in MAE and RMSE compared to the physics model confirms the effectiveness of the residual learning framework in correcting systematic biases in gas rate predictions. Notably, even for challenging wells such as W08, where the physics model fails ($R^2 = -30.24$), the hybrid model achieves a positive $R^2$ of 0.44, demonstrating its ability to generalize across difficult operating regimes. The consistently low MAPE values further indicate stable and reliable predictive performance.
 
 The MPFM baseline generally provides strong performance for gas rate prediction, achieving high $R^2$ values for wells such as W06, W10, W11, and W15. However, significant degradation is observed for certain wells, particularly W08 and W18, where negative $R^2$ values and large prediction errors are recorded. This suggests that MPFM measurements are sensitive to flow conditions and may become unreliable under complex multiphase regimes or adverse operating conditions.
 
@@ -2046,7 +2041,7 @@ MAPE (\%) & 2.38 & 45.25 & 6.12 & 13.63 & 4.64 & 46.58 & 4.07 \\
 \end{table}
 
 \subsection{Oil Rate ($q_o$)}
-Table~\ref{tab:temporal_oil_rate_comparison} summarizes the per-well temporal generalization performance for oil rate prediction.
+table~\ref{tab:temporal_oil_rate_comparison} summarizes the per-well temporal generalization performance for oil rate prediction.
 
 The physics-based model exhibits highly inconsistent performance across wells. While it achieves moderate accuracy for well W06 ($R^2 = 0.65$), it fails significantly for most other wells, with strongly negative $R^2$ values (e.g., W08, W11, W15, W19). This indicates that the physics formulation alone is unable to capture the complex and evolving dynamics of multiphase flow under changing operating conditions. The large errors in MAE and RMSE further confirm the limited adaptability of the physics model to temporal variations.
 
@@ -2092,11 +2087,11 @@ MAPE (\%) & 1.16 & 35.45 & 2.84 & 20.15 & 7.76 & 61.38 & 6.86 \\
 \end{table}
 
 \subsection{Water Rate ($q_w$)}
-Table~\ref{tab:temporal_water_rate_comparison} reports water rate prediction performance under lag-safe temporal extrapolation.
+table~\ref{tab:temporal_water_rate_comparison} reports water rate prediction performance under lag-safe temporal extrapolation.
 
 The physics-based model performs poorly for water rate prediction across all wells, with consistently negative $R^2$ values. This indicates that the model fails to capture the underlying dynamics of water production, particularly under multiphase flow conditions where water behavior is highly nonlinear and intermittent. Although the absolute errors (MAE and RMSE) are relatively moderate for some wells, the persistently high MAPE values often approaching or exceeding 100\% - highlight the difficulty of accurately modeling water rates using physics alone. These results suggest that the simplified physics formulation is insufficient to represent complex water production mechanisms such as phase interactions, breakthrough events, and low-rate regimes.
 
-In contrast, the hybrid model demonstrates substantial improvement in water rate prediction for most wells, as shown in Table~\ref{tab:temporal_water_rate_comparison}. Strong performance is observed for wells such as W06, W10, W11, and W15, where positive $R^2$ values and significantly reduced MAE and RMSE indicate accurate and stable predictions. The hybrid model effectively leverages residual learning to correct systematic biases in the physics model, resulting in consistent performance gains across varying operating conditions. However, reduced performance is observed for wells such as W08 and W18, where $R^2$ remains low or slightly negative. This suggests that water prediction remains challenging in certain regimes, particularly where water production is highly sparse or exhibits abrupt transitions.
+In contrast, the hybrid model demonstrates substantial improvement in water rate prediction for most wells, as shown in table~\ref{tab:temporal_water_rate_comparison}. Strong performance is observed for wells such as W06, W10, W11, and W15, where positive $R^2$ values and significantly reduced MAE and RMSE indicate accurate and stable predictions. The hybrid model effectively leverages residual learning to correct systematic biases in the physics model, resulting in consistent performance gains across varying operating conditions. However, reduced performance is observed for wells such as W08 and W18, where $R^2$ remains low or slightly negative. This suggests that water prediction remains challenging in certain regimes, particularly where water production is highly sparse or exhibits abrupt transitions.
 
 The MPFM baseline shows mixed performance for water rate prediction. While it achieves high accuracy for certain wells (e.g., W10), it performs poorly for others, including W06 and W18, where negative $R^2$ values are observed. This variability reflects the sensitivity of MPFM measurements to flow conditions, especially in low water-cut or unstable multiphase environments. Although MPFM provides reasonable MAE and RMSE values in some cases, its overall performance lacks consistency across wells.
 
@@ -2338,7 +2333,7 @@ This section evaluates the ability of the proposed model to generalize across we
 Spatial generalization represents a more challenging task than temporal generalization, as it requires the model to transfer learned relationships across wells with potentially different geological characteristics, flow regimes, and operational conditions. Therefore, strong performance under LOWO evaluation is indicative of a model's robustness and practical applicability in real-world deployment scenarios.
 
 \subsection{LOWO Results}
-Table~\ref{tab:lowo} summarizes the spatial generalization performance for the held-out well W10.
+table~\ref{tab:lowo} summarizes the spatial generalization performance for the held-out well W10.
 
 The physics-based model demonstrates limited generalization capability across all phases. For oil rate prediction, the model achieves a low $R^2$ of 0.07, indicating that it captures only a small fraction of the variance in the unseen well. Similarly, for gas rate prediction, although a moderate $R^2$ of 0.32 is observed, the absolute errors remain high, reflecting poor predictive accuracy. Water rate prediction is particularly poor, with a negative $R^2$ value, confirming the inability of the physics model to generalize across wells with different multiphase flow characteristics. These results highlight the inherent limitations of relying solely on physics-based formulations, which are often calibrated to well-specific conditions and lack adaptability to new wells.
 
@@ -2408,7 +2403,7 @@ $q_w$ & Physics & -0.25 & 5.39 & 12.15 & 100.00 \\
 \end{figure}
 
 \section{Performance Comparison with Contemporary Hybrid VFM}
-Table~\ref{tab:wgr_comparison} presents a comparison of the proposed hybrid model against the WGR prediction models reported in \citep{nemoto2023cloud}.
+table~\ref{tab:wgr_comparison} presents a comparison of the proposed hybrid model against the WGR prediction models reported in \citep{nemoto2023cloud}.
 
 It is important to note that while both this study and \citep{nemoto2023cloud} are based on wells from the same offshore gas field, the specific wells used in each study are not necessarily identical. As a result, the comparison reflects performance across similar field conditions rather than an exact well-to-well evaluation. This distinction is important, as variability in well behavior, operating conditions, and flow regimes can influence model performance.
 
