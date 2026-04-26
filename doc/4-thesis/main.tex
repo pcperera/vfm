@@ -5,7 +5,7 @@
 % When you are using IEEE, you can add IEEEdoi if you want the DOI to be listed in your references
 \documentclass[12pt,APA]{uomthesis}
 \usepackage{packages/lgrind}
-%\usepackage{lgrind}
+% \usepackage{lgrind}
 \usepackage{cmap}
 \usepackage[T1]{fontenc}
 \pagestyle{plain}
@@ -128,7 +128,8 @@ The proposed framework is evaluated using historical multi-well production data 
 
 
 \chapter{Introduction}
-\label{sec:intro}
+\label{ch:intro}
+
 The oil and gas industry is a global sector focused on the exploration, extraction, production, transportation, refining, and commercialization of hydrocarbons. As one of the most critical energy industries, it supplies fuels, feedstocks, and raw materials essential for industrial, commercial, and domestic use. The industry is characterized by complex operations spanning multiple technical, economic, and regulatory domains, requiring integration of geology, engineering, logistics, and environmental management. Hydrocarbon resources are typically categorized into crude oil, natural gas, and natural gas liquids, each of which undergoes specific extraction, processing, and distribution workflows. The industry operates across a value chain divided into three principal segments: Upstream, which involves exploration and production; Midstream, which focuses on transportation, storage, and initial processing; and Downstream, which encompasses refining, distribution, and commercialization of end-use products \citep{spe_petroleum_engineering_handbook, ahmed2010reservoir}. 
 
 The Upstream sector encompasses all activities related to the exploration and production of hydrocarbons. This includes geological and geophysical surveys, exploration drilling, reservoir characterization, well planning, drilling operations, completions, and production of oil, gas, and condensate. It is the segment where subsurface engineering, reservoir management, and field development strategies are applied. Central to these operations are fields and reservoirs, which define the spatial and geological context for upstream activities. A field is a geographically or geologically defined area that contains one or more hydrocarbon reservoirs. Fields represent the primary operational units for planning drilling programs, designing production facilities, and managing overall hydrocarbon recovery. They are delineated based on subsurface geology, reservoir continuity, hydrocarbon presence, and operational or administrative considerations. 
@@ -136,7 +137,7 @@ The Upstream sector encompasses all activities related to the exploration and pr
 An oil well is a borehole drilled from the surface into a hydrocarbon-bearing reservoir to access and produce oil, gas, and associated fluids. Wells are designed to provide a controlled pathway for hydrocarbons to flow from the reservoir to the surface, and their design depends on reservoir properties, depth, pressure, and fluid composition. The fluid mixture flowing out of the well consists of oil, natural gas and water. This mixture of flow is called the multi-phase flow. The flow rates of oil, gas, and water reflect the performance of the well. The Petroleum Engineers need to make informed decisions regarding the production strategies based on the performance of the wells. Through accurate predictions of flow rates, petroleum Engineers can diagnose production inefficiencies and constraints, and implement solutions to optimize production and project future investments. Physical flow meters and \abbr{Virtual Flow Meters}{VFM} are used to predict flow rates in oil wells. Physical flow meters are often very expensive, require regular maintenance, and are prone to failure under harsh operating conditions. Physical flow meters use in-built sensor data and physics based mathematical equations to predict the real-time flow rates. Virtual flow meters, in contrast, can use mathematical models based on physics, models based on machine learning, or hybrid models to predict flow rates \citep{bikmukhametov2020first}. 
 
 \section{Asset Hierarchy}
-In upstream oil and gas operations, the management and organization of hydrocarbon resources are structured through a hierarchical framework known as the asset hierarchy \ref{fig:asset_hierarchy}, which provides clarity for both subsurface and surface operational planning.
+In upstream oil and gas operations, the management and organization of hydrocarbon resources are structured through a hierarchical framework known as the asset hierarchy Figure~\ref{fig:asset_hierarchy}, which provides clarity for both subsurface and surface operational planning.
 
 \begin{itemize}
     \item \textbf{Asset}: An Asset is the highest-level operational and resource unit in upstream oil and gas management, encompassing multiple geographically or geologically defined oil and gas fields. It serves as a consolidated management entity under which exploration, development, production, and economic evaluation of the associated fields are coordinated. The asset framework enables integrated planning of drilling campaigns, reservoir development, production optimization, and infrastructure utilization across all fields it contains. By grouping multiple fields under a single asset, operators can streamline decision-making, allocate resources efficiently, and evaluate overall performance, reserves, and recovery potential at a portfolio level. In essence, the asset represents the top-level resource that aligns subsurface resources, surface facilities, and economic objectives for strategic management.
@@ -189,11 +190,9 @@ In upstream oil and gas operations, the management and organization of hydrocarb
 \end{figure}
 
 \section{Oil and Gas Wells}
-
 Hydrocarbon production wells are broadly classified into oil wells and gas wells based on the dominant produced phase. In practice, both types involve multiphase flow consisting of oil, gas, and water, which introduces significant complexity in modeling and measurement. Accurate estimation of phase flow rates is essential for reservoir management, production optimization, and allocation \citep{falcone2009multiphase, kolev2016multiphase}.
 
 \subsection{Oil Wells}
-
 Oil wells primarily produce liquid hydrocarbons, often accompanied by associated gas and water. Their behavior is typically governed by multiphase liquid-dominated flow.
 
 \subsubsection{Characteristics}
@@ -219,7 +218,6 @@ Oil wells primarily produce liquid hydrocarbons, often accompanied by associated
 \end{itemize}
 
 \subsection{Gas Wells}
-
 Gas wells primarily produce natural gas, with relatively small amounts of condensate and water. Their behavior is typically gas-dominated and strongly influenced by pressure conditions.
 
 \subsubsection{Characteristics}
@@ -250,10 +248,9 @@ Gas wells primarily produce natural gas, with relatively small amounts of conden
 \end{itemize}
 
 \section{Production Variables and Ratios}
-
 Accurate characterization of multiphase production is fundamental to oil well performance analysis, reservoir management, and virtual flow metering (VFM). Production from oil wells typically consists of three primary phases: oil, water, and gas, each contributing to the overall flow behavior in the wellbore and surface facilities.
 To describe and quantify this multiphase production, a set of key variables and derived ratios are commonly used. These include phase flow rates such as oil rate ($q_o$), water rate ($q_w$), gas rate ($q_g$), and total liquid rate ($q_L$), as well as diagnostic ratios such as water cut (WC), gas--oil ratio (GOR), and water--gas ratio (WGR).
-\ref{tab:production-variables} lists the common production variables and ratios used.
+Table~\ref{tab:production-variables} lists the common production variables and ratios used.
 
 \begin{table}[!htb]
 \uomTable{Production Variables and Ratios}{tab:production-variables}{
@@ -276,15 +273,12 @@ Gas Volume Fraction (GVF) & $GVF = \dfrac{q_g}{q_g + q_L}$, indicating the propo
 
 
 \section{Well Instrumentation}
-
 The configuration of instrumentation in an oil well varies depending on the operational objectives and reservoir characteristics. In general, sensors are strategically installed along the wellbore and surface facilities to monitor drilling, production, and safety-related parameters. The wellbore, often referred to as the borehole, is the cylindrical hole drilled from the surface into subsurface formations during the development of oil, gas, water, or geothermal wells. Figure~\ref{fig:well-instrumentation} illustrates the typical placement of instrumentation across different locations of a producing well.
 
 \subsection{Downhole Instrumentation}
-
 \abbr{Well Down Hole}{WDH} instrumentation refers to sensors installed at or near the bottom of the well, often integrated within downhole tools or permanent monitoring systems. These sensors are designed to capture critical information about the subsurface environment and wellbore conditions. Commonly measured parameters include pressure, temperature, and fluid properties, with some advanced systems also capable of acquiring seismic or acoustic data.
 
 The primary downhole instruments used in this study are the \abbr{Down Hole Pressure}{DHP} and \abbr{Down Hole Temperature}{DHT} sensors. These measurements provide real-time insight into reservoir behavior and well performance, enabling informed decision-making related to production optimization, reservoir management, and early detection of anomalies. Downhole data are particularly valuable for assessing reservoir drawdown, diagnosing flow restrictions, and ensuring operational safety throughout the well lifecycle.
-
 \subsection{Wellhead Instrumentation}
 
 \abbr{Well Head}{WH} sensors are installed at the wellhead, which represents the interface between the subsurface wellbore and surface production facilities. Wellhead instrumentation plays a crucial role in monitoring surface-operating conditions and ensuring safe and efficient production.
@@ -292,13 +286,11 @@ The primary downhole instruments used in this study are the \abbr{Down Hole Pres
 Typical wellhead measurements include pressure and temperature, obtained using the \abbr{Well Head Pressure}{WHP} and \abbr{Well Head Temperature}{WHT} sensors, respectively. These measurements are essential for monitoring well integrity, detecting abnormal operating conditions, and supporting production control strategies. Wellhead data also serve as key inputs for production surveillance systems and virtual flow metering applications.
 
 \subsection{Downstream Choke Instrumentation}
-
 The choke system is located downstream of the wellhead and is used to regulate the flow of produced fluids from the well. Choke valves control the flow rate by introducing a pressure drop, thereby enabling operators to manage reservoir drawdown, prevent sand production, and maintain well integrity.
 
 Instrumentation associated with the choke includes the \abbr{Downstream Choke Regulation}{DCR}, which represents the choke opening or valve position, and the \abbr{Downstream Choke Pressure}{DCP}, which measures the pressure downstream of the choke. Choke valves may be manually operated or automatically controlled as part of a production control system. Their placement downstream of the wellhead provides flexibility in regulating flow while maintaining safe operating conditions.
 
 \subsection{Role of Instrumentation in Virtual Flow Metering}
-
 All or a subset of the aforementioned sensors are used as independent variables in machine learning (ML)-based Virtual Flow Metering (VFM) models. Measurements from downhole, wellhead, and choke locations collectively capture the pressure-temperature flow relationships governing multiphase production. The integration of these sensor signals enables data-driven models to infer oil, gas, and water flow rates in the absence of direct physical flow meters, thereby supporting real-time production monitoring and optimization.
 
 \begin{figure}[!htb] 
@@ -374,21 +366,17 @@ choke & Downstream choke regulation & \% & \% \\
 
 
 \section{Flow States}
-
 Fluid flow within an oil and gas well occurs through a complex piping network and exhibits a wide range of physical behaviors. The flow is inherently multiphase and is influenced by well geometry, flow direction, and temporal variations in operating conditions. These characteristics collectively contribute to the complexity of flow-rate measurement and modeling in producing wells.
 Fluid flow in oil and gas wells typically consists of a multiphase mixture of oil, gas, and water. The relative proportions of these phases vary spatially along the wellbore and temporally with changing reservoir and operating conditions. Multiphase interactions give rise to complex flow phenomena such as phase slip, interfacial instabilities, and regime transitions, which significantly complicate both physical measurement and data-driven estimation of flow rates \citep{brill1999multiphase}.
 The piping network of an oil and gas well may include vertical, deviated, inclined, and horizontal sections. As a result, fluid flow can occur in upward, downward, or mixed directions depending on the well trajectory. Changes in inclination strongly affect phase distribution, gravitational segregation, and pressure losses, thereby influencing the observed flow behavior and sensor measurements along the well.
 
 \subsection{Steady State Flow}
-
 Steady state flow refers to operating conditions under which the pressure, flow rates, and phase fractions of the produced fluids remain approximately constant over time. In this regime, spatial and temporal gradients of flow variables are relatively small, and the system can be reasonably assumed to be in equilibrium. Steady-state assumptions are commonly employed in analytical flow models and production surveillance due to their mathematical simplicity and reduced computational complexity. However, such assumptions may not fully capture the dynamic behavior of multiphase flow in real well operations \citep{shippen2012multiphase}.
 
 \subsection{Unsteady State Flow}
-
 Unsteady state flow is characterized by temporal variations in pressure, flow rates, and phase distribution within the wellbore. These fluctuations may arise from operational changes such as choke adjustments, variations in reservoir inflow, or transient flow phenomena including slugging and phase redistribution. In unsteady conditions, the flow variables are continuously evolving, violating steady-state assumptions and increasing the uncertainty of flow-rate measurements. Capturing unsteady-state behavior is therefore critical for accurate production monitoring and motivates the use of advanced data-driven and hybrid modeling approaches \citep{santim2020transient}.
 
 \subsection{Implications for Flow Measurement}
-
 The combined effects of multiphase flow, complex well geometry, variable flow direction, and unsteady operating conditions present significant challenges for accurate flow-rate measurement in oil and gas wells. These complexities limit the reliability of conventional physical flow meters and motivate the use of virtual flow metering approaches for production monitoring \citep{bikmukhametov2020first}.
 
 \section{Physical Flow Meters}
@@ -436,7 +424,7 @@ Hybrid VFM combines the physics based and ML based models to improve the perform
 \label{sec:problem}
 Accurate estimation of multiphase flow rates in producing oil and gas wells is a fundamental requirement for effective production monitoring, reservoir management, and operational decision-making. Traditionally, this task is performed using MPFMs, which provide direct measurements of oil, gas, and water flow rates. However, MPFMs are capital-intensive, require regular calibration and maintenance, and are often deployed at limited locations due to cost and operational constraints. As a result, continuous and comprehensive flow rate measurements are rarely available across all wells and operating conditions.
 
-To address these limitations, VFM techniques have been developed as software-based alternatives to physical flow meters. The conventional VFM approaches rely on {first-principles physics-based models, which use pressure, temperature, choke settings, and fluid properties to estimate flow rates. While these models are grounded in physical laws and offer interpretability, their accuracy is often limited by simplifying assumptions, uncertainty in model parameters, unmodeled multiphase flow phenomena, and changing well and reservoir conditions over time. Consequently, purely physics-based VFMs may exhibit systematic bias or degraded performance when applied outside their calibration envelope.
+To address these limitations, VFM techniques have been developed as software-based alternatives to physical flow meters. The conventional VFM approaches rely on first-principles physics-based models, which use pressure, temperature, choke settings, and fluid properties to estimate flow rates. While these models are grounded in physical laws and offer interpretability, their accuracy is often limited by simplifying assumptions, uncertainty in model parameters, unmodeled multiphase flow phenomena, and changing well and reservoir conditions over time. Consequently, purely physics-based VFMs may exhibit systematic bias or degraded performance when applied outside their calibration envelope.
 
 Recent advances in data-driven and machine learning techniques have demonstrated strong predictive capabilities for complex nonlinear systems, including multiphase flow behavior. However, purely data-driven models typically require large volumes of high-quality labeled data, which are seldom available in production environments due to sparse MPFM measurements and irregular well testing schedules. Furthermore, black-box ML models often lack physical interpretability and may generate non-physical predictions when extrapolated beyond the training data, limiting their acceptance in safety-critical industrial applications.
 
@@ -456,7 +444,6 @@ This research aims to bridge the gap between physics-based modeling and data-dri
 
 \section{Research Objectives}
 \label{sec:objectives}
-
 The primary objective of this research is to develop and evaluate a physics-informed residual learning framework for virtual flow metering in oil and gas production wells under conditions of sparse and irregular flow rate measurements. To achieve this overarching goal, the following specific research objectives are defined:
 
 \begin{enumerate}
@@ -481,11 +468,9 @@ The primary objective of this research is to develop and evaluate a physics-info
 
 
 \section{Scope and Limitations}
-
 This research focuses on the development and evaluation of a physics-informed residual learning architecture for virtual flow metering in oil and gas production wells. The scope of the study and its inherent limitations are outlined below to clearly define the boundaries of the work and to contextualize the results.
 
 \subsection{Scope of the Research}
-
 \begin{enumerate}
     \item The study is confined to \textit{producing oil and gas wells} equipped with standard surface and downhole instrumentation, including pressure, temperature, and choke measurements, which are routinely available in production operations.
 
@@ -502,7 +487,6 @@ This research focuses on the development and evaluation of a physics-informed re
 \end{enumerate}
 
 \subsection{Limitations}
-
 \begin{enumerate}
     \item The accuracy of the proposed framework is inherently dependent on the quality, availability, and representativeness of the input data, including sensor measurements and ground-truth flow rate observations.
 
@@ -520,42 +504,34 @@ This research focuses on the development and evaluation of a physics-informed re
 
 
 \chapter{Literature Review}
-\label{sec:literature}
+\label{ch:literature}
 
 \section{Introduction}
-
 The accurate estimation of oil, gas, and water production rates is a fundamental requirement in petroleum production engineering, underpinning reservoir management, production optimization, flow assurance, and economic decision-making. Traditionally, phase flow rates are measured using physical multiphase flow meters (MPFMs). While MPFMs provide direct measurements, their widespread deployment is limited by high capital cost, maintenance requirements, calibration complexity, and installation constraints, particularly in offshore, subsea, and marginal field developments \citep{corneliussen2005handbook,meribout2020multiphase,hansen2019multi}.
 
 As a cost-effective alternative, Virtual Flow Metering (VFM) has emerged as a key enabling technology. VFM systems estimate phase flow rates indirectly using routinely available surface and downhole measurements such as pressures, temperatures, and choke settings. Over the past two decades, VFM methodologies have evolved from purely physics-based models to data-driven machine learning approaches and, more recently, to hybrid physics-data architectures \citep{bikmukhametov2020first}. This chapter reviews these developments, critically examines their strengths and limitations, and establishes the motivation for a physics-informed hybrid residual learning architecture for virtual flow metering.
 
 \section{Physics-Based Virtual Flow Metering}
-
 \subsection{Foundations of Petroleum Production Modeling}
-
 Physics-based VFM approaches rely on first-principles models derived from reservoir engineering, fluid mechanics, and thermodynamics. Classical petroleum engineering formulations describe the relationship between reservoir pressure, flowing bottom-hole pressure, and production rate using inflow performance relationships (IPRs) \citep{dake1978fundamentals}. These formulations are widely used in nodal analysis to predict well performance under steady-state conditions.
 
 IPR models typically assume homogeneous reservoir properties, steady-state flow, and known fluid characteristics. While these assumptions are reasonable during early production or controlled testing, they are frequently violated during long-term field operation, leading to systematic prediction errors.
 
 \subsection{Choke Flow and Surface Constraints}
-
 Surface choke flow models form a critical component of physics-based VFMs by linking upstream pressure, downstream pressure, and choke opening to flow rates. Numerous empirical and semi-empirical correlations have been developed to model multiphase flow through chokes \citep{agwu2022modelling,alrumah2019new}. These correlations are often calibrated for specific flow regimes and fluid compositions.
 
 Although choke models provide physically interpretable relationships, their accuracy is highly sensitive to operating conditions. Flow regime transitions, changing gas-liquid ratios, and water breakthrough can significantly degrade predictive performance. Consequently, choke correlations often require frequent recalibration, limiting their robustness for long-term monitoring.
 
 \subsection{Strengths and Limitations of Physics-Based VFMs}
-
 Physics-based VFMs offer several advantages, including interpretability, compliance with physical laws, and the ability to extrapolate beyond observed data ranges. However, they suffer from key limitations. Uncertain reservoir parameters, incomplete representation of multiphase flow physics, and measurement noise can lead to biased predictions \citep{bikmukhametov2020first}. Moreover, mechanistic models struggle to capture complex nonlinear interactions between operational variables, motivating the exploration of data-driven alternatives.
 
 \section{Data-Driven Virtual Flow Metering}
-
 \subsection{Early Machine Learning Approaches}
-
 The application of machine learning to VFM began with artificial neural networks (ANNs) and regression-based soft sensors \citep{al2017development,al2017radial}. These models learned direct mappings between sensor measurements and phase flow rates, often outperforming physics-based models under stable operating conditions.
 
 However, early ANN-based VFMs exhibited limited generalization capability and were prone to overfitting, particularly when training datasets were small or unevenly distributed across operating regimes.
 
 \subsection{Advanced Data-Driven Models}
-
 Subsequent research explored ensemble learning, adaptive optimization techniques, and Bayesian neural networks to improve robustness and uncertainty quantification \citep{al2018virtual,grimstad2021bayesian}. Ensemble methods reduced variance by combining multiple learners, while Bayesian approaches provided probabilistic estimates of prediction uncertainty.
 \citep{grimstad2021bayesian} develops a ML based VFM, implemented on \abbr{Bayesian Neural Network}{BNN}. BNN provide a probabilistic distribution over weights and predictions unlike traditional neural networks, which produce point estimates for weights and predictions. They have trained the model on a large and heterogeneous data-set, consisting of 60 wells across five different oil and gas assets. The predictive performance is analyzed on historical and future test data, where an average error of 4\%–6\% and 8\%–13\% is achieved for the 50\% best performing models, respectively. 
 
@@ -572,18 +548,14 @@ In a separate work also by \citep{al2017development} proposes a method for estim
 \citep{song2022intelligent} employs \abbr{Back Propogation Neural Network}{BPNN}, LSTM network, and \abbr{Random Forest}{RF} algorithm to develop an intelligent ML based model for virtual flow meters in oil and gas development. Their data-set is constructed using actual data from two oil wells in an offshore oil field in the South China Sea. Among the three models, the LSTM model has demonstrated the highest accuracy, with a Mean Absolute Error (MAE) of 3.9\%. LSTM has also demonstrated the highest stability and requires a moderate amount of data volume. BP network on the other hand have exhibited the lowest accuracy, with a MAE of 12.1\%, as well as the lowest stability. BP however has shown the smallest data volume requirement. The Random Forest model has shown moderate accuracy, high stability, but has required the highest data volume.
 
 \subsection{Time-Series and Attention-Based Models}
-
 The increasing availability of time-stamped production data has motivated the use of time-series models in VFM. Recurrent neural networks and long short-term memory (LSTM) networks have been used to capture temporal dependencies in production behavior \citep{andrianov2018machine}.
 This is because unlike feed-forward neural network, which process input data in a one-way, LSTM-RNN are designed to process sequential data, such as time series. \citep{andrianov2018machine} has achieved the best accuracy when the lengths of the input and output sequences to LSTM are equal. 
 
 \subsection{Limitations of Purely Data-Driven VFMs}
-
 Despite strong predictive performance, purely data-driven VFMs exhibit fundamental limitations. They lack explicit physical grounding, struggle with extrapolation beyond the training domain, and may violate physical constraints such as non-negativity or phase consistency \citep{bikmukhametov2020first}. The black-box nature of deep learning models also reduces trust and hinders adoption in industrial decision-making contexts.
 
 \section{Hybrid Physics - Data Virtual Flow Metering}
-
 \subsection{Motivation for Hybrid Modeling}
-
 Hybrid modeling approaches seek to combine the strengths of physics-based and data-driven models. In VFM applications, physics-based models capture dominant flow behavior, while machine learning models excel at learning unmodeled nonlinearities and systematic discrepancies \citep{hotvedt2020developing}.
 The hybrid VFM proposed by \citep{ishak2022virtual} uses ensemble learning to develop the data driven model by incorporating multiple ML models. The data driven model is then combined with the physics model using a combiner. They have achieved a 50\% improvement in performance using the combiner compared to their stand-alone performance of physics based and ML based VFM. 
 
@@ -592,28 +564,22 @@ The hybrid VFM proposed by \citep{ishak2022virtual} uses ensemble learning to de
 Hybird VFM models have become increasingly popular since 2018 and increase usage of neural networks seen for developing both physics and ML based models.
 
 \subsection{Residual Learning Frameworks}
-
 Residual learning has emerged as a particularly effective hybrid strategy. In this framework, a physics-based model provides baseline predictions, and a machine learning model is trained to learn residual errors between predictions and measurements \citep{bikmukhametov2020combining}. This separation improves data efficiency, stabilizes training, and preserves physical interpretability.
 
 Residual hybrid VFMs have demonstrated improved accuracy and robustness compared to both purely physics-based and purely data-driven approaches \citep{ishak2022virtual,gryzlov2023combining}.
 
 \subsection{Industrial Applications}
-
 Hybrid VFMs have been successfully deployed in industrial environments, including cloud-based real-time monitoring systems for offshore fields \citep{nemoto2023cloud}. These studies highlight the scalability and operational relevance of hybrid architectures, particularly in settings with sparse instrumentation and limited well-test data.
 
 \section{Physics-Informed Machine Learning}
-
 \subsection{Physics-Informed Neural Networks}
-
 Physics-Informed Neural Networks (PINNs) incorporate governing equations directly into the training process and have been explored for flow metering applications \citep{franklin2022physics}. While PINNs offer a principled approach to enforcing physical laws, their application to multiphase well flow remains challenging due to incomplete or uncertain governing equations.
 \citep{franklin2022physics} proposes a hybrid VFM combining \abbr{Physics Informed Neural Networks}{PINN} based physics model and LSTM-RNN based ML model. Their resulting hybrid model is capable of predicting the average flow rate some time-steps ahead using the measurements available in the oil well information system. Unlike the ML based LSTM-RNN model proposed by \citep{andrianov2018machine}, the system proposed by \citep{franklin2022physics} is hybrid model using neural networks for physics based model as well as the ML based model. 
 
 \subsection{Soft Physics Constraints and Closure Laws}
-
 An alternative to strict physics enforcement is the use of soft physical constraints embedded in model architecture. Examples include bounded logistic water-cut closures and explicit non-negativity constraints on phase rates \citep{bikmukhametov2020first}. These approaches improve physical realism while retaining flexibility and numerical stability.
 
 \section{Rationale for a Physics-Informed Hybrid Residual Architecture}
-
 The adoption of a physics-informed hybrid residual architecture in this work is motivated by several well-established considerations in the virtual flow metering and data-driven modeling literature:
 
 \begin{itemize}
@@ -795,10 +761,9 @@ Research & VFM Type & ML Model & Evaluation Metrics \\
 
 
 \chapter{Methodology}
-\label{chap:methodology}
+\label{ch:methodology}
 
 \section {Overview of the Proposed Architecture}
-
 This thesis proposes a physics-informed residual learning architecture for virtual flow metering that combines first-principles physical modeling with data-driven machine learning to estimate multiphase flow rates in oil and gas production wells. The framework is designed to exploit the complementary strengths of physics-based models and data-driven approaches while addressing the practical constraints of sparse and irregular flow rate measurements typically encountered in industrial environments.
 
 The overall architecture consists of three main components:
@@ -877,13 +842,12 @@ A schematic representation of the architecture is conceptually illustrated in Fi
 
 \end{tikzpicture}
 }
-\caption{Hybrid Physics-Informed Residual Learning Architecture for Virtual Flow Metering}
+\caption{Hybrid physics-informed residual learning architecture for virtual flow metering}
 \label{fig:component_architecture}
 \end{figure}
 
 
 \subsection{Baseline Physics-Based Inflow Modeling}
-
 At the core of the proposed framework lies a physics-based virtual flow metering model that provides first-order estimates of oil, water, and gas flow rates. This model is formulated using simplified physical relationships that capture the dominant dependencies between flow rates and routinely available well measurements, including downhole pressure, choke opening, downstream pressure, and temperature measurements.
 The physics model incorporates:
 
@@ -896,7 +860,6 @@ The physics model incorporates:
 Model parameters are calibrated on a per-well basis using nonlinear least-squares optimization against available multiphase flow meter measurements. This calibration step ensures that the physics model remains interpretable, physically consistent, and tailored to individual well characteristics while avoiding excessive model complexity.
 
 \subsection{Residual Learning using Machine Learning}
-
 While the physics-based model captures the dominant flow mechanisms, it is inherently limited by simplifying assumptions, parameter uncertainty, and unmodeled multiphase flow effects. To address these deficiencies, a data-driven residual learning component is introduced.
 
 Rather than predicting flow rates directly, the machine learning model is trained to learn the residual error between measured flow rates and physics-based predictions. Residuals are formulated in logarithmic space to stabilize variance and to ensure physically meaningful corrections, particularly at low flow rates.
@@ -911,7 +874,6 @@ The residual model:
 Lagged pressure features are incorporated to provide limited temporal context without imposing strong sequential assumptions, enabling the model to capture delayed system responses while remaining compatible with sparse measurement regimes.
 
 \subsection{Hybrid Inference and Physics-Guided Gating}
-
 During inference, physics-based predictions and machine-learned residuals are combined to produce final flow rate estimates. Importantly, residual corrections are not applied indiscriminately. Instead, physically motivated gating mechanisms are employed to ensure that machine learning corrections are only activated under conditions where the physics model is expected to be unreliable.
 For example:
 
@@ -924,7 +886,6 @@ For example:
 These gating strategies preserve physical plausibility, prevent non-physical predictions, and enhance model robustness when extrapolating beyond the calibration range.
 
 \subsection{Multi-Well Structure and Model Deployment}
-
 The proposed framework is designed to support scalable deployment across multiple wells by combining well-specific physics modeling with a globally trained residual learning component. For each well, the physics-based model is calibrated independently to capture well-specific characteristics such as reservoir pressure, inflow behavior, and operational conditions. In contrast, the machine learning residual model is trained across data from all wells, enabling it to learn shared patterns in the discrepancies between physics-based predictions and observed well-test measurements.
 
 This hybrid structure allows the model to retain physically interpretable behavior at the well level while leveraging cross-well information to improve predictive accuracy. As demonstrated in both temporal and spatial generalization experiments, the residual model captures transferable correction patterns that generalize effectively to unseen wells under the \abbr{Leave-One-Well-Out}{LOWO} evaluation framework.
@@ -1023,8 +984,6 @@ rather than MPFM flow rates. This choice is justified as follows:
     \item For long-term production modelling and scientific evaluation,
           well-test values serve as a more reliable \textbf{ground-truth reference}.
 \end{itemize}
-
-
 
 \begin{table}[!htb]
 \uomTable{Reference ground truth variables}{tab:reference_vars}{\begin{tabularx}{0.9\textwidth}{lYYYY} 
@@ -1128,7 +1087,6 @@ Collectively, the measurements presented in Figures~\ref{fig:W10_dhp}--\ref{fig:
 
 
 \subsection{Well-Level Preprocessing}
-
 \begin{itemize}
     \item \textbf{Well-wise data isolation and temporal ordering:}  
     The preprocessing is performed independently for each well by isolating records associated with a single well identifier. Observations are sorted in chronological order to preserve the original temporal structure of the data.
@@ -1160,7 +1118,6 @@ Collectively, the measurements presented in Figures~\ref{fig:W10_dhp}--\ref{fig:
 
 
 \subsection{Derivation of Multiphase Flow Variables}
-
 Additional flow-related variables are derived from the available MPFM measurements solely for the purpose of evaluating MPFM estimates against well-test data, and are not used for physics-model calibration or hybrid model training.
 The gas-oil ratio (GOR) is computed as:
 \begin{equation}
@@ -1175,7 +1132,6 @@ qw\_mpfm = \frac{\text{wc\_mpfm} \cdot qo\_mpfm}{1 - \text{wc\_mpfm}},
 where $\text{wc}$ is the water cut expressed as a fraction. This formulation ensures consistency between oil, water, and water cut measurements and avoids reliance on potentially noisy direct water rate measurements.
 
 \subsection{Temporal Index Construction}
-
 Following well-level preprocessing, a unified temporal index is constructed to enable consistent time-series modeling across wells. A reference time is defined as the earliest timestamp present in the dataset. For each observation, a discrete time index is computed as
 \begin{equation}
 \text{time\_idx} =
@@ -1186,15 +1142,12 @@ Following well-level preprocessing, a unified temporal index is constructed to e
 where $t$ is the observation timestamp, $t_{\text{ref}}$ is the reference time, and $\Delta t$ corresponds to the base time resolution of the data. This integer-valued index provides a compact and model-friendly representation of time while preserving relative temporal ordering.
 
 \subsection{Cross-Well Consolidation and Encoding}
-
 After preprocessing individual wells, the processed datasets are concatenated into a single multi-well dataframe. To support machine-learning models that require numerical inputs, categorical well identifiers are encoded into continuous numerical codes using category-based indexing. This encoding preserves well identity information while remaining compatible with standard regression models.
 
 The final output of the preprocessing stage is a cleaned, physically consistent, and temporally ordered dataset containing all required input variables, derived flow quantities, and auxiliary identifiers required for subsequent physics-based modeling and machine-learning residual learning.
 
-
 \section{Physics-Based Inflow Modelling}
 \label{sec:physics_model}
-
 The physics-based inflow model provides the first-principles foundation for predicting
 oil, water, and gas flow rates using measurable wellhead and downhole variables \citep{ahmed2010reservoir}.
 This model serves as the structured prior within the hybrid learning framework.
@@ -1222,7 +1175,6 @@ The physics-based model is designed to:
 
 \subsection{Model Assumptions and Physical Basis}
 \label{subsec:model_assumptions}
-
 The model assumes that the flowing downhole pressure,
 \(
 P_{\mathrm{wf}}(t)
@@ -1253,7 +1205,6 @@ given the set of independent well measurements.
 
 \subsection{Liquid-Rate Inflow Equation}
 \label{subsec:liquid_rate}
-
 Total liquid production is modeled using a pressure-driven inflow relationship inspired by classical inflow performance relationships. For wells operating below bubble-point pressure or under multiphase flow conditions, quadratic inflow formulations provide a reasonable approximation of nonlinear pressure-rate behavior while remaining computationally simple.
 The total liquid rate is expressed as \citep{vogel1968inflow}:
 
@@ -1274,7 +1225,6 @@ This formulation captures the nonlinear decline in liquid production with increa
 
 \subsection{Logistic Water-Cut Closure Model}
 \label{subsec:wc_closure}
-
 Phase splitting between oil and water is modeled using a logistic water-cut closure. Logistic functions are widely used in petroleum engineering to represent bounded variables such as water cut due to their smoothness and asymptotic behavior \citep{hastie2009elements}.
 
 Water cut is defined as:
@@ -1325,7 +1275,6 @@ The parameters $\mathbf{A}$ are estimated during model calibration as part of th
 
 \subsection{Gas Flow Modelling}
 \label{subsec:gas_rate}
-
 Gas production is modeled using a pressure-driven formulation modulated by choke effectiveness. In producing wells, gas flow is influenced by reservoir pressure drawdown and surface flow restrictions imposed by choke settings. Classical gas deliverability theory indicates that gas flow depends on pressure-squared differences between the reservoir and the wellbore \citep{ahmed2010reservoir, rawlins1935backpressure}. 
 Classical gas deliverability theory is often expressed as:
 
@@ -1370,7 +1319,6 @@ This formulation provides a computationally efficient and stable approximation o
 
 \subsection{Parameter Calibration via Nonlinear Least Squares}
 \label{subsec:parameter_calibration}
-
 All physics model parameters are calibrated independently for each well using nonlinear least-squares optimization against available multiphase flow meter measurements. Calibration is performed jointly across oil, water, and gas rates using normalized residuals to ensure balanced fitting across phases.
 Physically plausible bounds are imposed on all parameters to prevent non-physical solutions and improve numerical stability. This per-well calibration strategy allows the model to adapt to well-specific characteristics such as productivity, completion design, and reservoir conditions while maintaining a consistent functional form across wells.
 The objective of the parameter estimation procedure is to identify physically plausible model parameters that minimize the discrepancy between physics-based flow predictions and available ground-truth flow measurements obtained from multiphase flow meters.
@@ -1512,7 +1460,6 @@ The independently calibrated physics-based model serves as a physically grounded
 
 \section{Machine-Learning Residual Modelling}
 \label{sec:residual_ml}
-
 The physics-based inflow model provides physically consistent baseline predictions for oil,
 water, and gas production. However, real production behaviour is often influenced by
 complex wellbore dynamics, operational disturbances, multiphase interactions, and other
@@ -1527,7 +1474,6 @@ The machine-learning residual subsystem operates on a feature set derived from i
 
 \subsection{Residual Learning Model Philosophy}
 \label{subsec:residual_learning_model_philosophy}
-
 The use of residual learning instead of direct rate prediction provides several advantages \citep{he2016deep}:
 
 \begin{itemize}
@@ -1571,7 +1517,6 @@ The use of residual learning instead of direct rate prediction provides several 
 Overall, the machine-learning residual modelling component serves as a complementary layer that enhances physics-based predictions while respecting physical structure and industrial deployment requirements.
 
 \subsection{Residual Learning Formulation}
-
 Let $\hat{q}_o^{\text{phys}}(t)$, $\hat{q}_w^{\text{phys}}(t)$, and $\hat{q}_g^{\text{phys}}(t)$ denote the oil, water, and gas flow rates predicted by the calibrated physics model at time $t$. The corresponding measured flow rates obtained from multiphase flow meters are denoted by $q_o(t)$, $q_w(t)$, and $q_g(t)$.
 
 Residual learning is performed in logarithmic space to stabilize variance and ensure positivity of predicted flow rates \citep{box1964analysis}. The residual targets are defined as
@@ -1584,7 +1529,6 @@ r_i(t) = \log\!\left(1 + q_i(t)\right) - \log\!\left(1 + \hat{q}_i^{\text{phys}}
 This formulation allows the residual model to learn multiplicative corrections in the original flow-rate domain while remaining numerically stable for low-rate conditions.
 
 \subsection{Feature Construction}
-
 The input feature vector for residual learning is constructed by concatenating measured operating variables with physics-based flow predictions. For each valid time index $t$, the feature vector is defined as
 \begin{equation}
 \mathbf{x}(t) =
@@ -1600,7 +1544,6 @@ where $\mathbf{u}(t)$ represents the set of independent well measurements, inclu
 Including physics-based predictions as explicit features enables the residual model to condition its corrections on physically meaningful state estimates, thereby reducing extrapolation risk and improving generalization.
 
 \subsection{Data Normalization and Polynomial Expansion}
-
 Prior to training, the feature matrix is standardized using zero-mean and unit-variance scaling \citep{hastie2009elements},
 \begin{equation}
 \tilde{\mathbf{x}} = \frac{\mathbf{x} - \boldsymbol{\mu}}{\boldsymbol{\sigma}},
@@ -1614,7 +1557,6 @@ To capture low-order nonlinear interactions between features, a polynomial featu
 where $\Phi_d(\cdot)$ denotes the polynomial feature mapping without bias terms. In the current implementation, a linear expansion ($d=1$) is used to maintain computational efficiency and avoid overfitting under sparse data conditions.
 
 \subsection{Residual Model Architecture}
-
 The residual mapping from feature space to residual corrections is learned using a multi-output regression framework,
 \begin{equation}
 \mathbf{r}(t) = f_{\text{ML}}(\mathbf{z}(t)),
@@ -1626,7 +1568,6 @@ The function $f_{\text{ML}}(\cdot)$ is implemented as a \textit{MultiOutputRegre
 A single global residual model is trained using data pooled from all wells, while physics models are calibrated independently for each well. This design enables cross-well learning of common residual patterns while preserving well-specific physical behavior.
 
 \subsection{Hybrid Prediction and Residual Application}
-
 During inference, physics-based predictions are first generated for each well. The trained residual model then produces residual estimates $\hat{r}_i(t)$, which are applied selectively depending on the flow phase and operating regime.
 
 For oil and gas, residual corrections are applied in logarithmic space as
@@ -1652,7 +1593,6 @@ For water, residual corrections are applied only when the physics-based water ra
 Additional gating rules based on water cut and residual magnitude are applied to oil predictions to prevent physically implausible corrections under extreme conditions.
 
 \subsection{Consistency Constraints}
-
 To preserve physical consistency, predicted oil and water rates are constrained such that
 \begin{equation}
 \hat{q}_o(t) + \hat{q}_w(t) = \hat{q}_L(t),
@@ -1662,7 +1602,6 @@ where $\hat{q}_L(t)$ denotes the total liquid rate. Water predictions are clippe
 
 \section{Hybrid Physics-ML Rate Synthesis}
 \label{sec:hybrid-rate-synthesis}
-
 The hybrid physics-machine learning (ML) rate synthesis component defines how
 physics-based predictions and machine-learning residual corrections are combined
 to produce the final estimates of oil, water, and gas flow rates. This stage
@@ -1671,7 +1610,6 @@ for ensuring physical consistency, robustness, and safe deployment under sparse
 and irregular measurement conditions.
 
 \subsection{Sequential Inference Structure}
-
 The proposed framework follows a strictly sequential inference strategy. For each
 well and time index $t$, physics-based predictions are generated first, followed by
 selective application of machine-learning residual corrections. Let
@@ -1690,7 +1628,6 @@ machine-learning component operates as a corrective layer whose influence is
 controlled through physically motivated gating mechanisms.
 
 \subsection{Log-Space Residual Application}
-
 Residuals are learned and applied in logarithmic space to ensure numerical stability
 and preserve non-negativity of flow rates. For a given phase $i \in \{o, w, g\}$,
 the corrected rate is computed as
@@ -1706,7 +1643,6 @@ This formulation corresponds to a multiplicative correction \citep{box1964analys
 domain and reflects the assumption that modeling errors scale with the magnitude of the predicted flow rate.
 
 \subsection{Phase-Specific Synthesis Rules}
-
 The hybrid synthesis logic differs across fluid phases to reflect their distinct
 flow characteristics and data reliability.
 
@@ -1760,7 +1696,6 @@ This gating strategy prevents spurious corrections during dry or near-dry condit
 where measurement noise and model uncertainty are high.
 
 \subsection{Physical Consistency Enforcement}
-
 Following residual application, additional consistency constraints are enforced to
 ensure physically meaningful predictions. The total liquid rate is defined as
 \begin{equation}
@@ -1775,7 +1710,6 @@ and the oil rate is adjusted accordingly to preserve liquid consistency. All pha
 rates are constrained to be non-negative.
 
 \subsection{Role of Gating and Safety Mechanisms}
-
 The synthesis stage incorporates multiple gating and clipping mechanisms to limit
 machine-learning influence in poorly observed regimes. These safeguards reduce
 extrapolation risk under sparse or irregular measurements and ensure that physics-
@@ -1785,7 +1719,6 @@ By design, the hybrid synthesis logic prioritizes physical plausibility, robustn
 and stable behavior over unconstrained accuracy improvements.
 
 \subsection{Summary of Hybrid Rate Assembly}
-
 The hybrid physics-ML rate synthesis combines deterministic physics-based predictions
 with selectively applied machine-learning residual corrections. This structured
 integration enables improved predictive accuracy while preserving interpretability,
@@ -1793,10 +1726,8 @@ physical consistency, and scalability across large well populations.
 
 \section{Model Integration}
 \label{sec:model_integration}
-
 \subsection{Step-by-Step Pipeline Summary}
 \label{subsec:pipeline_summary}
-
 The overall modeling workflow of the proposed hybrid framework consists of a sequence of structured steps that integrate physics-based modeling with data-driven residual learning. The pipeline is designed to ensure causal consistency, scalability across wells, and robustness under both temporal and spatial generalization settings.
 
 \begin{enumerate}
@@ -1840,7 +1771,6 @@ During operation, the hybrid model generates flow rate predictions at discrete t
 
 \subsection{Computational Considerations}
 \label{sec:computational_considerations}
-
 The proposed hybrid modeling architecture combines a physics-based flow model with a data-driven residual learning component. While this integration improves predictive accuracy and generalization under sparse data conditions, it introduces several computational considerations related to efficiency, scalability, numerical stability, and deployment feasibility. These aspects are discussed below.
 
 \subsubsection{Model Decomposition and Computational Load}
@@ -1885,7 +1815,6 @@ This chapter describes the experimental design, data partitioning strategy, and 
 
 \section{Experimental Objectives}
 \label{sec:experimentation_objectives}
-
 The primary objectives of the experimental evaluation are to:
 
 \begin{enumerate}
@@ -1902,13 +1831,11 @@ The primary objectives of the experimental evaluation are to:
 
 
 \section{Production-Mimicking Experimental Workflow}
-
 All experiments are conducted using a production-mimicking workflow. Physics models calibrated during the training phase remain fixed throughout the experimentation, and the globally trained machine-learning residual model is applied strictly in inference mode. No retraining or parameter updates are performed during testing.
 
 Let $t$ denote the prediction time index. At each time step $t$, only measurements available up to that instant are used for prediction, thereby emulating real-time or near-real-time virtual flow metering operation.
 
 \section{Experimental Model Configurations}
-
 Two experimental model configurations are considered:
 
 \begin{enumerate}
@@ -1923,11 +1850,9 @@ Comparing these configurations allows the incremental contribution of residual l
 
 \section{Evaluation Metrics}
 \label{sec:evaluation_metrics}
-
 Model performance is quantified using a set of complementary metrics that capture absolute error, relative error, systematic bias, and goodness of fit. Let $y_i$ denote the measured value of a given flow rate at time index $i$, $\hat{y}_i$ the corresponding model prediction, and $N$ the number of evaluated samples.
 
 \subsection{Coefficient of Determination}
-
 The coefficient of determination ($R^2$) is defined as:
 \begin{equation}
 R^2 = 1 - \frac{\sum_{i=1}^{N} (y_i - \hat{y}_i)^2}
@@ -1936,7 +1861,6 @@ R^2 = 1 - \frac{\sum_{i=1}^{N} (y_i - \hat{y}_i)^2}
 where $\bar{y}$ denotes the mean of the measured values. The $R^2$ metric is unitless and indicates the proportion of variance in the measured data explained by the model.
 
 \subsection{Mean Absolute Error}
-
 The mean absolute error (MAE) is defined as:
 \begin{equation}
 \text{MAE} = \frac{1}{N} \sum_{i=1}^{N} \left| y_i - \hat{y}_i \right|.
@@ -1944,7 +1868,6 @@ The mean absolute error (MAE) is defined as:
 MAE is expressed in the same physical units as the predicted variable (e.g., Sm$^3$/h) and provides an intuitive measure of the average magnitude of prediction error.
 
 \subsection{Root Mean Squared Error}
-
 The root mean squared error (RMSE) is defined as:
 \begin{equation}
 \text{RMSE} =
@@ -1953,7 +1876,6 @@ The root mean squared error (RMSE) is defined as:
 RMSE is expressed in the same physical units as the predicted variable (e.g., Sm$^3$/h). Compared to MAE, RMSE penalizes larger errors more strongly and is therefore more sensitive to outliers.
 
 \subsection{Mean Absolute Percentage Error}
-
 The mean absolute percentage error (MAPE), also referred to as the mean absolute relative error (MARE), is defined as:
 \begin{equation}
 \text{MAPE} = \frac{100}{N}
@@ -1963,7 +1885,6 @@ The mean absolute percentage error (MAPE), also referred to as the mean absolute
 MAPE is a dimensionless metric reported as a percentage (\%). It quantifies the average relative magnitude of prediction error. For low-rate regimes, particularly for water production, MAPE may exhibit inflated values and is therefore interpreted with caution.
 
 \subsection{Mean Percentage Error}
-
 The mean percentage error (MPE), also referred to as the signed mean relative error or average discrepancy, is defined as:
 \begin{equation}
 \text{MPE} = \frac{100}{N}
@@ -1973,7 +1894,6 @@ The mean percentage error (MPE), also referred to as the signed mean relative er
 MPE is a dimensionless metric reported as a percentage (\%). It captures systematic prediction bias, with positive values indicating overprediction and negative values indicating underprediction.
 
 \section{Evaluation of Derived Production Ratios}
-
 In addition to individual phase flow rates, the experiments evaluate derived production ratios, including the water-gas ratio (WGR) and gas-oil ratio (GOR), defined as:
 \begin{equation}
 \text{wgr} = \frac{q_w}{q_g},
@@ -1986,7 +1906,6 @@ These ratios are computed from both measured and predicted flow rates, and the s
 
 \section{Cross-Well Temporal Generalization Evaluation Setup}
 \label{sec:temporal_setup}
-
 The cross-well temporal generalization evaluation is designed to assess the ability of the proposed modeling framework to produce accurate flow-rate predictions on unseen time periods while remaining within the same set of wells. 
 This evaluation reflects a common production monitoring scenario in which historical data are available for a well, and the objective is to predict flow rates under future operating conditions without retraining the model.
 
@@ -1998,7 +1917,6 @@ Model performance is quantified using well-test measurements as the reference st
 Reporting results on a per-well basis enables systematic assessment of temporal robustness under evolving operating conditions.
 
 \subsection{Experimental Data Partitioning}
-
 To ensure robust model development and unbiased performance evaluation, the dataset is partitioned into training, validation, and test subsets on a per-well basis using a temporal hold-out strategy.
 
 For each well, observations are first sorted chronologically, and the data are then split into three contiguous segments according to predefined proportions:
@@ -2023,7 +1941,6 @@ The final datasets are obtained by concatenating the corresponding subsets acros
 
 \section{Spatial Generalization Evaluation Setup}
 \label{sec:lowo_setup}
-
 The spatial generalization evaluation assesses the ability of the proposed modeling framework to transfer predictive capability to a previously unseen well. 
 This evaluation is conducted using a targeted Leave-One-Well-Out (LOWO) strategy, designed to emulate a realistic deployment scenario in which a trained model is applied to a new well with limited or no prior exposure during training.
 
@@ -2035,7 +1952,6 @@ Both physics-only and hybrid model configurations are evaluated on the held-out 
 
 
 \section{Summary of Experimental Design}
-
 The experimental design emphasizes realism, reproducibility, and practical relevance. By enforcing temporal separation, preventing data leakage, and mimicking production deployment conditions, the experiments provide a comprehensive and unbiased assessment of the proposed virtual flow metering model. The results presented in the following chapter build upon this experimental framework to demonstrate the effectiveness of physics-informed residual learning for multiphase flow rate estimation in oil and gas production wells.
 
 \begin{table}[h!]
@@ -2071,11 +1987,11 @@ Signed mean relative error (average discrepancy) &
 
 
 \chapter{Results and Analysis}
+\label{ch:results}
 
 This chapter presents the experimental results and analysis of the proposed hybrid physics-machine learning virtual flow metering framework. 
 
 \section{Temporal Generalization Performance}
-
 Temporal generalization evaluates the ability of the proposed model to predict future production behavior using historical data from the same well. This is a critical requirement for virtual flow metering applications, where models must remain reliable under evolving operating conditions, including changes in pressure, choke settings, and multiphase flow regimes.
 
 In this study, temporal generalization is assessed by training the models on earlier time periods and evaluating them on unseen future data for each well. This setup ensures that no future information is used during training, thereby mimicking real-world deployment conditions. The evaluation is conducted across multiple wells with varying flow characteristics, enabling a comprehensive assessment of model robustness and adaptability.
@@ -2084,7 +2000,6 @@ The performance of three approaches is compared: the physics-based model, the pr
 
 
 \subsection{Gas Rate (\texorpdfstring{$q_g$}{qg})}
-
 Table~\ref{tab:temporal_gas_rate_comparison} reports gas rate prediction performance under lag-safe temporal extrapolation.
 
 The physics-based model exhibits highly variable performance for gas rate prediction across wells. While moderate accuracy is achieved for wells such as W06 ($R^2 = 0.77$) and W11 ($R^2 = 0.59$), the model fails significantly for several others, including W08, W15, and W19, where strongly negative $R^2$ values are observed. These results indicate that the physics formulation struggles to capture the complex gas flow behavior under varying operating conditions, particularly in wells with dynamic pressure drawdown and multiphase interactions. The consistently high MAE and RMSE values further highlight the limited predictive capability of the standalone physics model for temporal extrapolation.
@@ -2131,7 +2046,6 @@ MAPE (\%) & 2.38 & 45.25 & 6.12 & 13.63 & 4.64 & 46.58 & 4.07 \\
 \end{table}
 
 \subsection{Oil Rate ($q_o$)}
-
 Table~\ref{tab:temporal_oil_rate_comparison} summarizes the per-well temporal generalization performance for oil rate prediction.
 
 The physics-based model exhibits highly inconsistent performance across wells. While it achieves moderate accuracy for well W06 ($R^2 = 0.65$), it fails significantly for most other wells, with strongly negative $R^2$ values (e.g., W08, W11, W15, W19). This indicates that the physics formulation alone is unable to capture the complex and evolving dynamics of multiphase flow under changing operating conditions. The large errors in MAE and RMSE further confirm the limited adaptability of the physics model to temporal variations.
@@ -2178,7 +2092,6 @@ MAPE (\%) & 1.16 & 35.45 & 2.84 & 20.15 & 7.76 & 61.38 & 6.86 \\
 \end{table}
 
 \subsection{Water Rate ($q_w$)}
-
 Table~\ref{tab:temporal_water_rate_comparison} reports water rate prediction performance under lag-safe temporal extrapolation.
 
 The physics-based model performs poorly for water rate prediction across all wells, with consistently negative $R^2$ values. This indicates that the model fails to capture the underlying dynamics of water production, particularly under multiphase flow conditions where water behavior is highly nonlinear and intermittent. Although the absolute errors (MAE and RMSE) are relatively moderate for some wells, the persistently high MAPE values often approaching or exceeding 100\% - highlight the difficulty of accurately modeling water rates using physics alone. These results suggest that the simplified physics formulation is insufficient to represent complex water production mechanisms such as phase interactions, breakthrough events, and low-rate regimes.
@@ -2420,13 +2333,11 @@ MAPE (\%) & 69.96 & 5.90 & 82.23 & 34.02 & 47.85 & 39.62 & 19.06 \\
 
 
 \section{Spatial Generalization Performance}
-
 This section evaluates the ability of the proposed model to generalize across wells, i.e., to predict production rates for wells that were not observed during training. This is assessed using the Leave-One-Well-Out (LOWO) evaluation protocol described in Section~\ref{sec:lowo_setup}, where all data from a single well is held out for testing, and the model is trained on the remaining wells. In this study, well W10 is selected as the held-out well for evaluation.
 
 Spatial generalization represents a more challenging task than temporal generalization, as it requires the model to transfer learned relationships across wells with potentially different geological characteristics, flow regimes, and operational conditions. Therefore, strong performance under LOWO evaluation is indicative of a model's robustness and practical applicability in real-world deployment scenarios.
 
 \subsection{LOWO Results}
-
 Table~\ref{tab:lowo} summarizes the spatial generalization performance for the held-out well W10.
 
 The physics-based model demonstrates limited generalization capability across all phases. For oil rate prediction, the model achieves a low $R^2$ of 0.07, indicating that it captures only a small fraction of the variance in the unseen well. Similarly, for gas rate prediction, although a moderate $R^2$ of 0.32 is observed, the absolute errors remain high, reflecting poor predictive accuracy. Water rate prediction is particularly poor, with a negative $R^2$ value, confirming the inability of the physics model to generalize across wells with different multiphase flow characteristics. These results highlight the inherent limitations of relying solely on physics-based formulations, which are often calibrated to well-specific conditions and lack adaptability to new wells.
@@ -2497,7 +2408,6 @@ $q_w$ & Physics & -0.25 & 5.39 & 12.15 & 100.00 \\
 \end{figure}
 
 \section{Performance Comparison with Contemporary Hybrid VFM}
-
 Table~\ref{tab:wgr_comparison} presents a comparison of the proposed hybrid model against the WGR prediction models reported in \citep{nemoto2023cloud}.
 
 It is important to note that while both this study and \citep{nemoto2023cloud} are based on wells from the same offshore gas field, the specific wells used in each study are not necessarily identical. As a result, the comparison reflects performance across similar field conditions rather than an exact well-to-well evaluation. This distinction is important, as variability in well behavior, operating conditions, and flow regimes can influence model performance.
@@ -2538,7 +2448,6 @@ Slip liquid holdup, tuned friction factor\textsuperscript{1} & -0.23 & 20.10 & 0
 \end{table}
 
 \section{Key Observations}
-
 The following key observations can be drawn from the temporal and spatial generalization experiments:
 
 \begin{itemize}
@@ -2585,18 +2494,17 @@ Overall, the proposed hybrid model achieves performance that is competitive with
 
 \section{Code Availability and Reproducibility}
 \label{sec:reproducibility}
-
 All code implementations, experimental results, supporting documentation, and supplementary literature associated with this research are publicly available in the GitHub repository \url{https://github.com/pcperera/vfm}. 
 This repository is maintained by the author and serves as the primary reference for the computational aspects of this thesis.
 
 The repository includes the complete implementation of the proposed physics-informed residual learning framework for virtual flow metering, along with data preprocessing routines, model training and evaluation scripts, and visualization utilities used to generate the results presented in this thesis. Where applicable, documentation is provided to facilitate reproducibility and to enable further extension of the proposed methods.
 
 \chapter{Discussion}
+\label{ch:dicussion}
 
 This chapter interprets the experimental findings in the context of physical modeling, data-driven learning, and practical deployment considerations.
 
 \section{Temporal vs Spatial Generalization}
-
 The temporal generalization results demonstrate that the hybrid model is highly effective at extrapolating future behavior within the same well when lag-safe causality constraints are enforced. Across multiple wells, the hybrid model achieves near industry-standard accuracy for oil and gas rates, significantly outperforming the physics-based model and consistently matching or exceeding the performance of MPFM, which serves as an industry-standard benchmark. This indicates that the residual errors learned by the model are largely stable over time within a given well, enabling consistent correction of systematic physics bias under evolving operating conditions.
 
 In contrast, spatial generalization is inherently more challenging, as it requires the model to transfer learned relationships across wells with different characteristics. Despite this, the hybrid model demonstrates strong transferability under the LOWO evaluation (with W10 as the held-out well), achieving near industry-standard accuracy for oil and gas rates. This suggests that the learned residual corrections capture underlying physical deviations that are consistent across wells, rather than being purely well-specific. The ability to generalize to an unseen well further confirms that the model is not overfitting to individual well behavior, but instead learning transferable representations of multiphase flow dynamics.
@@ -2604,7 +2512,6 @@ In contrast, spatial generalization is inherently more challenging, as it requir
 However, some performance variability is still observed across wells in the temporal setting (e.g., W08), highlighting the sensitivity of the model to underrepresented operating regimes. This indicates that while the hybrid model generalizes well, its performance is influenced by the diversity and coverage of training data. Compared to MPFM, the hybrid model provides more consistent performance across wells, whereas MPFM exhibits instability under certain flow conditions, reflecting its dependence on sensor assumptions and flow regime behavior.
 
 \section{Comparison with Comtemporary Hybrid VFM}
-
 The comparison with the models reported in \citep{nemoto2023cloud} provides additional context for evaluating the effectiveness of the proposed approach. While both studies are based on wells from the same offshore gas field, the specific wells used are not necessarily identical. Therefore, the comparison reflects performance under similar field conditions rather than a direct well-to-well evaluation.
 
 Despite this, the proposed hybrid model demonstrates superior performance in terms of explanatory power, achieving higher $R^2$ values compared to the physics-based configurations presented in the \citep{nemoto2023cloud} model. Although some literature configurations achieve slightly lower MAPE values, these are typically associated with lower $R^2$, indicating a reduced ability to capture variability in WGR behavior.
@@ -2614,7 +2521,6 @@ The improved performance of the hybrid model can be attributed to its ability to
 Importantly, the fact that both studies are conducted within the same field environment strengthens the validity of this comparison. The observed improvements indicate that the hybrid approach generalizes effectively within the same asset, even when applied to different wells with varying operational characteristics.
 
 \section{Deployment Implications}
-
 The results demonstrate that the hybrid framework offers a practical and scalable alternative to traditional MPFM systems, particularly in environments where dense instrumentation is unavailable or cost-prohibitive. While MPFM provides strong performance in many cases, it should be noted that it is not a true ground-truth measurement but rather an industry-standard benchmark subject to measurement uncertainty and flow regime limitations. As observed in the experiments, MPFM performance can degrade under complex multiphase conditions.
 
 The hybrid model, on the other hand, achieves substantial improvements over physics-only approaches while maintaining competitive performance relative to MPFM. Its ability to generalize both temporally and spatially makes it well-suited for deployment in brownfield assets, where historical data is available but measurement infrastructure may be limited.
@@ -2624,7 +2530,6 @@ Furthermore, the use of lag-safe temporal splitting ensures that the evaluation 
 An additional advantage of the hybrid approach is its ability to leverage existing physics knowledge while adapting to data-driven corrections, reducing reliance on extensive sensor calibration and manual tuning required in traditional systems.
 
 \section{Summary}
-
 In summary, the experimental results confirm that:
 \begin{itemize}
     \item Hybrid physics-ML modeling indicatively improves production rate estimation under both temporal and spatial generalization, particularly for oil and gas rates.
@@ -2639,32 +2544,27 @@ In summary, the experimental results confirm that:
 These findings support the central thesis that physics-informed residual learning can bridge the gap between deterministic models and fully data-driven approaches, enabling accurate, robust, and deployable solutions for real-world well production monitoring.
 
 \chapter{Future Work}
-\label{chap:future-work}
+\label{ch:future_work}
 
 The physics-informed residual learning framework developed in this study demonstrates promising performance for virtual flow metering under sparse and irregular measurement conditions. While the proposed approach addresses several practical limitations of conventional flow metering techniques, there remain multiple avenues for further research and enhancement. This chapter outlines potential directions for future work aimed at improving model fidelity, robustness, scalability, and industrial applicability.
 
 \section{Extension of Physics-Based Modeling}
-
 The current physics layer employs a simplified steady-state formulation to model liquid and gas production based on pressure, temperature, and choke measurements. Future work could extend this formulation to incorporate more detailed multiphase flow physics, including frictional pressure losses, phase slip effects, and temperature-dependent fluid properties. Incorporating transient flow equations or quasi-steady corrections may further improve performance under highly unsteady operating conditions, such as during choke adjustments or flow instabilities.
 
 In addition, the physics model could be enhanced by integrating well-specific geological and completion parameters, such as tubing roughness, completion depth, or reservoir connectivity, thereby reducing the reliance on purely data-driven corrections.
 
 \section{Advanced Residual Learning Architectures}
-
 The residual learning component in the current framework is implemented using tree-based ensemble models for computational efficiency and robustness. Future research could investigate alternative residual learning architectures, including recurrent neural networks or attention-based temporal models, to better capture time-dependent error structures. Such models may be particularly beneficial for wells exhibiting strong temporal correlations or delayed flow responses.
 
 Hybrid residual architectures that combine lightweight temporal models with regime-aware gating mechanisms could further improve accuracy while maintaining computational tractability.
 
 \section{Dynamic Regime Detection and Adaptive Gating}
-
 In the present framework, residual corrections are selectively applied using predefined gating rules based on physical heuristics such as water cut thresholds and residual magnitude. Future work could focus on developing adaptive or data-driven regime detection mechanisms that automatically identify flow regimes and dynamically adjust correction strategies. Probabilistic gating or soft-switching approaches may provide smoother transitions between physics-dominated and data-driven predictions.
 
 \section{Uncertainty Quantification and Confidence Estimation}
-
 The current model produces point estimates of flow rates without explicit uncertainty bounds. Future research could incorporate uncertainty quantification techniques, such as Bayesian residual learning or ensemble-based confidence estimation, to provide probabilistic flow predictions. Quantifying predictive uncertainty is critical for operational decision-making, production forecasting, and risk assessment in field-scale applications.
 
 \section{Validation Across Diverse Field Conditions}
-
 Future studies should validate the proposed framework across a wider range of reservoirs, well types, and production conditions. Applying the model to different asset classes, including gas-dominated wells, mature waterfloods, and unconventional reservoirs, would further assess its generalizability and robustness. Such validation would strengthen confidence in the framework's applicability beyond the specific datasets considered in this study.
 
 Overall, these future research directions aim to enhance the physical realism, adaptability, and industrial relevance of physics-informed residual learning approaches for virtual flow metering, building upon the foundational architecture developed in this work.
